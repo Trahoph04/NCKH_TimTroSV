@@ -188,6 +188,12 @@ def parse_detail_page(html: str, config: dict) -> dict:
     if price:
         result["price_text"] = price
 
+    # khối liên hệ (selector riêng mỗi nguồn, vd ".box-contact"). KHÔNG quét cả trang —
+    # quét cả trang sẽ dính hotline/tổng đài của chính website thành "SĐT chủ trọ".
+    contact = _extract(tree.root, det.get("contact"))
+    if contact:
+        result["contact_text"] = contact[:2000]
+
     # images: gallery, ưu tiên data-src (lazy-load)
     img_attr = det.get("images_attr", "src")
     img_filter = det.get("images_filter", "static123")  # substring CDN để lọc icon/logo

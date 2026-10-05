@@ -4,6 +4,9 @@ import httpx
 
 from .dedup import find_duplicates
 from .fetcher import BlockedError, Fetcher
+from .address import normalize_address
+from .contact import extract_contact
+from .extras import extract_extras
 from .geocode import CTU_LAT, CTU_LNG, Geocoder, haversine_m
 from .normalize import normalize
 from .parser import (
@@ -44,6 +47,8 @@ def merge_detail(n: NormalizedListing, detail: dict, base_url: str = "") -> Norm
         n.address = detail["address"]
     if detail.get("description"):
         n.description = detail["description"]
+    if detail.get("contact_text"):
+        n.contact_text = detail["contact_text"]
     if detail.get("images"):
         # ảnh detail có thể là relative path (vd tromoi /storage/...) → urljoin base
         n.images = [urljoin(base_url, u) if base_url else u for u in detail["images"]]
@@ -126,6 +131,18 @@ async def run_source(
                 counts["new_count"] += 1
             elif result == "updated":
                 counts["updated_count"] += 1
+            if n.source_id and (result != "seen"):
+                # thuộc tính mềm (điện/nước/cọc/giới tính) từ mô tả — migration 90
+                repo.set_extras(n.source, n.source_id, extract_extras(n.title, n.description).as_dict())
+                # liên hệ công khai + địa chỉ chuẩn hoá — migration 91
+                repo.set_contact(n.source, n.source_id, extract_contact(
+                    n.title, n.description, n.contact_text,
+                    source="detail_page" if n.contact_text else "description",
+                    ignore=config.get("ignore_phones"),
+                ).as_dict())
+                repo.set_address(n.source, n.source_id, normalize_address(
+                    n.address, n.district, n.title, n.description,
+                ))
 
         # full sweep: tin không thấy → miss_count++/expired
         if mode == "full":

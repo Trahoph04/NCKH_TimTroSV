@@ -40,3 +40,10 @@ class NormalizedListing(BaseModel):
     lng: float | None = None
     geocode_confidence: str = "failed"
     distance_to_ctu: float | None = None
+    # thuộc tính mềm trích từ mô tả (crawler/extras.py) — None = nguồn chưa trích
+    extras: dict | None = None
+    # text chứa liên hệ lấy từ trang chi tiết (crawler/contact.py). None = nguồn không có
+    contact_text: str | None = None
+    # liên hệ + địa chỉ chuẩn hoá do nguồn tự cung cấp (nhatot) — migration 91
+    contact: dict | None = None
+    address_norm: dict | None = None

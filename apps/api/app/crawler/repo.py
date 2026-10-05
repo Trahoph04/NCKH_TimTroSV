@@ -50,7 +50,62 @@ _UPSERT = text(
         updated_at = CASE WHEN aggregated_listings.content_hash <> :content_hash
                           THEN :now ELSE aggregated_listings.updated_at END
     RETURNING (xmax = 0) AS inserted,
-              (content_hash = :content_hash AND xmax <> 0) AS updated
+              (xmax <> 0 AND updated_at = :now) AS updated
+    """
+)
+
+# Extras (migration 90): COALESCE(new, old) — không xoá giá trị đã có bằng None.
+_SET_EXTRAS = text(
+    """
+    UPDATE aggregated_listings SET
+        electricity_price   = COALESCE(CAST(:electricity_price AS INTEGER), electricity_price),
+        water_price         = COALESCE(CAST(:water_price AS INTEGER), water_price),
+        water_unit          = COALESCE(:water_unit, water_unit),
+        utility_state_price = COALESCE(CAST(:utility_state_price AS BOOLEAN), utility_state_price),
+        deposit_amount      = COALESCE(CAST(:deposit_amount AS INTEGER), deposit_amount),
+        deposit_months      = COALESCE(CAST(:deposit_months AS REAL), deposit_months),
+        gender_only         = COALESCE(:gender_only, gender_only),
+        curfew_hour         = COALESCE(CAST(:curfew_hour AS SMALLINT), curfew_hour),
+        free_hours          = COALESCE(CAST(:free_hours AS BOOLEAN), free_hours),
+        extras_extracted_at = :now
+    WHERE source = :source AND source_id = :source_id
+    """
+)
+
+
+# ── Liên hệ (migration 91) ───────────────────────────────────────────────────
+# COALESCE(new, old): lần trích sau ra None không xoá số đã có.
+_SET_CONTACT = text(
+    """
+    UPDATE aggregated_listings SET
+        contact_phone      = COALESCE(:contact_phone, contact_phone),
+        contact_phone_alt  = COALESCE(:contact_phone_alt, contact_phone_alt),
+        contact_zalo       = COALESCE(:contact_zalo, contact_zalo),
+        contact_name       = COALESCE(:contact_name, contact_name),
+        contact_facebook   = COALESCE(:contact_facebook, contact_facebook),
+        contact_source     = COALESCE(:contact_source, contact_source),
+        contact_extracted_at = :now
+    WHERE source = :source AND source_id = :source_id
+    """
+)
+
+# ── Địa chỉ chuẩn hoá (migration 91) ────────────────────────────────────────
+# Chỉ ghi khi độ tin cậy mới >= độ tin cậy đang có (không hạ cấp địa chỉ tốt).
+_CONF_RANK = {"none": 0, "district": 1, "ward": 2, "street": 3, "exact": 4}
+_SET_ADDRESS = text(
+    """
+    UPDATE aggregated_listings SET
+        address_full       = COALESCE(:address_full, address_full),
+        street             = COALESCE(:street, street),
+        ward               = COALESCE(:ward, ward),
+        district_norm      = COALESCE(:district_norm, district_norm),
+        address_confidence = :address_confidence,
+        address_source     = COALESCE(:address_source, address_source),
+        address_normalized_at = :now
+    WHERE source = :source AND source_id = :source_id
+      AND CAST(:conf_rank AS INTEGER) >= COALESCE(
+            CASE address_confidence WHEN 'exact' THEN 4 WHEN 'street' THEN 3
+                                    WHEN 'ward' THEN 2 WHEN 'district' THEN 1 ELSE 0 END, 0)
     """
 )
 
@@ -92,6 +147,58 @@ class ListingRepo:
         if row.inserted:
             return "new"
         return "updated" if row.updated else "seen"
+
+    def set_extras(self, source: str, source_id: str, extras: dict) -> None:
+        """Ghi thuộc tính mềm (extras.py) theo (source, source_id). Chỉ ghi đè khi có giá trị mới —
+        COALESCE giữ giá trị cũ nếu lần trích này ra None (mô tả bị cắt ngắn...)."""
+        with self.engine.begin() as conn:
+            conn.execute(
+                _SET_EXTRAS,
+                {"source": source, "source_id": source_id, **extras,
+                 "now": datetime.now(timezone.utc)},
+            )
+
+    def set_contact(self, source: str, source_id: str, contact: dict) -> None:
+        """Ghi SĐT/Zalo/tên người đăng (contact.py) — chỉ dữ liệu công khai trong tin."""
+        if not any(contact.values()):
+            return
+        with self.engine.begin() as conn:
+            conn.execute(_SET_CONTACT, {"source": source, "source_id": source_id,
+                                        **contact, "now": datetime.now(timezone.utc)})
+
+    def set_address(self, source: str, source_id: str, addr: dict) -> None:
+        """Ghi địa chỉ chuẩn hoá (address.py); không hạ cấp địa chỉ đang có."""
+        with self.engine.begin() as conn:
+            conn.execute(_SET_ADDRESS, {
+                "source": source, "source_id": source_id, **addr,
+                "conf_rank": _CONF_RANK.get(addr.get("address_confidence") or "none", 0),
+                "now": datetime.now(timezone.utc)})
+
+    def pending_contact(self) -> list[dict]:
+        """Tin chưa trích liên hệ (backfill)."""
+        with self.engine.connect() as conn:
+            return [dict(r) for r in conn.execute(text(
+                "SELECT source, source_id, title, description FROM aggregated_listings "
+                "WHERE contact_extracted_at IS NULL AND source_id IS NOT NULL ORDER BY id"
+            )).mappings().all()]
+
+    def pending_address(self, force_all: bool = False) -> list[dict]:
+        """Tin cần chuẩn hoá địa chỉ, kèm toạ độ để reverse geocode khi thiếu address."""
+        where = "TRUE" if force_all else "address_normalized_at IS NULL"
+        with self.engine.connect() as conn:
+            return [dict(r) for r in conn.execute(text(
+                "SELECT source, source_id, title, address, district, description, "
+                "ST_Y(geom) AS lat, ST_X(geom) AS lng "
+                f"FROM aggregated_listings WHERE {where} AND source_id IS NOT NULL ORDER BY id"
+            )).mappings().all()]
+
+    def pending_extras(self) -> list[dict]:
+        """Tin chưa từng trích extras (backfill) — có mô tả hoặc tiêu đề."""
+        with self.engine.connect() as conn:
+            return [dict(r) for r in conn.execute(text(
+                "SELECT source, source_id, title, description FROM aggregated_listings "
+                "WHERE extras_extracted_at IS NULL AND source_id IS NOT NULL ORDER BY id"
+            )).mappings().all()]
 
     def mark_misses(self, source: str, seen_ids: list[str]) -> int:
         """Sau full run: tin của nguồn không nằm trong seen_ids → miss_count++ và có thể expired."""
