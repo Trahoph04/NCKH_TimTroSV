@@ -1,5 +1,9 @@
 # Ghép bạn ở ghép + Nhắn tin — Phân tích & thiết kế
 
+> **Đối chiếu as-built 06/10/2026.** Các mục dưới đây đã được sửa cho khớp code: 1.4/1.7/1.8 (chat **có gửi ảnh**,
+> đã re-encode xoá EXIF — quyết định 05/10 thay cho cam kết text-only), 2.4 bước 1 (lọc cứng **2 tầng**, ADR-014),
+> bổ sung 2.4b (Stable Roommates) và 2.4c (`deck_log`, chọn thẻ, ε-greedy, độ tản). Phần còn lại là thiết kế gốc.
+
 _Lập: 26/09/2026 · Lane: Phú (matching, core) + Huy/Bảo (UI) · Mốc: code freeze 08/10, nghiệm thu 12–16/10_
 
 > Trả lời 2 câu hỏi đang treo: (1) **nhắn tin: WebSocket hay liên kết Zalo?** (2) **ghép bạn ở: 30 hồ sơ thì làm collaborative filtering thế nào?**
@@ -68,7 +72,7 @@ Nếu sau nghiệm thu muốn nâng: **SSE (`EventSource`) trước, WebSocket s
 | Tầng | Người kia thấy gì | Mở khi nào |
 |---|---|---|
 | **T1 — Ẩn danh** | Tên hiển thị (tên gọi, không MSSV), giới tính, Trường/Khoa, tóm tắt thói quen, % tương thích + lý do | Ngay khi vào danh sách gợi ý |
-| **T2 — Nhắn tin** | + chat 1-1 text-only trong app | **Cả hai** đã accept `match_request` |
+| **T2 — Nhắn tin** | + chat 1-1 trong app (chữ, ảnh đã xoá EXIF, chia sẻ tin trọ) | **Cả hai** đã thích nhau (swipe 2 chiều, hoặc nhận lời mời) |
 | **T3 — Liên hệ ngoài** | + SĐT / link `zalo.me/<sđt>` | **Cả hai** bấm "Cho phép xem liên hệ" trong khung chat (một lần nữa, riêng với tầng T2) |
 
 Hai lần đồng ý (accept lời mời, rồi mới cho liên hệ) chính là cái Zalo-một-mình không làm được. Zalo ở đây là **đích đến**, không phải kênh duy nhất: SV nói vài câu trong app, thấy hợp thì bàn giao sang Zalo để dùng lâu dài — đúng lập luận "tận dụng kênh SV đã dùng" của kế hoạch, mà không đánh đổi quyền riêng tư.
@@ -163,7 +167,7 @@ CREATE TABLE messages (
     id               SERIAL PRIMARY KEY,
     conversation_id  INTEGER NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
     sender_id        INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    body             TEXT NOT NULL,           -- text-only, không ảnh/file
+    body             TEXT NOT NULL,           -- thiết kế gốc text-only; as-built có kind/payload cho ảnh + tin trọ (Chat_Realtime.md)
     created_at       TIMESTAMPTZ DEFAULT now()
 );
 CREATE INDEX idx_messages_conv ON messages (conversation_id, id);   -- id tăng dần = cursor polling
@@ -186,13 +190,18 @@ Hội thoại **không tạo bằng tay** — sinh tự động trong transactio
 ## 1.7 Đạo đức dữ liệu — viết vào Chương 5
 
 - Màn hình chat có dòng ghi rõ: tin nhắn được lưu trên server của nhóm nghiên cứu, **xóa sau khi nghiệm thu (10/2026)**, không dùng cho mục đích khác.
-- Text-only, không ảnh/file, không đọc/không trích tin nhắn vào báo cáo (kể cả ẩn danh).
+- **Có gửi ảnh** (quyết định 05/10, thay cho "text-only" ở bản thiết kế đầu): SV cần gửi ảnh phòng/hợp đồng cho nhau
+  khi bàn chuyện thuê chung — cấm ảnh thì họ chuyển sang Zalo sớm, mất luôn lớp T3. Giảm thiểu rủi ro bằng:
+  ảnh **re-encode JPEG, xoá toàn bộ EXIF** (kể cả toạ độ GPS) phía server; chỉ thành viên hội thoại tải được
+  (`/chat/media/{id}` kiểm quyền); giới hạn 4 ảnh × 8 MB, chặn body quá lớn ở tầng ASGI; huỷ ghép ⇒ xoá file;
+  `python -m app.chat.media_gc` dọn ảnh mồ côi. **Không** đọc/không trích tin nhắn hay ảnh vào báo cáo (kể cả ẩn danh).
 - Có nút "Xóa hội thoại" (hard delete cả `messages`) — tôn trọng yêu cầu rút dữ liệu đã cam kết trong form.
-- Chốt bằng câu lệnh `DELETE FROM messages;` trong quy trình dọn dữ liệu sau nghiệm thu, ghi vào `Deployment_Guide.md`.
+- Chốt bằng câu lệnh `DELETE FROM messages;` **và xoá thư mục ảnh trong volume `media`** trong quy trình dọn dữ liệu
+  sau nghiệm thu, ghi vào `Deployment_Guide.md`.
 
 ## 1.8 Ngoài phạm vi (nói rõ trong "Hạn chế")
 
-Group chat (UI), gửi ảnh, typing indicator, push notification, đọc-đã-xem realtime, chat với chủ trọ (chủ trọ không có tài khoản trong hệ thống — đây là hệ quả của mô hình Aggregator, xem `01_DanhGia_Va_DinhHuong_NCKH.md`).
+Group chat (UI), push notification, chat với chủ trọ (chủ trọ không có tài khoản trong hệ thống — đây là hệ quả của mô hình Aggregator, xem `01_DanhGia_Va_DinhHuong_NCKH.md`).
 
 ---
 
@@ -234,21 +243,24 @@ Nhúng một bộ câu hỏi có cấu trúc thành 384 chiều bằng model tex
 
 ## 2.4 Thuật toán đề xuất — 4 bước
 
-### Bước 1 — Lọc cứng (chạy trước, không vào công thức điểm)
-Đúng như `BANG_DOI_CHIEU` cuối `tao_google_form_v2.gs` — implement nguyên văn:
+### Bước 1 — Lọc cứng 2 tầng (chạy trước, không vào công thức điểm) — as-built `matching/filters.py`
 
-```python
-def passes_hard_filters(a, b) -> bool:
-    if a.gender is None or b.gender is None or a.gender != b.gender:
-        return False                                  # chỉ ghép cùng giới, tuyệt đối
-    if set(a.hanh_vi) & set(DB_TO_HANHVI[k] for k in b.deal_breakers): return False
-    if set(b.hanh_vi) & set(DB_TO_HANHVI[k] for k in a.deal_breakers): return False
-    if a.smoke_in_room and 'Hút thuốc trong phòng' in b.deal_breakers: return False
-    if b.smoke_in_room and 'Hút thuốc trong phòng' in a.deal_breakers: return False
-    if abs(a.budget_band - b.budget_band) > 1:        return False
-    if a.scenario_incompatible(b):                    return False   # ở 1 mình ≠ ghép 3 người
-    return True
-```
+Bản đầu coi **mọi** deal-breaker là veto. Đo trên 19 hồ sơ thật: chỉ **6/19** người có pool > 0 — tính năng chết
+(trung bình mỗi người khai 4,63/9 deal-breaker). Tách 2 tầng theo tiêu chí *có thương lượng được trong thời gian
+thuê không* (ADR-014) ⇒ **16/19** (notebook 06 mục 1, 4):
+
+| Thứ tự | Kiểm | Tầng |
+|---|---|---|
+| 1 | cùng giới (`gender NULL` ⇒ ngoài pool) | an toàn — tuyệt đối |
+| 2 | deal-breaker CỨNG hai chiều: *hút thuốc trong phòng* (cột `smoke_in_room`), *ở bẩn* (`cleanliness ≤ 2`) | an toàn — tuyệt đối |
+| 3 | ngân sách lệch > 1 bậc (NULL ⇒ bỏ qua) | khả thi |
+| 4 | một trong hai khai "ở một mình" | khả thi |
+| 5 | thời điểm cần phòng (câu E1) lệch > 2 tháng; "Chưa gấp" / NULL ⇒ bỏ qua | khả thi |
+
+7 deal-breaker còn lại là **mềm**: thành chiều trừ điểm nặng nhất (`deal_breaker_soft`) **và** hiện rõ chữ trên thẻ
+("bạn ấy có N điều bạn từng nói không chấp nhận: …"). Lọc được kiểm **lại** ở `POST /matching/swipe` và lời mời —
+deck chỉ là gợi ý, ghi mới là hành động. Thẻ "độ tản" của buổi thử nghiệm (2.4c) chỉ được nới tầng **khả thi**,
+không bao giờ nới tầng an toàn.
 
 Lọc cứng là phần **làm cho matching an toàn** và giải thích được — đưa nó thành mục riêng trong Chương 3, đừng coi là tiền xử lý.
 
@@ -275,6 +287,29 @@ Harmonic mean là chỗ chống được cặp một chiều: `s=0.9 / s=0.3` ra
 - Trả **top-5** kèm `score_breakdown`, **không** dùng ngưỡng tuyệt đối 0,7. Ngưỡng cố định trên pool nhỏ sẽ có lúc trả 0 kết quả → demo chết. Nếu cần ngưỡng, dùng **phân vị** trên phân bố điểm thật.
 - Mỗi ứng viên: 3 lý do mạnh nhất (`w_k·(1−d_k)` lớn nhất) + 1 lưu ý (`w_k·d_k` lớn nhất). Ví dụ: *"Cùng giờ ngủ sau 0h · cùng Trường CNTT&TT · cả hai đều rửa chén trong ngày. Lưu ý: bạn ấy hay nấu ăn trong phòng."* Rẻ, ăn điểm SUS, và là ảnh chụp cho Chương 4.
 - Đo **ILS** của top-5 ([R2]) để có một dòng số về đa dạng.
+
+### 2.4b Stable Roommates (Irving 1985) — as-built `matching/stable.py`, dùng ở eval
+
+Ghép phòng là bài toán **không hai phía** (khác Stable Marriage) ⇒ có thể **vô nghiệm**. Preference của x là các
+ứng viên qua lọc cứng, xếp theo điểm **có hướng** s(x→y) (không dùng harmonic — đã trộn ý của y), phá tie bằng
+`user_id`. Vô nghiệm ⇒ trả ghép tham lam kèm số blocking pair ("almost-stable"). Kết quả trên khảo sát: pool nữ
+**có** ghép ổn định, pool nam **không** (2 blocking pair) — notebook 06 mục 7. Không dùng để xếp deck (deck là
+gợi ý cá nhân, không phải phân phòng toàn cục) — dùng để trả lời "nếu phải phân cặp cho cả nhóm thì có ổn định không".
+
+### 2.4c Deck: chọn thẻ, ε-greedy, độ tản, `deck_log` — as-built `matching/repo.py:deck`
+
+1. **Ghi `deck_log` phía server** cho mọi thẻ đã hiển thị (vị trí, điểm, s_ab, s_ba, `features` = {d_k}, mode,
+   bộ trọng số, `explore`). Swipe đọc telemetry từ đây, không nhận từ body (ADR-015). `decided_ms` = thời điểm swipe
+   − `served_at` (> 10 phút ⇒ NULL).
+2. **Chọn thẻ**: hồ sơ thật trước; thẻ mô phỏng ≤ số thẻ thật (≤ 50% deck), sàn 2 thẻ khi không có hồ sơ thật.
+   Lý do: hồ sơ mô phỏng không bao giờ thích lại ⇒ deck 7/8 thẻ mô phỏng thì buổi thử nghiệm không sinh nổi match thật.
+3. **ε-greedy** (mode `ranked`): round(0,2·k) thẻ lấy ngẫu nhiên **ngoài** top, chèn vào vị trí ngẫu nhiên;
+   `explore='epsilon'`. Hạt giống theo (người, ngày) — tải lại trong ngày không đổi bộ thẻ.
+4. **Độ tản** (mode `random`, buổi thử nghiệm): ~20% thẻ là ứng viên chỉ vướng tầng **khả thi**
+   (`filters.only_feasibility_gap`), `explore='spread'`; swipe like trên thẻ này được nới đúng tầng khả thi. Thứ tự
+   xáo tất định theo người xem; ẩn %, lý do, cảnh báo.
+5. **Phạt exposure** 0,02 × số người đã thấy hồ sơ đó (chống congestion, [R16]); đo bằng Gini (notebook 06 mục 8).
+6. Notebook **phải** tách thẻ `explore IS NOT NULL` khi tính P@k/NDCG — chúng được chọn có chủ đích ngoài top.
 
 ## 2.5 Trọng số lấy từ khảo sát, không lấy từ cảm tính
 

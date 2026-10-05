@@ -28,7 +28,7 @@ _Cập nhật: 2026-08-08_
 
 ## Đã đóng (phiên 2026-10-01) — Chat realtime giữa SV đã ghép
 
-- **Nền match tối thiểu + chat realtime (mockup 06)** — migration `92_matching_chat.sql` (swipes, conversations, conversation_members, messages, chat_media, user_reports, cột form v2 cho roommate_profiles; đã thêm vào `infra/db/Dockerfile`). Backend `apps/api/app/matching/` (`POST /matching/swipe` thích 2 chiều ⇒ match + hội thoại cùng transaction, `GET /matching/likes`) + `apps/api/app/chat/` (REST + WebSocket `/chat/ws` + hub Redis pub/sub, ảnh re-encode xoá EXIF, seed `python -m app.chat.seed_demo`). FE `/chat`: tab Đã ghép/Lời mời, dải "Mới ghép", đang nhập, online, đã xem, gửi ảnh, chia sẻ tin trọ, gợi ý nhanh, Thành đôi!, báo cáo, huỷ ghép, badge header, fallback polling. Verified: 14 test mới + 139/139 toàn bộ; e2e Playwright 2 trình duyệt 20/20 (API 2 worker). Chi tiết `docs/tech_specs/Chat_Realtime.md`, ADR-012.
+- **Nền match tối thiểu + chat realtime (mockup 06)** — migration `92_matching_chat.sql` (swipes, conversations, conversation_members, messages, chat_media, user_reports, cột form v2 cho roommate_profiles; đã thêm vào `infra/db/Dockerfile`). Backend `apps/api/app/matching/` (`POST /matching/swipe` thích 2 chiều ⇒ match + hội thoại cùng transaction, `GET /matching/likes`) + `apps/api/app/chat/` (REST + WebSocket `/chat/ws` + hub Redis pub/sub, ảnh re-encode xoá EXIF, seed `python -m app.chat.seed_demo`). FE `/chat`: tab Đã ghép/Lời mời, dải "Mới ghép", đang nhập, online, đã xem, gửi ảnh, chia sẻ tin trọ, gợi ý nhanh, Thành đôi!, báo cáo, huỷ ghép, badge header, fallback polling. Verified: 14 test mới + 139/139 toàn bộ; kiểm tay 2 trình duyệt 20/20 (API 2 worker; script Playwright KHÔNG có trong repo — xem Chat_Realtime.md mục 7). Chi tiết `docs/tech_specs/Chat_Realtime.md`, ADR-012.
 - **GOTCHA**: DB volume cũ KHÔNG tự có bảng mới ⇒ apply tay `92_matching_chat.sql` (idempotent). Mật khẩu 4 tài khoản trong `80_seeds.sql` thật ra là `secret`, KHÔNG phải `123456` như `reset_and_seed.sh` in ra (đã kiểm bằng bcrypt). Tài khoản demo chat: `*.demo@example.com` / `demo1234`.
 - **Chưa làm (matching core)**: `GET /matching/deck` + thuật toán (lọc cứng → Gower → harmonic), form hồ sơ 12 câu, `import_survey.py`. Mọi đường sinh match mới chỉ cần gọi `matching.repo.create_match()` trong transaction.
 
@@ -242,3 +242,58 @@ phát sự kiện nhưng FE bỏ qua, người đồng ý trước phải chờ 
 **Còn lại**: chưa có endpoint RÚT LẠI đồng ý (thiết kế coi đồng ý là một chiều); kiểu
 `ContactState` khai cục bộ trong `ProfilePanel.tsx` thay vì `lib/chat/types.ts` (do lúc
 viết agent không được sửa file dùng chung — có thể dời về `types.ts` cho gọn).
+
+---
+
+## Phiên 05–06/10/2026 — Hoàn thành `planning/ViecConLai_GhepBan_Chat.md` (trước code freeze 08/10)
+
+Branch `feature/ghep-ban-chat` (từ `main`). Quyết định của nhóm: 1.3 = (a)+(b) · ảnh trong chat = giữ, sửa tài
+liệu · 1.5 = trang `/roommate/rate` · cho phép dọn dữ liệu test trên DB dev.
+
+### Đã xong
+- **1.1 Commit**: toàn bộ việc các phiên trước vào 8 commit theo nhóm (trước đó chỉ có `Initial commit`). Gỡ
+  `.git/index.lock` mồ côi từ 15/09. `_to_delete/`, `exports/` vào `.gitignore`. Tên SV thật trong
+  `ViecConLai_GhepBan_Chat.md` thay bằng id trước khi commit.
+- **1.2 Đăng nhập MSSV trên web**: tab MSSV/Email ở `/login` (mặc định MSSV; `?via=email`), Route Handler
+  `/api/auth/login/ctu`. Kiểm: 10/10 tài khoản khảo sát đăng nhập được qua web (kể cả gõ chữ thường).
+- **1.3** (ADR-017) hồ sơ thật trước, thẻ mô phỏng ≤ 50%. Deck SV nữ thật: 7/8 mô phỏng → **2 thật + 2 mô phỏng**.
+- **1.4** `/roommate?mode=random` hoặc `ROOMMATE_DECK_MODE=random` (env của web, đọc lúc chạy) + dải "Buổi thử nghiệm".
+- **1.5** Chấm làm mù 1–5: `GET/POST /matching/rate`, bảng `roommate_ratings` (mig 94), trang `/roommate/rate`,
+  CSV `python -m app.matching.export_ratings` — schema cố định ghi trong file và notebook 06 mục 9.
+- **1.6** `eval/notebooks/06_roommate_eval.ipynb` (sinh từ `eval/tools/build_nb06.py`, gọi đúng hàm sản phẩm qua
+  `eval/roommate_lib.py`), venv `eval/.venv`. `eval/metrics.py` đã đối chiếu scipy (`eval/test_metrics.py`).
+  Số đo: cosine ≥ 0,7 ở **91,4%** cặp cùng giới (93 cặp; tài liệu cũ ghi 93%); harmonic < cộng ở **84/93** cặp (9 cặp
+  bằng nhau vì s_ab = s_ba); 1 tầng **6/19** → 2 tầng **16/19**; τ TB độ nhạy ±20% = **0,974** (tệ nhất 0,600);
+  Stable Roommates: nữ có, nam không (2 blocking pair); Gini exposure 0,430 → 0,367 khi phạt; trần độ phủ 89,5%
+  (người khai "ở một mình"). Mục 9 có khung + dữ liệu GIẢ ghi nhãn, chờ `ratings.csv`.
+- **1.7** Dọn DB dev: swipe/match/hội thoại/deck_log của user 25 (giữ tài khoản + hồ sơ), 603 user pytest
+  (`mt_ chat_ t3_ crud_`), 75 tin trọ test, 219 hội thoại rỗng. Phiếu in: `python3 eval/tools/print_slips.py` →
+  `eval/data/phieu_dang_nhap.html` (gitignored, quyền 600).
+- **2.1** ε-greedy 20% (`explore='epsilon'`) · **2.2** lọc thời điểm cần phòng (lệch > 2 tháng) · **2.3** thẻ độ tản
+  (`explore='spread'`, chỉ nới tầng khả thi) · **2.4** `decided_ms` phía server · **2.5** lời mời kèm lời nhắn
+  (`/matching/invite`, `/invites`, `/invites/{id}/respond`; nút "✉ Nhắn" trên thẻ; lời nhắn hiện ở tab Lời mời cả
+  `/roommate` và `/chat`) · **2.6** ghép lại không ghi đè `unmatched` (mig 94 bỏ UNIQUE cũ, partial unique cặp đang
+  hiệu lực) · **2.7** pass người đang ghép ⇒ huỷ ghép + xoá hội thoại · **2.9** rate limit (`app/ratelimit.py`).
+- **Mục 3 (chat)**: toàn bộ Major + Minor — redirect vô hạn (`?reauth=1`), ảnh giữ chỗ w/h, `CHAT_WS_URL` chuẩn hoá
+  + wss theo trang, đếm tin +2, "Thành đôi!" phía bị động, ngừng-nhập khi đổi hội thoại, rò object URL, badge
+  gồm lời mời, `next` có query, TOCTOU 500→404, vé WS trước accept + 5 socket/user, cache typing, phân trang hội
+  thoại, upload 413 ở ASGI, `media_gc`, hub Redis race + envelope hỏng, đối phương xoá tài khoản. Hai khẳng định
+  chưa kiểm của `Chat_Realtime.md` (fan-out nhiều worker, Redis chết) giờ có test (`test_chat_hub.py`).
+- **Mục 4**: 4.1 user 2/3 có gender + nhãn mô phỏng (mig 94) · 4.2 chú thích mật khẩu `secret` · 4.3
+  `reset_and_seed` chờ qua TCP + bảng migration cuối · 4.4 pytest dùng `nckh_test` (ADR-018).
+- **Mục 5 tài liệu**: SRS FR-5.1–5.6, API_Specification (matching, `/auth/login/ctu`, chat; chatbot RAG dời sang
+  `/assistant` vì `/chat` đã dùng), KeHoach_NghiemThu 1.2 + kịch bản demo, Thuyet_Minh_Bo_Sung R12–R18,
+  Matching_Messaging_Design (as-built 2 tầng, Stable Roommates, deck), Chat_Realtime, `ContactState` về `types.ts`.
+
+### Kiểm chứng
+- `pytest`: **256 passed**, 2 skip (cần CSV trong container) — trên `nckh_test`; DB dev không đổi (45 user).
+- `docker compose build web` (= `npm run build`, type-check) xanh.
+- curl: cookie hỏng → 2 redirect → `/login` 200, cookie bị xoá; `next=/roommate?mode=random` giữ query;
+  `next=//evil.com` → `/`.
+
+### Còn lại / chờ
+- 2.8 học trọng số từ swipe — **sau** buổi thử nghiệm (thiết kế 3.4).
+- 4.5 test_simulate cần CSV trong container (giữ skip — CSV có PII, không đưa vào image).
+- 4.6 test ngoài LAN: code đã sẵn (wss/chuẩn hoá URL), chưa chạy thử tunnel thật.
+- UI ưu tiên thấp mục 3 (chú thích ảnh, avatar, kéo-thả/dán ảnh, kiểm dung lượng phía client, chặn từ tab Lời mời).
+- Mục 6 (đạo đức, sau nghiệm thu) và các quyết định 7.2, 7.4 (rút lại T3), 7.5 (`scheduler.py`/`.env.example` read-only).

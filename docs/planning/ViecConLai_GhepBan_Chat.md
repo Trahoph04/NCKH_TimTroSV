@@ -1,9 +1,29 @@
 # Việc còn lại — Ghép bạn ở + Chat realtime
 
-_Cập nhật: 05/10/2026 · sau các phiên 04–05/10 · Nguồn: rà soát code 04/10 (7 agent đọc toàn bộ module) + kiểm thực tế trên DB/browser_
+_Cập nhật: 06/10/2026 · sau các phiên 04–06/10 · Nguồn: rà soát code 04/10 (7 agent đọc toàn bộ module) + kiểm thực tế trên DB/browser_
 
 > **Mốc thời gian** (theo `KeHoach_NghiemThu_T10.md`): buổi thử nghiệm người dùng xếp ở tuần 28/09–04/10 · **code freeze 08/10** (còn 3 ngày) · nghiệm thu 12–16/10.
 > Mục 1 dưới đây là những việc **chặn buổi thử nghiệm** — làm trước mọi thứ khác.
+
+---
+
+## ✅ Kết quả phiên 05–06/10 (branch `feature/ghep-ban-chat`) — chi tiết ở `docs/CHECKPOINT.md`
+
+| Mục | Trạng thái |
+|---|---|
+| 1.1 Commit | ✅ 8 commit theo nhóm + các commit của phiên này |
+| 1.2 Đăng nhập MSSV trên web | ✅ tab MSSV ở `/login`; 10/10 tài khoản khảo sát đăng nhập được |
+| 1.3 Thẻ mô phỏng | ✅ chọn **(a)+(b)** (ADR-017): deck SV nữ 7/8 mô phỏng → 2 thật + 2 mô phỏng. Không làm (c) |
+| 1.4 `mode=random` | ✅ `/roommate?mode=random` hoặc `ROOMMATE_DECK_MODE=random` |
+| 1.5 Chấm điểm 1–5 | ✅ trang `/roommate/rate` + `export_ratings` (schema cố định) |
+| 1.6 Notebook 06 | ✅ 9 mục, chạy được hôm nay; mục 9 có khung + dữ liệu GIẢ ghi nhãn, chờ `ratings.csv`. `metrics.py` đã đối chiếu scipy |
+| 1.7 Dọn dữ liệu | ✅ user 25 sạch hoạt động · 603 user pytest + 75 tin test · phiếu in `eval/tools/print_slips.py` |
+| 2.1–2.7, 2.9 | ✅ · **2.8** chờ dữ liệu buổi thử nghiệm |
+| 3 Chat — Major + Minor | ✅ hết · UI ưu tiên thấp: ✅ lời nhắn ở tab Lời mời, chip hồ sơ đầy hơn, kiểm dung lượng ảnh phía client; ⬜ chú thích ảnh, avatar, kéo-thả/dán ảnh, chặn từ tab Lời mời, >6 tin đã chia sẻ |
+| 4.1–4.4 | ✅ (4.4 = DB test riêng `nckh_test`, ADR-018) · **4.5** giữ skip (CSV có PII) · **4.6** code sẵn, chưa chạy tunnel thật |
+| 5 Tài liệu | ✅ hết |
+| 6 Đạo đức | ⏳ sau nghiệm thu (thêm: xoá `eval/data/phieu_dang_nhap.html`) |
+| 7 Quyết định | 7.1 ✅ (a)+(b) · 7.3 ✅ giữ ảnh (ADR-016) · 7.2, 7.4, 7.5 còn chờ — 7.5 thêm: `.env.example` cũng read-only |
 
 ---
 
@@ -165,6 +185,8 @@ Các mục cần có, chạy được ngay với dữ liệu hôm nay:
 - Xoá `eval/data/` (CSV có họ tên · MSSV · email thật) và `eval/data/.credentials.csv`
 - Xoá hồ sơ mô phỏng: `docker compose exec -T api python -m app.matching.simulate --reset --count 0`
 - Xoá các tài khoản cấp cho buổi thử nghiệm nếu không còn dùng
+- Xoá `eval/data/phieu_dang_nhap.html` (phiếu in có mật khẩu) và `eval/data/ratings.csv` / `deck_log.csv` nếu đã xuất
+- `DROP DATABASE nckh_test` (chứa bản sao lược đồ + user test)
 
 ---
 

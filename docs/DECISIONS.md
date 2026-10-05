@@ -109,3 +109,24 @@ Ghi quyết định kiến trúc quan trọng + LÝ DO. Không xóa cũ, chỉ a
 - **Quyết định**: `GET /matching/deck` ghi `deck_log` (vị trí, điểm, s_ab/s_ba, snapshot `{d_k}`, deck_mode, weights_ver); `POST /matching/swipe` ĐỌC lại từ đó và bỏ qua mọi trường client gửi. Migration `93_matching_deck.sql`.
 - **Lý do**: Để client tự khai vị trí thẻ thì bằng chứng khử thiên lệch mất giá trị và client sửa được số liệu nghiên cứu. `deck_log` đồng thời là nguồn đo **congestion** (số người đã thấy mỗi hồ sơ) — ở pool nhỏ vài hồ sơ "trung tính mọi chiều" hứng hết lời mời, nên deck hạ ưu tiên theo exposure (tham chiếu Fair Reciprocal Recommendation, RecSys 2024).
 - **Đánh đổi**: Mỗi lần phục vụ deck ghi thêm N dòng. Điểm HIỂN THỊ là điểm thật, còn THỨ TỰ áp hình phạt exposure — hai số có thể lệch nhau, phải nói rõ khi trình bày.
+
+## ADR-016: Chat có gửi ảnh — đảo cam kết "text-only" của thiết kế 1.7
+- **Ngày**: 2026-10-05
+- **Bối cảnh**: Matching_Messaging_Design.md 1.7 hứa chat text-only; code đã có gửi ảnh (re-encode, xoá EXIF). Tài liệu và sản phẩm mâu thuẫn — hội đồng hỏi là lộ.
+- **Quyết định**: Giữ gửi ảnh, sửa tài liệu (chọn của nhóm, 05/10).
+- **Lý do**: SV bàn thuê chung cần gửi ảnh phòng/hợp đồng; cấm ảnh thì họ chuyển sang Zalo sớm — dữ liệu sang bên thứ ba và mất lớp T3. Rủi ro riêng tư lớn nhất của ảnh điện thoại là toạ độ GPS trong EXIF — đã xoá phía server; ảnh chỉ thành viên hội thoại tải được; huỷ ghép xoá file; dọn mồ côi bằng `media_gc`; xoá toàn bộ sau nghiệm thu.
+- **Đánh đổi**: Lưu nhiều dữ liệu cá nhân hơn text-only; volume `media` phải nằm trong quy trình xoá sau nghiệm thu (ViecConLai mục 6).
+
+## ADR-017: Deck ưu tiên hồ sơ thật, thẻ mô phỏng ≤ 50%
+- **Ngày**: 2026-10-05
+- **Bối cảnh**: Deck của SV nữ thật 7/8 thẻ là hồ sơ mô phỏng (12 mô phỏng / 3 thật). Hồ sơ mô phỏng không bao giờ thích lại ⇒ buổi thử nghiệm không sinh dữ liệu match.
+- **Quyết định**: (a)+(b): chọn hồ sơ thật trước; thẻ mô phỏng ≤ số thẻ thật, sàn 2 thẻ khi không có hồ sơ thật. KHÔNG làm (c) "đặt sẵn swipe cho hồ sơ mô phỏng".
+- **Lý do**: (c) tạo ra lượt quan tâm không ai bày tỏ — dù gắn nhãn vẫn là dữ liệu bịa nằm cạnh dữ liệu thật. (a)+(b) chỉ đổi việc *chọn* thẻ, không đổi điểm; thứ tự hiển thị vẫn theo điểm (ranked) hoặc xáo (random).
+- **Đánh đổi**: Deck ngắn hơn (SV nữ: 4 thẻ thay vì 8). Ưu tiên theo "thật/mô phỏng" là một tín hiệu ngoài điểm — notebook phải tách `is_simulated` khi đo.
+
+## ADR-018: Pytest chạy trên database riêng `nckh_test`
+- **Ngày**: 2026-10-06
+- **Bối cảnh**: Test cần Postgres thật (không mock) và từng ghi thẳng vào DB dev: 603 user rác + 75 tin trọ test đang active trên trang tìm kiếm + deck toàn "SV · 100%".
+- **Quyết định**: `conftest.py` đổi `DATABASE_URL` → `<db>_test` trước khi import `app`; `infra/db/create_test_db.sh` dựng `nckh_test` từ đúng các file initdb (cùng nguồn lược đồ với DB dev). Thoát hiểm: `PYTEST_USE_DEV_DB=1`.
+- **Lý do**: Rẻ hơn rollback-mỗi-test (engine tạo ở import-time, nhiều test dùng nhiều connection/thread/WebSocket — bọc transaction không phủ được). CI dựng DB mới mỗi lần nên tự có `nckh_test`.
+- **Đánh đổi**: `nckh_test` không tự nhận migration mới trên DB đang chạy — phải `create_test_db.sh --recreate` (giống quy tắc apply tay migration cho DB dev).

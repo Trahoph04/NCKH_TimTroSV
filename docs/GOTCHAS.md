@@ -109,3 +109,43 @@ Kiểm lại pool thật: `SELECT src, gender, count(*) FROM roommate_profiles W
 Cách sửa triệt để (chưa làm): cho tests một database riêng qua biến môi trường,
 hoặc bọc mỗi test trong transaction rollback. Cả hai đều đụng `conftest.py` và
 cách `app.main` tạo engine ở import-time, nên để sau nghiệm thu.
+
+**Cập nhật 06/10/2026 — đã sửa triệt để:** pytest giờ chạy trên DB riêng `nckh_test`.
+`tests/conftest.py` đổi `DATABASE_URL` sang `<tên>_test` TRƯỚC khi import `app` (engine
+tạo ở import-time nên phải đứng đầu conftest). DB dựng mới tự có `nckh_test`
+(`99-test-db.sh` trong initdb); DB đang chạy: `docker compose exec -T db bash
+/usr/local/bin/create_test_db.sh` (cần image db đã build lại; `--recreate` để dựng lại sau
+khi thêm migration). Thiếu `nckh_test` ⇒ pytest báo `database "nckh_test" does not exist`.
+Lệnh dọn ở trên chỉ còn cần cho DB dev bẩn từ trước — lần dọn 06/10 phải thêm tiền tố
+`crud_` (test_listings) và xoá 75 tin trọ "Phong tro test …"/"Updated title …" do các
+user đó đăng (đang **active**, hiện trên trang tìm kiếm), cùng 219 hội thoại không còn
+thành viên (`python -m app.chat.media_gc`).
+
+## Khoá FOR SHARE rồi UPDATE cùng dòng ⇒ deadlock khi hai request song song (06/10/2026)
+
+`ChatRepo.create_message` khoá dòng `conversation_members` để chặn huỷ ghép xen giữa
+kiểm quyền và ghi (TOCTOU). Bản đầu dùng `FOR SHARE`, nhưng cuối transaction lại
+`UPDATE` chính dòng đó (con trỏ đã đọc) ⇒ hai lần gửi song song cùng giữ SHARE rồi cùng
+xin nâng khoá ⇒ `DeadlockDetected` (test_concurrent_same_client_id bắt được). Dùng
+`FOR NO KEY UPDATE`: vẫn chặn DELETE (cascade), còn hai lần gửi thì xếp hàng.
+
+## WebSocket từ chối trước `accept()` ⇒ TestClient ném lỗi ở `websocket_connect`, không ở `receive` (06/10/2026)
+
+Kiểm vé trước `accept()` (không cấp socket cho kẻ không có vé). Hệ quả cho test:
+`WebSocketDisconnect` nổ ngay khi VÀO `with client.websocket_connect(...)`, nên
+`pytest.raises` phải bọc NGOÀI khối `with`, không đặt bên trong. Trình duyệt thật thấy
+lỗi kết nối (HTTP 403), không thấy mã 4401 — FE không dựa vào mã đóng nên không sao.
+
+## `app.matching` import vòng với `app.chat` (06/10/2026)
+
+`chat/repo.py` import `matching.repo` ở cấp module; `matching/__init__.py` import
+`matching/router.py`. Router matching mà import `chat.repo` ở đầu file ⇒ `ImportError:
+cannot import name 'ChatRepo' from partially initialized module` và **api không khởi
+động**. Import muộn bên trong hàm (`_publish_swipe`). Notebook eval né cả `__init__`
+bằng package rỗng trong `sys.modules` (`eval/roommate_lib.py`).
+
+## `.env.example` đang read-only (06/10/2026)
+
+`-r--r--r--` giống `scheduler.py` trước đây. Không tự đổi quyền; biến mới
+(`ROOMMATE_DECK_MODE`, `CHAT_WS_URL`) có giá trị mặc định trong `docker-compose.yml`.
+Nếu read-only không cố ý: `chmod u+w .env.example` rồi thêm hai biến đó.

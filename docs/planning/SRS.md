@@ -99,9 +99,12 @@ Kiến trúc tách Frontend (Next.js) — Backend (FastAPI) — Database (Postgr
 ### FR-5: Tìm bạn ở ghép (AI)
 | ID | Yêu cầu | Quyền |
 |---|---|---|
-| FR-5.1 | Điền hồ sơ ở ghép 6 câu forced-choice → matching_vector | User |
-| FR-5.2 | Weighted Cosine Similarity, threshold 0.7 (T7) | User |
-| FR-5.3 | Gửi lời mời kết nối; B chấp nhận → lộ liên hệ 2 chiều | User |
+| FR-5.1 | Điền hồ sơ ở ghép **12 câu theo form khảo sát v2** (giới tính, Trường/Khoa, ngân sách, kịch bản ở, giờ ngủ, rửa chén, chịu ồn, máy lạnh, chia tiền, hút thuốc, hành vi, deal-breaker) — lưu xong trả ngay top-3 | User |
+| FR-5.2 | Điểm tương thích = **Gower có trọng số** (trọng số dẫn từ khảo sát) cho từng chiều → điểm có hướng s(A→B), s(B→A) → **harmonic mean** → xếp top-K kèm lý do/lưu ý (ADR-013). *Thay cho "Weighted Cosine ≥ 0,7": đo trên 93 cặp cùng giới của khảo sát, 91,4% cặp có cosine ≥ 0,7 ⇒ ngưỡng không loại được ai (notebook 06 mục 2)* | User |
+| FR-5.3 | Gửi lời mời kết nối (thích / lời mời kèm lời nhắn); hai bên cùng thích ⇒ thành đôi + mở chat; liên hệ chỉ lộ khi **cả hai** bấm đồng ý lần nữa (T3) | User |
+| FR-5.4 | **Chỉ ghép cùng giới**, tuyệt đối, không có tuỳ chọn. Hồ sơ `gender = NULL` ⇒ **ngoài pool** (không đoán giới tính của ai) | System |
+| FR-5.5 | **Lọc cứng 2 tầng** (ADR-014): tầng an toàn = cùng giới + deal-breaker *hút thuốc trong phòng* / *ở bẩn* (veto hai chiều); tầng khả thi = ngân sách lệch > 1 bậc, khai "ở một mình", thời điểm cần phòng lệch > 2 tháng. Deal-breaker còn lại là **mềm**: trừ điểm + cảnh báo rõ chữ trên thẻ, không ẩn | System |
+| FR-5.6 | Deck: hồ sơ thật ưu tiên, thẻ mô phỏng ≤ 50%; ε-greedy 80/20; chế độ `random` cho buổi thử nghiệm (xáo thứ tự, ẩn %); telemetry do server ghi (`deck_log`, ADR-015) | System |
 
 ### FR-6: Chatbot RAG (AI)
 | ID | Yêu cầu | Quyền |
@@ -194,7 +197,7 @@ Kiến trúc tách Frontend (Next.js) — Backend (FastAPI) — Database (Postgr
 | T4 Dedup | FR-3.6 | Crawler |
 | T5 Cold-start | FR-4.1, FR-4.3 | Recommend |
 | T6 Filter bubble | FR-4.5 | Recommend |
-| T7 Roommate | FR-5.1, FR-5.2 | Matching |
+| T7 Roommate | FR-5.1 – FR-5.6 | Matching |
 | T8 RAG hallucination | FR-6.2 | Chatbot |
 | T9 Multi-turn | FR-6.3 | Chatbot |
 | T10 Risk detection | FR-7.1 | Risk |

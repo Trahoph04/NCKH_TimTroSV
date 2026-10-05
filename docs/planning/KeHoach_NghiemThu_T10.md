@@ -2,6 +2,10 @@
 
 _Lập: 13/09/2026 · Mốc nghiệm thu: **tuần 12–16/10/2026** · Chủ nhiệm: Phú_
 
+> **Cập nhật 06/10:** mục 1.2 không còn "cắt nhắn tin, thay bằng Zalo" — chat realtime trong web đã làm xong
+> (WebSocket + Redis, ảnh xoá EXIF, T3 lộ liên hệ khi cả hai đồng ý; xem `docs/tech_specs/Chat_Realtime.md`).
+> Kịch bản demo mục 5 đã đổi theo.
+
 > Nguyên tắc xuyên suốt: **hội đồng chấm 3 thứ — demo chạy trót lọt, báo cáo có số liệu, mỗi nội dung đã đăng ký trong thuyết minh có sản phẩm tương ứng.** Mọi việc không phục vụ 1 trong 3 thứ đó thì cắt.
 
 ---
@@ -37,7 +41,7 @@ Kết luận: nền tảng dữ liệu + web đã ổn; **4 module AI và toàn 
 
 | Thuyết minh ghi | Làm thay bằng | Lý do đưa vào báo cáo |
 |---|---|---|
-| Nhắn tin, tạo nhóm trong web | Kết nối Zalo sau khi match | Tận dụng kênh SV đã dùng, tránh lưu tin nhắn riêng tư → an toàn dữ liệu hơn |
+| Tạo nhóm (ghép 3+ người) trong web | Chỉ chat 1–1 giữa hai SV đã ghép đôi | Ghép nhóm là bài toán khác (phân hoạch nhóm, không phải ghép cặp); schema đã mở cho N người (`conversation_members`) nhưng chưa có UI |
 | Isolation Forest phát hiện gian lận | Rule-based + Isolation Forest **chỉ trên giá/m²** | Không có đủ tin lừa đảo thật để học; rule minh bạch, giải thích được |
 | MAE feedback sau 2 tuần (Thuyết minh bổ sung) | Khảo sát hài lòng tức thời 20 SV | Không đủ thời gian theo dõi 2 tuần |
 | ≥3000 listing (bổ sung) | Báo số thật (~300–500) | Cần Thơ có ít nguồn; báo cáo theo thuyết minh gốc (không ghi 3000) |
@@ -138,11 +142,15 @@ Phụ lục: bộ câu hỏi khảo sát, hướng dẫn cài đặt, danh sách
 1. (1') Trang chủ — số liệu thật, lọc "Dưới 2 triệu · Khu II · ≤10 phút".
 2. (2') Bản đồ — bán kính quanh Khu II, marker đỏ → bấm → review 1 sao "cọc không trả" + lý do rủi ro; marker xanh → review tốt. Bấm "Khiếu nại".
 3. (1') Gợi ý cho bạn — nhập ngân sách/khu/tiện ích → 10 tin + lý do.
-4. (2') Ghép bạn ở — hồ sơ đã điền → top-5 kèm % → gửi lời mời → tài khoản thứ 2 chấp nhận → hiện nút Zalo.
+4. (2') Ghép bạn ở — đăng nhập tab **MSSV** → hồ sơ đã điền → bộ thẻ kèm % + lý do → "Quan tâm" (hoặc "✉ Nhắn" kèm lời
+   nhắn) → tài khoản thứ 2 mở tab Lời mời, thích lại → **"Thành đôi!"** bật ra ở **cả hai** máy → mở chat, nhắn 1 câu
+   (realtime) → cả hai bấm đồng ý chia sẻ liên hệ (**T3**) → hiện email/SĐT + nút Zalo.
 5. (1.5') Chatbot — "Chủ trọ giữ cọc không trả thì sao?" (trích BLDS Điều 328) và "Phòng nào dưới 1.5 triệu gần khu I?" (trích DB).
 6. (0.5') Slide số liệu: 4 metric + SUS.
 
-Chuẩn bị sẵn: 2 tài khoản đăng nhập, DB đã seed review mẫu, `docker compose up` trước 30 phút, video dự phòng.
+Chuẩn bị sẵn: 2 tài khoản đăng nhập (demo: `*.demo@example.com` / `demo1234`, chạy `python -m app.chat.seed_demo
+--reset` trước buổi), DB đã seed review mẫu, `docker compose up` trước 30 phút, video dự phòng. Hai tài khoản demo
+PHẢI chưa quẹt nhau (seed_demo --reset) để match bật ra đúng lúc trên sân khấu.
 
 ---
 

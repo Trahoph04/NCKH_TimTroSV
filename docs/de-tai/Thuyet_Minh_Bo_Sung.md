@@ -28,6 +28,17 @@ Bản gốc chỉ trích báo chí ([3][4][8][9]). Bổ sung references học th
 - [R10] OpenStreetMap Foundation. *Overpass API & Nominatim Documentation.* — POI + geocoding miễn phí, T2,T3.
 - [R11] (Bổ sung 1 bài tạp chí KH ĐH CTU/ĐH BKHN về xử lý địa chỉ tiếng Việt — tra cứu trước khi nộp.)
 
+**Ghép bạn ở — Reciprocal Recommender (T7):**
+- [R12] Pizzato, L., Rej, T., Chung, T., Koprinska, I., Kay, J. (2010). *RECON: A Reciprocal Recommender for Online Dating.* ACM RecSys. — điểm tương thích hai chiều, gộp bằng harmonic mean.
+- [R13] Palomares, I., Porcel, C., Pizzato, L., Guy, I., Herrera-Viedma, E. (2021). *Reciprocal Recommender Systems: Analysis of State-of-Art Literature, Challenges and Opportunities towards Social Recommendation.* Information Fusion, 69, 103–127. — tổng quan RRS; lọc reciprocal khi dựng deck.
+- [R14] Gower, J.C. (1971). *A General Coefficient of Similarity and Some of Its Properties.* Biometrics, 27(4), 857–871. — độ tương đồng trên dữ liệu trộn kiểu (thứ bậc / nhị phân / tập hợp), xử lý thiếu dữ liệu.
+- [R15] Yang, C. et al. (2024). *Revisiting Reciprocal Recommender Systems: Metrics, Formulation, and Method.* arXiv:2408.09748. — metric đánh giá RRS.
+- [R16] Tomita, Y. et al. (2024). *Fair Reciprocal Recommendation in Matching Markets.* ACM RecSys. — congestion / công bằng exposure (đo bằng Gini, notebook 06 mục 8).
+- [R17] Irving, R.W. (1985). *An Efficient Algorithm for the "Stable Roommates" Problem.* Journal of Algorithms, 6(4), 577–595. — ghép ổn định không hai phía, có thể vô nghiệm.
+- [R18] *(Weighted Gower distance — BMC Medical Research Methodology, 2024.)* — trọng số cho từng chiều của Gower. **Tra cứu tên tác giả + tiêu đề đầy đủ trước khi nộp.**
+
+> R15, R16: đối chiếu lại danh sách tác giả trên trang bài báo trước khi đưa vào .docx.
+
 > Ghi chú: đánh số lại liên tục với references báo chí gốc khi gộp vào .docx.
 
 ---
