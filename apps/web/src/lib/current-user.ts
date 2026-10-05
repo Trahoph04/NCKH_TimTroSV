@@ -35,3 +35,11 @@ export async function getCurrentUser(
     return null;
   }
 }
+
+// URL cho page server-side khi getCurrentUser() trả null. Tới được page nghĩa
+// là middleware đã thấy cookie ⇒ cookie đó không dùng được; `reauth=1` báo
+// middleware xoá cookie trước khi hiện /login, nếu không sẽ vòng redirect
+// /login → next → /login… vô hạn.
+export function reauthUrl(next: string): string {
+  return `/login?reauth=1&next=${encodeURIComponent(next)}`;
+}

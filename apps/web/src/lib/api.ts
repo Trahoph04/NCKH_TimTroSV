@@ -49,6 +49,15 @@ export function login(email: string, password: string): Promise<TokenPair> {
   });
 }
 
+// Tài khoản cấp trước cho buổi thử nghiệm chỉ có identity provider='ctu'
+// (không có 'local') ⇒ phải đi đường riêng, /auth/login sẽ trả 401.
+export function loginCtu(mssv: string, password: string): Promise<TokenPair> {
+  return apiFetch<TokenPair>("/auth/login/ctu", {
+    method: "POST",
+    body: JSON.stringify({ mssv, password }),
+  });
+}
+
 export function register(
   email: string,
   password: string,

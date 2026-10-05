@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { getListing, type ApiError } from "@/lib/api";
-import { getCurrentUser } from "@/lib/current-user";
+import { getCurrentUser, reauthUrl } from "@/lib/current-user";
 import ListingForm from "../../ListingForm";
 
 export const dynamic = "force-dynamic";
@@ -12,7 +12,7 @@ export default async function EditListingPage({
 }) {
   const user = await getCurrentUser();
   if (!user) {
-    redirect(`/login?next=/listings/${params.id}/edit`);
+    redirect(reauthUrl(`/listings/${params.id}/edit`));
   }
 
   let listing;

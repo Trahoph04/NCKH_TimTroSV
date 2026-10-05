@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/current-user";
+import { getCurrentUser, reauthUrl } from "@/lib/current-user";
 import SiteHeader from "../SiteHeader";
 import RoommateApp from "./RoommateApp";
 
@@ -10,7 +10,7 @@ export const metadata = { title: "Ghép bạn ở — Trọ CTU" };
 // kèm lý do. Thuật toán ở apps/api/app/matching/.
 export default async function RoommatePage() {
   const user = await getCurrentUser();
-  if (!user) redirect("/login?next=/roommate");
+  if (!user) redirect(reauthUrl("/roommate"));
 
   return (
     <div className="flex h-[100dvh] flex-col overflow-hidden">

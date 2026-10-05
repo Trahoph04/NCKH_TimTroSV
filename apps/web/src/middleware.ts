@@ -22,17 +22,35 @@ export function middleware(req: NextRequest) {
   if (isProtected && !hasSession) {
     const url = req.nextUrl.clone();
     url.pathname = "/login";
-    url.searchParams.set("next", pathname);
+    url.search = "";
+    url.searchParams.set("next", pathname + req.nextUrl.search);
     return NextResponse.redirect(url);
   }
 
-  if (AUTH_PAGES.some((p) => pathname.startsWith(p)) && hasSession) {
+  const isAuthPage = AUTH_PAGES.some((p) => pathname.startsWith(p));
+
+  // Page server-side đã gọi /me và thấy token không dùng được (đổi JWT_SECRET,
+  // reset_and_seed xoá user…) ⇒ redirect về /login?reauth=1. Cookie vẫn CÒN nên
+  // nếu nhánh dưới đẩy tiếp về `next` là vòng redirect vô hạn
+  // (ERR_TOO_MANY_REDIRECTS). Xoá cookie ở đây và cho trang login hiện ra.
+  if (isAuthPage && req.nextUrl.searchParams.has("reauth")) {
+    const url = req.nextUrl.clone();
+    url.searchParams.delete("reauth");
+    const res = NextResponse.redirect(url);
+    res.cookies.delete(ACCESS_COOKIE);
+    res.cookies.delete(REFRESH_COOKIE);
+    return res;
+  }
+
+  if (isAuthPage && hasSession) {
     // đã đăng nhập mà vào /login?next=/chat ⇒ đi thẳng tới /chat (trước đây luôn về /me)
     const raw = req.nextUrl.searchParams.get("next") || "/";
-    const url = req.nextUrl.clone();
-    url.pathname = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
-    url.search = "";
-    return NextResponse.redirect(url);
+    const safe = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
+    // `next` có thể mang query (/roommate?mode=random) — gán thẳng vào pathname
+    // sẽ mã hoá "?" thành %3F ⇒ 404. Tách bằng URL rồi kiểm lại cùng origin.
+    const target = new URL(safe, req.nextUrl.origin);
+    if (target.origin !== req.nextUrl.origin) target.href = new URL("/", req.nextUrl.origin).href;
+    return NextResponse.redirect(target);
   }
 
   return NextResponse.next();

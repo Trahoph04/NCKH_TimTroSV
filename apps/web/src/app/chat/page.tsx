@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/current-user";
+import { getCurrentUser, reauthUrl } from "@/lib/current-user";
 import SiteHeader from "../SiteHeader";
 import ChatApp from "./ChatApp";
 
@@ -9,7 +9,7 @@ export const metadata = { title: "Tin nhắn — Trọ CTU" };
 // Mockup 06 (UI_NCKH.html) — tin nhắn realtime giữa hai SV đã ghép ở.
 export default async function ChatPage({ searchParams }: { searchParams: { c?: string } }) {
   const user = await getCurrentUser();
-  if (!user) redirect("/login?next=/chat");
+  if (!user) redirect(reauthUrl("/chat"));
 
   const c = Number(searchParams.c);
   return (

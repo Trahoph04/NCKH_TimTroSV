@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getMyListings, type ApiError, type ListingOut } from "@/lib/api";
 import { getAccessToken } from "@/lib/session";
-import { getCurrentUser } from "@/lib/current-user";
+import { getCurrentUser, reauthUrl } from "@/lib/current-user";
 import ListingCard from "@/app/ListingCard";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function MyListingsPage() {
   const user = await getCurrentUser();
   if (!user) {
-    redirect("/login?next=/listings/mine");
+    redirect(reauthUrl("/listings/mine"));
   }
 
   const token = getAccessToken();

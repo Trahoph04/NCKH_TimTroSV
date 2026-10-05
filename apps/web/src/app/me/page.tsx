@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/current-user";
+import { getCurrentUser, reauthUrl } from "@/lib/current-user";
 import SiteHeader from "../SiteHeader";
 import LogoutButton from "./LogoutButton";
 
@@ -10,7 +10,7 @@ export default async function MePage() {
   const user = await getCurrentUser();
 
   if (!user) {
-    redirect("/login");
+    redirect(reauthUrl("/me"));
   }
 
   return (
