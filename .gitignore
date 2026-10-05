@@ -39,7 +39,21 @@ Thumbs.db
 # ── Docker volumes / runtime ──
 pgdata/
 
+# ── Dữ liệu khảo sát + mật khẩu tài khoản thử nghiệm ──
+# eval/data/ chứa họ tên · MSSV · email SV thật và file mật khẩu sinh ngẫu nhiên
+# (.credentials.csv). TUYỆT ĐỐI không commit — cam kết riêng tư trong form khảo
+# sát (xem Matching_Messaging_Design.md 1.4.3 + 1.7). Xoá sau nghiệm thu.
+eval/data/
+
+# venv riêng cho notebook eval (numpy/pandas/scipy không nằm trong container api)
+eval/.venv/
+eval/notebooks/.ipynb_checkpoints/
+
 # ── Temporary & sensitive files ──
 .tmp-map*.png
 test_all_proxies.ps1
 apps/web/tsconfig.tsbuildinfo
+
+# ── Rác / xuất tạm (không version) ──
+_to_delete/
+exports/

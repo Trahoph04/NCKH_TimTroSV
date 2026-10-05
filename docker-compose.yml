@@ -38,8 +38,12 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       CRAWLER_ENABLED: ${CRAWLER_ENABLED:-true}
       ORS_API_KEY: ${ORS_API_KEY:-}
+      GOOGLE_PLACES_API_KEY: ${GOOGLE_PLACES_API_KEY:-}
+      MEDIA_DIR: /app/media
     ports:
       - "8000:8000"
+    volumes:
+      - media:/app/media   # ảnh gửi trong chat (đã xoá EXIF) — xoá volume = xoá ảnh
     depends_on:
       db:
         condition: service_healthy
@@ -56,6 +60,10 @@ services:
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8000
       API_INTERNAL_URL: http://api:8000
+      # chạy thử từ máy khác qua http://<IP>:3000 ⇒ cookie không được `secure`
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      # chỉ đặt khi web/API ở 2 tên miền khác nhau (tunnel), vd. wss://xxx.trycloudflare.com/chat/ws
+      CHAT_WS_URL: ${CHAT_WS_URL:-}
     ports:
       - "3000:3000"
     depends_on:
@@ -63,3 +71,4 @@ services:
 
 volumes:
   pgdata:
+  media:

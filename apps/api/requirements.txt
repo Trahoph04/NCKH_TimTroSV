@@ -19,3 +19,7 @@ email-validator==2.2.0
 
 # test
 pytest==8.3.4
+
+# chat realtime (upload ảnh multipart + re-encode/xoá EXIF)
+python-multipart==0.0.20
+Pillow==11.0.0
