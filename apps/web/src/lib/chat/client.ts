@@ -65,20 +65,38 @@ export const chatApi = {
 
 export const mediaUrl = (id: string) => `/api/chat/media/${id}`;
 
+const pageIsSecure = () => typeof window !== "undefined" && window.location.protocol === "https:";
+
+/** Chuẩn hoá về ws(s)://host[:port]/chat/ws.
+ *  - Nhận cả "https://x.trycloudflare.com", "x.trycloudflare.com", "wss://x/chat/ws".
+ *  - Trang https ⇒ BẮT BUỘC wss: trình duyệt chặn ws:// từ trang https (mixed
+ *    content) mà không báo lỗi gì ra UI ⇒ realtime chết im lặng sau tunnel.
+ *  - Không có path ⇒ thêm /chat/ws (người đặt biến hay chỉ dán tên miền). */
+export function normalizeWsUrl(raw: string, secure = pageIsSecure()): string {
+  let s = raw.trim();
+  if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(s)) s = `${secure ? "wss" : "ws"}://${s}`;
+  const u = new URL(s);
+  if (u.protocol === "https:" || u.protocol === "wss:" || secure) u.protocol = "wss:";
+  else u.protocol = "ws:";
+  if (u.pathname === "" || u.pathname === "/") u.pathname = "/chat/ws";
+  u.search = "";
+  u.hash = "";
+  return u.toString();
+}
+
 /** URL WebSocket tới FastAPI. Ưu tiên CHAT_WS_URL server trả kèm vé (tunnel/tên miền riêng).
  *  Không có thì: API ở localhost mà trang mở bằng IP LAN (máy khác / điện thoại)
- *  ⇒ thay host bằng host của trang — chính là máy đang chạy docker compose. */
+ *  ⇒ thay host bằng host của trang — chính là máy đang chạy docker compose.
+ *  Scheme lấy theo TRANG (không theo NEXT_PUBLIC_API_URL, vốn bake sẵn http lúc build). */
 export function chatWsUrl(fromServer?: string | null): string {
   const explicit = fromServer || process.env.NEXT_PUBLIC_CHAT_WS_URL;
-  if (explicit) return explicit;
+  if (explicit) return normalizeWsUrl(explicit);
   const api = new URL(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000");
   if (["localhost", "127.0.0.1"].includes(api.hostname) && typeof window !== "undefined") {
     api.hostname = window.location.hostname;
   }
-  api.protocol = api.protocol === "https:" ? "wss:" : "ws:";
   api.pathname = "/chat/ws";
-  api.search = "";
-  return api.toString();
+  return normalizeWsUrl(api.toString(), pageIsSecure() || api.protocol === "https:");
 }
 
 export function newClientId(): string {

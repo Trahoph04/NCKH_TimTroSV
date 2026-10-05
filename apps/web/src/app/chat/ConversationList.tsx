@@ -231,6 +231,9 @@ function LikesList({ likes, onRespond }: { likes: Like[]; onRespond: Props["onRe
               </span>
             ))}
           </div>
+          {l.note && (
+            <p className="mt-2 rounded-lg bg-primary-soft px-3 py-2 text-sm text-ink-soft">✉ “{l.note}”</p>
+          )}
           {l.bio && <p className="mt-2 line-clamp-2 text-sm text-ink-soft">“{l.bio}”</p>}
           <div className="mt-3 grid grid-cols-2 gap-2">
             <button

@@ -94,7 +94,9 @@ export function profileChips(p: RoommateProfile): string[] {
   const chips: string[] = [];
   if (p.sleep_time != null) chips.push(["Ngủ sớm", "Ngủ 23h–0h", "Cú đêm"][p.sleep_time] ?? "");
   if (p.cleanliness != null) chips.push(`Sạch sẽ ${p.cleanliness}/5`);
+  if (p.noise_tolerance != null) chips.push(`Chịu ồn ${p.noise_tolerance}/5`);
   if (p.smoke === false) chips.push("Không hút thuốc");
+  else if (p.smoke) chips.push(p.smoke_in_room ? "Hút thuốc trong phòng" : "Hút thuốc (ra ngoài)");
   if (p.budget_band != null) chips.push(BUDGET[p.budget_band] ?? "");
   return chips.filter(Boolean);
 }

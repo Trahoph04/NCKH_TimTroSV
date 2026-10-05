@@ -4,11 +4,20 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import * as L from "./labels";
 import ProfileForm from "./ProfileForm";
-import type { DeckItem, DeckRes, LikeItem, ProfileRes } from "./types";
+import { ProfileFacts, ProfileHeader } from "./ProfileSummary";
+import type { DeckItem, DeckMode, DeckRes, LikeItem, ProfileRes } from "./types";
 
 type Tab = "deck" | "likes" | "passed" | "profile";
 
-export default function RoommateApp({ me }: { me: { id: number; name: string } }) {
+export default function RoommateApp({
+  me,
+  mode = "ranked",
+}: {
+  me: { id: number; name: string };
+  // "random" = buổi thử nghiệm: thứ tự ngẫu nhiên, KHÔNG hiện % hay lý do (thiết
+  // kế 3.6). Server tự ẩn tín hiệu, FE chỉ cần gọi đúng mode.
+  mode?: DeckMode;
+}) {
   const [tab, setTab] = useState<Tab>("deck");
   const [prof, setProf] = useState<ProfileRes | null>(null);
   const [deck, setDeck] = useState<DeckRes | null>(null);
@@ -33,14 +42,14 @@ export default function RoommateApp({ me }: { me: { id: number; name: string } }
 
   const loadDeck = useCallback(async () => {
     try {
-      const r = await fetch("/api/matching/deck?limit=10", { cache: "no-store" });
+      const r = await fetch(`/api/matching/deck?limit=10&mode=${mode}`, { cache: "no-store" });
       if (!r.ok) throw new Error();
       setDeck(await r.json());
       setErr(null);
     } catch {
       setErr("Không tải được bộ thẻ. Thử lại sau.");
     }
-  }, []);
+  }, [mode]);
 
   const loadList = useCallback(async (which: "likes" | "passed") => {
     try {
@@ -80,12 +89,41 @@ export default function RoommateApp({ me }: { me: { id: number; name: string } }
         return;
       }
       if (d.matched && d.conversation_id) setMatched({ convId: d.conversation_id, name });
+      if (d.unmatched) void loadList("passed");
       // Bỏ thẻ vừa quyết khỏi deck tại chỗ, không chờ tải lại — tránh nhấp nháy
       setDeck((p) => (p ? { ...p, items: p.items.filter((i) => i.user_id !== targetId) } : p));
       setLikes((p) => p.filter((i) => i.user_id !== targetId));
       setErr(null);
     } catch {
       setErr("Không kết nối được máy chủ");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // Lời mời kèm lời nhắn = "Quan tâm" + một câu giới thiệu. Đi song song với
+  // quẹt (thiết kế 2.10): match 2 chiều nhân đôi tỉ lệ rụng, lời nhắn cho người
+  // kia lý do cụ thể để đáp lại.
+  async function invite(targetId: number, note: string, name: string): Promise<boolean> {
+    setBusy(true);
+    try {
+      const r = await fetch("/api/matching/invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ target_id: targetId, note: note.trim() || null }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        setErr(typeof d.detail === "string" ? d.detail : "Không gửi được lời mời");
+        return false;
+      }
+      if (d.matched && d.conversation_id) setMatched({ convId: d.conversation_id, name });
+      setDeck((p) => (p ? { ...p, items: p.items.filter((i) => i.user_id !== targetId) } : p));
+      setErr(null);
+      return true;
+    } catch {
+      setErr("Không kết nối được máy chủ");
+      return false;
     } finally {
       setBusy(false);
     }
@@ -150,6 +188,17 @@ export default function RoommateApp({ me }: { me: { id: number; name: string } }
           ))}
         </nav>
 
+        {mode === "random" && (
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-tint px-4 py-3 text-sm text-ink-soft">
+            <span>
+              <strong>Buổi thử nghiệm:</strong> thẻ được xáo ngẫu nhiên và không hiện % tương thích.
+            </span>
+            <Link href="/roommate/rate" className="font-semibold text-primary underline">
+              Chấm điểm 5 thẻ →
+            </Link>
+          </div>
+        )}
+
         {err && <ErrBox msg={err} onRetry={tab === "deck" ? loadDeck : loadProfile} />}
 
         {tab === "deck" && (
@@ -159,7 +208,7 @@ export default function RoommateApp({ me }: { me: { id: number; name: string } }
             ) : (
               <div className="space-y-4">
                 {deck?.items.map((it) => (
-                  <Card key={it.user_id} item={it} busy={busy} onSwipe={swipe} />
+                  <Card key={it.user_id} item={it} busy={busy} onSwipe={swipe} onInvite={invite} />
                 ))}
               </div>
             )}
@@ -275,32 +324,21 @@ function EmptyDeck({
 }
 
 function Card({
-  item, busy, onSwipe,
+  item, busy, onSwipe, onInvite,
 }: {
   item: DeckItem;
   busy: boolean;
   onSwipe: (id: number, d: "like" | "pass", name: string) => void;
+  onInvite: (id: number, note: string, name: string) => Promise<boolean>;
 }) {
   const p = item.profile;
   const name = p?.name || "Sinh viên CTU";
+  const [composing, setComposing] = useState(false);
+  const [note, setNote] = useState("");
   return (
     <article className="overflow-hidden rounded-2xl bg-white shadow-sm">
       <div className="flex items-start justify-between gap-3 border-b border-line-soft p-5">
-        <div>
-          {/* Tầng T1 (ẩn danh): tên gọi + Trường/Khoa + tóm tắt lối sống.
-              KHÔNG ảnh chân dung — quẹt trên LỐI SỐNG, không trên ngoại hình. */}
-          <h3 className="font-bold text-ink">{name}</h3>
-          <p className="text-sm text-ink-muted">
-            {p?.gender === "nam" ? "Nam" : p?.gender === "nu" ? "Nữ" : "—"}
-            {p?.don_vi ? ` · ${p.don_vi}` : ""}
-          </p>
-          {item.is_simulated && (
-            // Nhãn bắt buộc: hồ sơ mô phỏng bị loại khỏi mọi số liệu đánh giá
-            <span className="mt-1 inline-block rounded bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
-              hồ sơ mô phỏng
-            </span>
-          )}
-        </div>
+        <ProfileHeader p={p} isSimulated={item.is_simulated} />
         {item.score !== null && (
           <div className="shrink-0 text-right">
             <p className="text-2xl font-extrabold text-primary">{Math.round(item.score * 100)}%</p>
@@ -310,16 +348,7 @@ function Card({
       </div>
 
       <div className="space-y-3 p-5">
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
-          <Row k="Giờ ngủ" v={L.at(L.SLEEP, p?.sleep_time)} />
-          <Row k="Rửa chén" v={L.at(L.CLEAN, p?.cleanliness)} />
-          <Row k="Chịu ồn" v={L.at(L.NOISE, p?.noise_tolerance)} />
-          <Row k="Máy lạnh" v={L.at(L.AC, p?.ac_usage)} />
-          <Row k="Ngân sách" v={L.at(L.BUDGET, p?.budget_band)} />
-          <Row k="Dự định ở" v={L.at(L.SCENARIO, p?.scenario)} />
-        </dl>
-
-        {p?.bio && <p className="rounded-lg bg-tint px-3 py-2 text-sm italic text-ink-soft">“{p.bio}”</p>}
+        <ProfileFacts p={p} />
 
         {item.reasons.length > 0 && (
           <ul className="space-y-1">
@@ -347,6 +376,40 @@ function Card({
         )}
       </div>
 
+      {composing && (
+        <div className="space-y-2 border-t border-line-soft p-4">
+          <label htmlFor={`note-${item.user_id}`} className="text-xs font-medium text-ink-soft">
+            Lời nhắn kèm lời mời (không bắt buộc)
+          </label>
+          <textarea
+            id={`note-${item.user_id}`}
+            value={note}
+            maxLength={300}
+            rows={2}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Vd. Mình học Khu 2, cần phòng từ tháng sau, ngủ sớm…"
+            className="w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-primary focus:outline-none"
+          />
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => setComposing(false)}
+              className="rounded-lg px-3 py-2 text-sm text-ink-muted"
+            >
+              Huỷ
+            </button>
+            <button
+              disabled={busy}
+              onClick={async () => {
+                if (await onInvite(item.user_id, note, name)) setComposing(false);
+              }}
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+            >
+              Gửi lời mời
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex gap-2 border-t border-line-soft p-4">
         <button
           disabled={busy}
@@ -357,6 +420,14 @@ function Card({
         </button>
         <button
           disabled={busy}
+          onClick={() => setComposing((v) => !v)}
+          title="Quan tâm kèm một lời nhắn"
+          className="rounded-xl border border-primary px-4 py-3 text-sm font-semibold text-primary transition hover:bg-tint disabled:opacity-50"
+        >
+          ✉ Nhắn
+        </button>
+        <button
+          disabled={busy}
           onClick={() => onSwipe(item.user_id, "like", name)}
           className="flex-1 rounded-xl bg-primary py-3 font-semibold text-white transition hover:bg-primary-bright disabled:opacity-50"
         >
@@ -364,15 +435,6 @@ function Card({
         </button>
       </div>
     </article>
-  );
-}
-
-function Row({ k, v }: { k: string; v: string }) {
-  return (
-    <>
-      <dt className="text-ink-faint">{k}</dt>
-      <dd className="font-medium text-ink-soft">{v}</dd>
-    </>
   );
 }
 
@@ -395,6 +457,9 @@ function ListTab({
             <p className="mt-1 text-xs text-ink-faint">
               Giờ ngủ {L.at(L.SLEEP, p.sleep_time)} · {L.at(L.CLEAN, p.cleanliness)}
             </p>
+            {p.note && (
+              <p className="mt-2 rounded-lg bg-tint px-3 py-2 text-sm text-ink-soft">✉ “{p.note}”</p>
+            )}
           </div>
           {action(p)}
         </div>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { priceShort, profileRows } from "@/lib/chat/format";
-import type { Conversation, ConversationDetail } from "@/lib/chat/types";
+import type { ContactState, Conversation, ConversationDetail } from "@/lib/chat/types";
 import { Avatar } from "./ConversationList";
 
 type Props = {
@@ -17,24 +17,8 @@ type Props = {
 
 // ----------------------------------------------------------------- T3
 // Liên hệ chỉ hiện khi CẢ HAI bên bấm đồng ý (POST .../contact-consent).
-// Khối này khai kiểu tại chỗ thay vì sửa lib/chat/types.ts: panel tự hỏi
-// /api/chat/conversations/{id}/contact-consent và tự giữ trạng thái, nên không
-// cần ChatApp truyền thêm prop nào — đổi ít file thì ít đụng nhau.
-type ContactPartner = {
-  user_id: number;
-  name: string;
-  email: string | null;
-  phone: string | null;
-  zalo_url: string | null;
-};
-
-type ContactState = {
-  mine: boolean;
-  theirs: boolean;
-  unlocked: boolean;
-  waiting_for_other: boolean;
-  partner: ContactPartner | null;
-};
+// Panel tự hỏi /api/chat/conversations/{id}/contact-consent và tự giữ trạng
+// thái, nên ChatApp không cần truyền thêm prop nào.
 
 // 15s: không phải realtime, chỉ để người bấm TRƯỚC thấy trạng thái mở ra mà
 // không phải F5. Nhịp dày hơn không đáng — hai bên thường bấm cách nhau vài giờ.
@@ -61,7 +45,7 @@ export default function ProfilePanel({ conv, detail, online, onClose, onReport, 
   // đồng bộ) — so id trước khi dùng.
   const fromDetail =
     detail && detail.id === conv.id
-      ? (detail as ConversationDetail & { contact?: ContactState | null }).contact ?? null
+      ? detail.contact ?? null
       : null;
   // Hai nguồn, lấy bản nhiều chữ ký hơn: ChatApp tải lại detail vì lý do khác
   // (tin mới đến) nên có thể biết "bên kia vừa đồng ý" trước nhịp poll 15s của

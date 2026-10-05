@@ -64,6 +64,8 @@ services:
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       # chỉ đặt khi web/API ở 2 tên miền khác nhau (tunnel), vd. wss://xxx.trycloudflare.com/chat/ws
       CHAT_WS_URL: ${CHAT_WS_URL:-}
+      # buổi thử nghiệm: random = /roommate xáo thẻ + ẩn % cho MỌI người (?mode= vẫn ghi đè)
+      ROOMMATE_DECK_MODE: ${ROOMMATE_DECK_MODE:-ranked}
     ports:
       - "3000:3000"
     depends_on:

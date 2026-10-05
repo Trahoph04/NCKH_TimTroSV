@@ -68,4 +68,29 @@ export type ProfileRes = {
   options: { hanh_vi: string[]; deal_breakers: string[] };
 };
 
-export type LikeItem = DeckProfile & { liked_at?: string; passed_at?: string };
+// invite_id/note có khi "thích" này đến từ POST /matching/invite (lời mời kèm lời nhắn)
+export type LikeItem = DeckProfile & {
+  liked_at?: string;
+  passed_at?: string;
+  invite_id?: number | null;
+  note?: string | null;
+};
+
+export type DeckMode = "ranked" | "random";
+
+// GET /matching/rate — KHÔNG có score/arm: người chấm không được biết thẻ nào
+// do thuật toán chọn (thiết kế 2.7, chấm làm mù).
+export type RateCard = {
+  card_code: string;
+  position: number;
+  rating: number | null;
+  is_simulated: boolean;
+  profile: DeckProfile | null;
+};
+
+export type RateRes = {
+  items: RateCard[];
+  reason: "no_profile" | "profile_incomplete" | "pool_empty" | null;
+  round: number;
+  done?: boolean;
+};

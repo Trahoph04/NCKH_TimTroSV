@@ -72,6 +72,11 @@ function Images({ m, onOpen }: { m: Message; onOpen: (src: string) => void }) {
   const srcs = refs?.map((r) => mediaUrl(r.id)) ?? m.local_images ?? [];
   const n = srcs.length;
   const shown = srcs.slice(0, 4);
+  // Ảnh đơn: giữ chỗ đúng tỉ lệ w/h server trả về TRƯỚC khi ảnh tải xong. Không
+  // có thì khung cao 0 → ảnh tải xong nở ra đẩy nội dung, khung chat trượt khỏi
+  // đáy hội thoại (người dùng đang đọc tin mới nhất thì bị đẩy lên).
+  const single = n === 1 ? refs?.[0] : undefined;
+  const ratio = single && single.w > 0 && single.h > 0 ? `${single.w} / ${single.h}` : undefined;
   return (
     <div className={`grid gap-1 overflow-hidden rounded-2xl ${n === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
       {shown.map((src, i) => (
@@ -79,12 +84,15 @@ function Images({ m, onOpen }: { m: Message; onOpen: (src: string) => void }) {
           key={src}
           onClick={() => onOpen(src)}
           className={`photo-placeholder relative block overflow-hidden ${n === 1 ? "max-h-80 w-64 sm:w-72" : "h-32 w-32 sm:h-36 sm:w-36"}`}
+          style={ratio ? { aspectRatio: ratio } : undefined}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={src}
             alt={`Ảnh ${i + 1}`}
             loading="lazy"
+            width={single?.w}
+            height={single?.h}
             className={`h-full w-full ${n === 1 ? "object-contain" : "object-cover"}`}
           />
         </button>

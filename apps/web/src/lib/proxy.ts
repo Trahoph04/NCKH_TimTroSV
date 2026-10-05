@@ -8,7 +8,8 @@ import { getAccessToken, getRefreshToken, setAuthCookies } from "./session";
 // chắc chắn hết hạn giữa chừng → tự refresh 1 lần rồi gọi lại, set cookie mới.
 // Chỉ dùng trong Route Handler (được phép set cookie).
 
-const PASS_HEADERS = ["content-type", "cache-control", "content-length", "etag", "last-modified"];
+// retry-after: 429 của rate limit (app/ratelimit.py) cần nó để FE biết chờ bao lâu
+const PASS_HEADERS = ["content-type", "cache-control", "content-length", "etag", "last-modified", "retry-after"];
 
 async function tryRefresh(): Promise<string | undefined> {
   const rt = getRefreshToken();

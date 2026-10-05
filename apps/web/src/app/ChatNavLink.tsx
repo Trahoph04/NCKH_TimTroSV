@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-// Mục "Tin nhắn" trên header + badge số tin chưa đọc.
+// Mục "Tin nhắn" trên header + badge = tin chưa đọc + lời mời ghép đang chờ.
 // Trang /chat đẩy số mới qua sự kiện window "chat:unread" (realtime);
 // các trang khác hỏi /api/chat/unread mỗi 30s. Chưa đăng nhập ⇒ không hiện badge.
 export default function ChatNavLink({ active, className }: { active: boolean; className: string }) {
@@ -15,15 +15,18 @@ export default function ChatNavLink({ active, className }: { active: boolean; cl
       try {
         const res = await fetch("/api/chat/unread", { cache: "no-store" });
         if (!res.ok) return;
-        const data = (await res.json()) as { messages: number };
-        if (alive) setCount(data.messages);
+        // Cộng cả `likes`: bản trước bỏ số này nên có người thích mình mà header
+        // không báo gì, trong khi tab Lời mời trong /chat thì có.
+        const data = (await res.json()) as { messages: number; likes?: number };
+        if (alive) setCount(data.messages + (data.likes ?? 0));
       } catch {
         /* offline: giữ số cũ */
       }
     };
     const onPush = (e: Event) => setCount((e as CustomEvent<number>).detail);
     window.addEventListener("chat:unread", onPush);
-    if (!active) load();
+    // Vào /chat: vẫn tải 1 lần để có số ngay; ChatApp chỉ đẩy số khi danh sách đã tải xong.
+    load();
     const t = active ? undefined : setInterval(load, 30_000);
     return () => {
       alive = false;

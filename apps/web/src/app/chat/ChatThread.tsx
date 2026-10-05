@@ -23,7 +23,9 @@ type Props = {
   onSendText: (text: string) => void;
   onSendImages: (files: File[]) => void;
   onSendListing: (listingId: number, snapshot: Message["payload"]) => void;
-  onTyping: (isTyping: boolean) => void;
+  // convId tường minh: lúc unmount (đổi hội thoại) hội thoại "đang mở" đã là cái
+  // mới, gửi "ngừng nhập" theo hội thoại đang mở là gửi nhầm chỗ.
+  onTyping: (isTyping: boolean, convId: number) => void;
   onShowProfile: () => void;
   onReport: () => void;
 };
@@ -84,9 +86,19 @@ export default function ChatThread(p: Props) {
     if (p.typing && el && atBottom) el.scrollTop = el.scrollHeight;
   }, [p.typing, atBottom]);
 
-  useEffect(() => () => {
-    clearTimeout(typingStop.current);
-  }, []);
+  // Rời hội thoại khi đang gõ dở (đổi sang hội thoại khác / quay lại danh sách):
+  // phải báo "ngừng nhập" NGAY, nếu không đối phương thấy "Đang nhập…" thêm 6s
+  // (TYPING_TTL_MS) cho một tin không bao giờ tới.
+  const typingRef = useRef(p.onTyping);
+  typingRef.current = p.onTyping;
+  useEffect(() => {
+    const convId = conv.id;
+    return () => {
+      clearTimeout(typingStop.current);
+      if (typingSent.current) typingRef.current(false, convId);
+      typingSent.current = 0;
+    };
+  }, [conv.id]);
 
   const onScroll = () => {
     const el = scrollRef.current;
@@ -110,12 +122,12 @@ export default function ChatThread(p: Props) {
   const signalTyping = (value: string) => {
     const now = Date.now();
     if (value && now - typingSent.current > 2500) {
-      p.onTyping(true);
+      p.onTyping(true, conv.id);
       typingSent.current = now;
     }
     clearTimeout(typingStop.current);
     typingStop.current = setTimeout(() => {
-      p.onTyping(false);
+      p.onTyping(false, conv.id);
       typingSent.current = 0;
     }, value ? 3500 : 0);
   };
@@ -126,7 +138,7 @@ export default function ChatThread(p: Props) {
     p.onSendText(body);
     setText("");
     clearTimeout(typingStop.current);
-    if (typingSent.current) p.onTyping(false);
+    if (typingSent.current) p.onTyping(false, conv.id);
     typingSent.current = 0;
     inputRef.current?.focus();
   };

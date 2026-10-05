@@ -71,12 +71,31 @@ export type RoommateProfile = {
   is_simulated: boolean;
 };
 
+// T3 — liên hệ chỉ có khi CẢ HAI bên đồng ý (chat/repo.py:_CONTACT_SQL)
+export type ContactPartner = {
+  user_id: number;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  zalo_url: string | null;
+};
+
+export type ContactState = {
+  mine: boolean;
+  theirs: boolean;
+  unlocked: boolean;
+  waiting_for_other: boolean;
+  partner: ContactPartner | null;
+};
+
 export type ConversationDetail = Conversation & {
   partner_profile: RoommateProfile | null;
   shared_listings: { id: number; sender_id: number; payload: ListingSnapshot; created_at: string }[];
+  contact?: ContactState | null;
 };
 
-export type Like = RoommateProfile & { liked_at: string };
+// invite_id/note: "thích" đến từ lời mời kèm lời nhắn (POST /matching/invite)
+export type Like = RoommateProfile & { liked_at: string; invite_id?: number | null; note?: string | null };
 
 export type ChatEvent =
   | { type: "hello"; user_id: number; online: number[] }

@@ -233,6 +233,10 @@ export default function ChatApp({ me, initialConversationId }: { me: Me; initial
           return prev;
         }
         const c = prev[idx];
+        // Tin của chính mình tới HAI lần: response POST (sendWith) + tiếng vọng
+        // message.new qua WS. Đã thấy tin này (hoặc tin mới hơn) ở last_message
+        // thì không cộng đếm lần nữa — bản trước +1 hai lần cho mỗi tin gửi đi.
+        if (c.last_message && c.last_message.id >= msg.id) return prev;
         const fromPartner = msg.sender_id != null && msg.sender_id !== me.id;
         const seeing = activeRef.current === convId && visibleRef.current;
         const updated: Conversation = {
@@ -292,6 +296,14 @@ export default function ChatApp({ me, initialConversationId }: { me: Me; initial
         case "match.new":
           loadConvs();
           loadLikes();
+          // Phía BỊ ĐỘNG (người kia vừa bấm thích đáp lại) cũng phải có khoảnh
+          // khắc "Thành đôi!" — bản trước bỏ qua conversation_id nên chỉ người
+          // bấm sau mới thấy. Người bấm sau cũng nhận sự kiện này: respondLike
+          // đặt đúng modal đó, `m ?? …` giữ nguyên nên không bật hai lần.
+          chatApi
+            .conversation(ev.conversation_id)
+            .then((d) => setMatchModal((m) => m ?? { conversationId: ev.conversation_id, name: d.partner.name }))
+            .catch(() => {});
           break;
         case "like.new":
           loadLikes();
@@ -303,6 +315,9 @@ export default function ChatApp({ me, initialConversationId }: { me: Me; initial
           loadDetail(ev.conversation_id);
           break;
         case "conversation.removed":
+          threadsRef.current[ev.conversation_id]?.items.forEach((m) =>
+            m.local_images?.forEach((u) => URL.revokeObjectURL(u)),
+          );
           setConvs((prev) => prev.filter((c) => c.id !== ev.conversation_id));
           if (activeRef.current === ev.conversation_id) {
             setActiveId(null);
@@ -384,11 +399,26 @@ export default function ChatApp({ me, initialConversationId }: { me: Me; initial
     }
   }, [active, activeThread, visible, me.id]);
 
-  // badge "Tin nhắn" trên header
+  // badge "Tin nhắn" trên header = tin chưa đọc + lời mời đang chờ (khớp
+  // /chat/unread mà các trang khác hỏi). Chưa tải xong danh sách thì KHÔNG đẩy:
+  // đẩy 0 lúc convs còn rỗng là xoá badge đúng về 0 rồi mới nhảy lại.
   useEffect(() => {
-    const total = convs.reduce((s, c) => s + c.unread, 0);
+    if (loadingConvs) return;
+    const total = convs.reduce((s, c) => s + c.unread, 0) + likes.length;
     window.dispatchEvent(new CustomEvent("chat:unread", { detail: total }));
-  }, [convs]);
+  }, [convs, likes, loadingConvs]);
+
+  // Rời trang: thu hồi object URL ảnh xem trước của các tin chưa gửi được.
+  // merge() chỉ thu hồi khi tin thật về thay bản optimistic — tin thất bại hẳn
+  // thì URL (và cả File trong bộ nhớ) nằm lại tới khi đóng tab.
+  useEffect(
+    () => () => {
+      Object.values(threadsRef.current).forEach((t) =>
+        t.items.forEach((m) => m.status && m.local_images?.forEach((u) => URL.revokeObjectURL(u))),
+      );
+    },
+    [],
+  );
 
   // ------------------------------------------------------------- gửi tin
   const pushPending = (convId: number, m: Message) =>
@@ -466,8 +496,8 @@ export default function ChatApp({ me, initialConversationId }: { me: Me; initial
   };
 
   const sendTyping = useCallback(
-    (isTyping: boolean) => {
-      if (activeRef.current != null) send({ type: "typing", conversation_id: activeRef.current, is_typing: isTyping });
+    (isTyping: boolean, convId: number) => {
+      send({ type: "typing", conversation_id: convId, is_typing: isTyping });
     },
     [send],
   );
