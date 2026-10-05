@@ -404,6 +404,9 @@ def real_profiles(donors: list[dict], csv_path: Path) -> list[Profile]:
             "smoke_in_room": smoke_in_room,
             "hanh_vi": hanh_vi,
             "deal_breakers": sm.deal_breakers_with_smoking(dbs, infer),
+            # thiếu cột này thì lọc thời điểm cần phòng (filters.py mục 5) không
+            # chạy trên pool đối chứng ⇒ số "qua lọc" ở notebook cao hơn sản phẩm
+            "need_from": (r.get("need_from") or "").strip()[:40] or None,
             "is_simulated": False,
         }))
     return out

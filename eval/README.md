@@ -19,7 +19,7 @@ eval/
 | `03_geocoding_eval.ipynb` | Geocoding | %confidence≥medium, sai >1km | ≥80% / 0 trên 50 mẫu |
 | `04_risk_eval.ipynb` | Risk | recall scam | ≥85% |
 | `05_rag_eval.ipynb` | Chatbot RAG | Faithfulness, AnsRel (RAGAS) | ≥0.7 / ≥0.75 |
-| `06_roommate_eval.ipynb` | Matching | MAE feedback 2 tuần | ≤1.5/5 |
+| `06_roommate_eval.ipynb` | Matching (ghép bạn ở) | pool theo tầng lọc · cosine vs Gower · harmonic vs cộng · ablation · độ nhạy τ · độ phủ theo N (mô phỏng) · Stable Roommates · Gini exposure · P@3/NDCG@3/Wilcoxon (chấm làm mù 1–5) | P@3 thuật toán > ngẫu nhiên, Wilcoxon p < 0,05 |
 
 ## Dataset cần chuẩn bị (Sprint 0–1)
 
@@ -32,8 +32,24 @@ eval/
 | `data/qa_test.json` | Câu hỏi + answer kỳ vọng | 50 Q&A |
 
 ## Chạy
+
+Máy dev không có numpy/pandas ở Python hệ thống ⇒ venv riêng `eval/.venv` (đã gitignore):
+
 ```bash
-cd NCKH/eval
-pip install -r requirements.txt
-jupyter lab notebooks/
+python3 -m venv eval/.venv
+eval/.venv/bin/pip install numpy pandas scipy matplotlib "sqlalchemy>=2" pydantic-settings nbformat nbclient ipykernel jupyterlab
+eval/.venv/bin/python eval/test_metrics.py          # metrics.py khớp scipy (kendall τ-b, Wilcoxon, Gini, cosine)
+eval/.venv/bin/jupyter lab eval/notebooks/
 ```
+
+Notebook 06 được **sinh từ mã nguồn** `eval/tools/build_nb06.py` (dễ review hơn JSON) và gọi thẳng thuật toán sản
+phẩm qua `eval/roommate_lib.py`. Dữ liệu (đều trong `eval/data/`, gitignored — có PII):
+
+| File | Từ đâu |
+|---|---|
+| `survey_v2.csv` | `eval/tools/survey_xlsx_to_csv.py` từ file xuất Google Form |
+| `ratings.csv` | `docker compose exec -T api python -m app.matching.export_ratings > eval/data/ratings.csv` (sau buổi thử nghiệm) |
+| `deck_log.csv` | lệnh in ở notebook 06 mục 8 |
+| `.credentials.csv` → `phieu_dang_nhap.html` | `import_survey` → `python3 eval/tools/print_slips.py` |
+
+**Không** in họ tên/email/MSSV trong notebook — output notebook có thể bị commit.
