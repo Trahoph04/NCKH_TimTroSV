@@ -7,9 +7,10 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.exc import IntegrityError
 
 from .deps import get_current_user
-from .providers import AuthError, verify_google, verify_local
+from .providers import AuthError, verify_ctu, verify_google, verify_local
 from .repo import AuthRepo
 from .schemas import (
+    CtuLoginIn,
     GoogleLoginIn,
     LoginIn,
     RefreshIn,
@@ -97,6 +98,27 @@ async def login_google(body: GoogleLoginIn, repo: AuthRepo = Depends(get_repo)):
         # email đã tồn tại (đăng ký local trước) — chặn để tránh chiếm tài khoản
         raise HTTPException(409, "Email đã dùng cho phương thức đăng nhập khác")
     return _tokens(created["user_id"], created["role"])
+
+
+@router.post("/login/ctu", response_model=TokenPair)
+def login_ctu(body: CtuLoginIn, repo: AuthRepo = Depends(get_repo)):
+    """Đăng nhập bằng MSSV — tài khoản cấp trước cho buổi thử nghiệm.
+
+    KHÔNG tự tạo tài khoản khi không tìm thấy MSSV (khác /login/google): pool
+    ghép chỉ gồm người đã đồng ý dùng thử trong khảo sát, nên tạo tài khoản
+    bằng một MSSV lạ sẽ mở pool cho người chưa đồng ý.
+
+    Thông điệp lỗi giống nhau cho "không có MSSV" và "sai mã" — không để kẻ gọi
+    API dò xem MSSV nào có trong hệ thống.
+    """
+    identity = repo.find_identity("ctu", body.mssv.strip().upper())
+    if identity is None:
+        raise HTTPException(401, "MSSV hoặc mã đăng nhập sai")
+    try:
+        verify_ctu(identity["secret_hash"], body.password)
+    except AuthError:
+        raise HTTPException(401, "MSSV hoặc mã đăng nhập sai")
+    return _tokens(identity["user_id"], identity["role"])
 
 
 @router.post("/refresh", response_model=TokenPair)

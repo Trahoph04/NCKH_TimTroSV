@@ -54,3 +54,15 @@ def decode_token(token: str, expected_type: str) -> dict:
     if payload.get("type") != expected_type:
         raise jwt.InvalidTokenError(f"expected {expected_type} token")
     return payload
+
+
+def make_ws_ticket(user_id: int, ttl_seconds: int = 60) -> str:
+    """Vé ngắn hạn để mở WebSocket chat.
+
+    Browser không gắn được header Authorization vào WebSocket, còn access token
+    nằm trong httpOnly cookie phía Next (khác origin với API). Nên FE xin vé qua
+    Route Handler (có cookie) rồi mở ws://API/chat/ws?ticket=... — vé chỉ sống
+    60s và chỉ dùng được cho WS (type='ws'), lộ ra log URL cũng không thành
+    access token.
+    """
+    return _encode(str(user_id), "ws", timedelta(seconds=ttl_seconds))

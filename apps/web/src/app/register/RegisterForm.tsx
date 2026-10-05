@@ -36,7 +36,7 @@ export default function RegisterForm() {
       });
 
       if (res.ok) {
-        router.push("/me");
+        router.push("/");
         router.refresh();
         return;
       }

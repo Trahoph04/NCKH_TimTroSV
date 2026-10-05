@@ -8,12 +8,17 @@ import {
 
 // httpOnly cookie — JS client không đọc được token (chống XSS đánh cắp token).
 // secure=false ở dev (http localhost); prod bật qua NODE_ENV.
+// COOKIE_SECURE ghi đè: chạy bản build production qua HTTP trong mạng LAN
+// (máy khác mở http://<IP>:3000) thì PHẢI đặt COOKIE_SECURE=false — trình duyệt
+// bỏ cookie `secure` trên http (trừ localhost) ⇒ đăng nhập xong vẫn bị đá ra.
 const isProd = process.env.NODE_ENV === "production";
+const secureCookie =
+  process.env.COOKIE_SECURE != null ? process.env.COOKIE_SECURE === "true" : isProd;
 
 const baseOpts = {
   httpOnly: true,
   sameSite: "lax" as const,
-  secure: isProd,
+  secure: secureCookie,
   path: "/",
 };
 

@@ -62,10 +62,21 @@ async def verify_google(id_token: str) -> VerifiedIdentity:
     )
 
 
-# ── ctu (future) ─────────────────────────────────────────────────────────
-async def verify_ctu(mssv: str, password: str) -> VerifiedIdentity:
-    """STUB: xác thực MSSV+pass với cổng CTU. Cắm SSO/LDAP thật ở đây.
+# ── ctu ──────────────────────────────────────────────────────────────────
+def verify_ctu(secret_hash: str | None, password: str) -> None:
+    """Xác thực MSSV + mã dùng một lần của tài khoản ĐÃ CẤP TRƯỚC.
 
-    Interface đã sẵn để router gọi giống google/local — chỉ cần fill logic.
+    KHÔNG phải SSO CTU thật — và nói rõ điều đó là có chủ đích. Tài khoản được
+    `app.matching.import_survey` tạo sẵn từ phản hồi khảo sát, mật khẩu sinh
+    ngẫu nhiên và in thành phiếu phát tại buổi thử nghiệm (không có SĐT nên
+    không gửi OTP được, và dựng gửi email là ngoài phạm vi phiên này — xem
+    Matching_Messaging_Design.md 1.4.3).
+
+    Khi cắm SSO/LDAP CTU thật: bỏ `secret_hash`, gọi cổng CTU ở đây và giữ
+    nguyên chữ ký phía router. `user_identities.secret_hash` tách khỏi
+    `users.password_hash` chính là để lúc đó không phải đụng bảng users.
     """
-    raise AuthError("CTU login chưa triển khai")
+    if not secret_hash:
+        raise AuthError("Tài khoản này chưa đặt mã đăng nhập")
+    if not verify_password(password, secret_hash):
+        raise AuthError("MSSV hoặc mã đăng nhập sai")

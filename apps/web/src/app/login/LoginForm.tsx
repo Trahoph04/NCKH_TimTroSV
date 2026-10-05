@@ -36,7 +36,9 @@ export default function LoginForm() {
       });
 
       if (res.ok) {
-        const next = searchParams.get("next") || "/me";
+        // chỉ cho phép đường dẫn nội bộ (chặn open-redirect kiểu ?next=//evil.com)
+        const raw = searchParams.get("next") || "/";
+        const next = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
         router.push(next);
         router.refresh();
         return;

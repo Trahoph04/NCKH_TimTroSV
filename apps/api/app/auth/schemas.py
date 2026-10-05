@@ -32,3 +32,14 @@ class UserOut(BaseModel):
     name: str | None = None
     role: str
     avatar_url: str | None = None
+
+
+class CtuLoginIn(BaseModel):
+    """Đăng nhập bằng MSSV cho tài khoản cấp trước ở buổi thử nghiệm.
+
+    MSSV chuẩn CTU dạng 'B2303891'; không ràng buộc regex chặt để không chặn oan
+    các dạng mã khác (cao học, liên kết) — sai thì vẫn 401 như thường.
+    """
+
+    mssv: str = Field(min_length=4, max_length=20)
+    password: str = Field(min_length=4, max_length=128)
