@@ -16,3 +16,13 @@ COPY migrations/50_route_time.sql /docker-entrypoint-initdb.d/50-route-time.sql
 COPY migrations/50_ugc.sql /docker-entrypoint-initdb.d/50-ugc.sql
 COPY migrations/60_data_cleaning.sql /docker-entrypoint-initdb.d/60-data-cleaning.sql
 COPY migrations/70_listing_classify.sql /docker-entrypoint-initdb.d/70-listing-classify.sql
+# dữ liệu mẫu (12 tin + 4 tài khoản demo) — chạy cuối, sau khi mọi bảng đã có
+COPY migrations/80_seeds.sql /docker-entrypoint-initdb.d/80-seeds.sql
+# extras (điện/nước/cọc/giới tính) + places/place_reviews (Google Maps) + reviews (UGC)
+COPY migrations/90_extras_reviews.sql /docker-entrypoint-initdb.d/90-extras-reviews.sql
+# liên hệ (SĐT/Zalo) + địa chỉ chuẩn hoá + SĐT/website của place Google
+COPY migrations/91_contact_address.sql /docker-entrypoint-initdb.d/91-contact-address.sql
+# ghép bạn ở (swipes) + nhắn tin realtime (conversations/messages/chat_media/user_reports)
+COPY migrations/92_matching_chat.sql /docker-entrypoint-initdb.d/92-matching-chat.sql
+# deck log (server ghi vị trí/điểm đã hiển thị — không tin FE) + 2 cột lọc cứng còn thiếu
+COPY migrations/93_matching_deck.sql /docker-entrypoint-initdb.d/93-matching-deck.sql

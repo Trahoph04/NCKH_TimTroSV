@@ -1,0 +1,224 @@
+{
+  "_meta": {
+    "mo_ta": "Danh sách đơn vị đào tạo ĐH Cần Thơ — dùng cho dropdown câu A3 của form khảo sát THS2026-66, và cho dropdown hồ sơ trong app.",
+    "ngay_soan": "2026-09-07",
+    "CANH_BAO": "PHẢI đối chiếu với đề án tuyển sinh CTU hiện hành TRƯỚC KHI PHÁT FORM. Các mục do_tin_cay='can_kiem_tra' là suy từ cơ cấu cũ, chưa xác minh được từ nguồn chính thức. Sai tên đơn vị ngay câu đầu là mất uy tín cả form.",
+    "nguon_da_tra": [
+      "https://tuoitre.vn/truong-dai-hoc-can-tho-thanh-lap-4-truong-1-vien-1-khoa-truc-thuoc-2022101011272971.htm",
+      "https://tuyensinh.ctu.edu.vn/chuong-trinh-dai-tra/841-danh-muc-nganh-va-chi-tieu-tuyen-sinh-dhcq.html",
+      "https://baochinhphu.vn/tu-15-7-2025-truong-dai-hoc-can-tho-chuyen-thanh-dai-hoc-can-tho-102250715143744957.htm"
+    ],
+    "ghi_chu_khu_hoc": "Form KHÔNG hỏi khu học. Gốc tính khoảng cách = Khu II duy nhất. Đo từ toạ độ trong docs/specs/Map_Routing.md: khu I↔II 1,84km · II↔III 1,27km · I↔III 2,54km → ba khu là MỘT cụm bán kính 2,5km, sai số tối đa ~6 phút (C4 chia bucket 5 phút → lệch ≤1 bậc). Khu Hòa An cách 30,4km (~68 phút) → LOẠI ở câu sàng lọc, và vốn đã ngoài phạm vi SRS ('quận Ninh Kiều và lân cận').",
+    "cach_dung": "Lấy mảng ten[] đổ vào NGANH_LIST trong tao_google_form_v2.gs. Mảng nganh[] hiện để trống — điền dần từ đề án tuyển sinh, dùng cho dropdown hồ sơ TRONG APP (không dùng cho form khảo sát)."
+  },
+  "don_vi_dao_tao": [
+    {
+      "ten": "Trường Bách khoa",
+      "do_tin_cay": "cao",
+      "nganh": []
+    },
+    {
+      "ten": "Trường Công nghệ Thông tin & Truyền thông",
+      "do_tin_cay": "cao",
+      "nganh": []
+    },
+    {
+      "ten": "Trường Kinh tế",
+      "do_tin_cay": "cao",
+      "nganh": []
+    },
+    {
+      "ten": "Trường Nông nghiệp",
+      "do_tin_cay": "cao",
+      "nganh": []
+    },
+    {
+      "ten": "Viện Công nghệ Sinh học & Thực phẩm",
+      "do_tin_cay": "cao",
+      "nganh": []
+    },
+    {
+      "ten": "Khoa Giáo dục Thể chất",
+      "do_tin_cay": "cao",
+      "nganh": []
+    },
+    {
+      "ten": "Trường Sư phạm",
+      "do_tin_cay": "can_kiem_tra",
+      "nganh": [],
+      "ghi_chu": "Trước là Khoa Sư phạm. Kiểm tra đã nâng cấp thành Trường chưa."
+    },
+    {
+      "ten": "Trường Thủy sản",
+      "do_tin_cay": "can_kiem_tra",
+      "nganh": [],
+      "ghi_chu": "Trước là Khoa Thủy sản. Kiểm tra tên hiện hành (Trường hay Khoa)."
+    },
+    {
+      "ten": "Khoa Khoa học Tự nhiên",
+      "do_tin_cay": "can_kiem_tra",
+      "nganh": []
+    },
+    {
+      "ten": "Khoa Khoa học Xã hội & Nhân văn",
+      "do_tin_cay": "can_kiem_tra",
+      "nganh": []
+    },
+    {
+      "ten": "Khoa Ngoại ngữ",
+      "do_tin_cay": "can_kiem_tra",
+      "nganh": []
+    },
+    {
+      "ten": "Khoa Luật",
+      "do_tin_cay": "can_kiem_tra",
+      "nganh": []
+    },
+    {
+      "ten": "Khoa Môi trường & Tài nguyên Thiên nhiên",
+      "do_tin_cay": "can_kiem_tra",
+      "nganh": []
+    },
+    {
+      "ten": "Khoa Phát triển Nông thôn (Hòa An)",
+      "do_tin_cay": "can_kiem_tra",
+      "nganh": [],
+      "ghi_chu": "Đơn vị ở khu Hòa An (Hậu Giang), cách khu II ~30km — NGOÀI phạm vi đề tài. SV đơn vị này đã bị loại ở câu sàng lọc; nếu vẫn lọt phiếu, lọc bỏ khi phân tích dữ liệu gợi ý phòng (phần đặt vấn đề thì vẫn dùng được)."
+    },
+    {
+      "ten": "Khoa Chính trị",
+      "do_tin_cay": "can_kiem_tra",
+      "nganh": []
+    },
+    {
+      "ten": "Khoa Dự bị Dân tộc",
+      "do_tin_cay": "can_kiem_tra",
+      "nganh": []
+    },
+    {
+      "ten": "Khác / chưa có trong danh sách",
+      "do_tin_cay": "cao",
+      "nganh": [],
+      "ghi_chu": "BẮT BUỘC giữ. Thiếu lối thoát này thì SV thuộc đơn vị bị sót sẽ chọn bừa, làm bẩn dữ liệu."
+    }
+  ],
+  "danh_muc_nganh_thô": {
+    "_ghi_chu": "127 mã xét tuyển năm 2026, gom theo KHỐI ngành (không phải theo đơn vị đào tạo). Dùng làm nguyên liệu để điền mảng nganh[] ở trên — phải tự tra đơn vị quản lý của từng ngành.",
+    "_nguon": "https://tuyensinh.ctu.edu.vn/chuong-trinh-dai-tra/841-danh-muc-nganh-va-chi-tieu-tuyen-sinh-dhcq.html",
+    "su_pham_giao_duc": [
+      "Giáo dục Mầm non",
+      "Giáo dục Tiểu học",
+      "Giáo dục Công dân",
+      "Giáo dục Thể chất",
+      "Sư phạm Toán học",
+      "Sư phạm Tin học",
+      "Sư phạm Vật lý",
+      "Sư phạm Hóa học",
+      "Sư phạm Sinh học",
+      "Sư phạm Ngữ văn",
+      "Sư phạm Lịch sử",
+      "Sư phạm Địa lý",
+      "Sư phạm Tiếng Anh",
+      "Sư phạm Tiếng Pháp",
+      "Sư phạm Khoa học Tự nhiên",
+      "Sư phạm Lịch sử - Địa lý"
+    ],
+    "nhan_van_xa_hoi": [
+      "Ngôn ngữ Anh",
+      "Ngôn ngữ Pháp",
+      "Triết học",
+      "Văn học",
+      "Báo chí",
+      "Truyền thông đa phương tiện",
+      "Thông tin - Thư viện"
+    ],
+    "kinh_te_quan_ly": [
+      "Kinh tế",
+      "Chính trị học",
+      "Xã hội học",
+      "Tâm lý học giáo dục",
+      "Quản trị kinh doanh",
+      "Marketing",
+      "Kinh doanh quốc tế",
+      "Kinh doanh thương mại",
+      "Thương mại điện tử",
+      "Tài chính - Ngân hàng",
+      "Công nghệ tài chính",
+      "Kế toán",
+      "Kiểm toán"
+    ],
+    "luat": [
+      "Luật",
+      "Luật Dân sự và Tố tụng dân sự",
+      "Luật Kinh tế"
+    ],
+    "khoa_hoc_cong_nghe": [
+      "Sinh học",
+      "Công nghệ sinh học",
+      "Sinh học ứng dụng",
+      "Hóa học",
+      "Khoa học môi trường",
+      "Khoa học dữ liệu",
+      "Toán ứng dụng",
+      "Thống kê",
+      "Khoa học máy tính",
+      "Mạng máy tính và truyền thông dữ liệu",
+      "Kỹ thuật phần mềm",
+      "Hệ thống thông tin",
+      "Kỹ thuật máy tính",
+      "Trí tuệ nhân tạo",
+      "Công nghệ thông tin",
+      "An toàn thông tin"
+    ],
+    "ky_thuat_cong_nghiep": [
+      "Công nghệ hóa học",
+      "Quản lý công nghiệp",
+      "Logistics và Quản lý chuỗi cung ứng",
+      "Kỹ thuật cơ khí",
+      "Kỹ thuật cơ điện tử",
+      "Kỹ thuật ô tô",
+      "Kỹ thuật điện",
+      "Kỹ thuật điện tử - Viễn thông",
+      "Kỹ thuật y sinh",
+      "Kỹ thuật điều khiển và tự động hóa",
+      "Kỹ thuật vật liệu",
+      "Kỹ thuật môi trường",
+      "Vật lý kỹ thuật"
+    ],
+    "thuc_pham_nong_nghiep": [
+      "Công nghệ thực phẩm",
+      "Công nghệ sau thu hoạch",
+      "Công nghệ chế biến thủy sản",
+      "Đảm bảo chất lượng và An toàn thực phẩm",
+      "Khoa học đất",
+      "Chăn nuôi",
+      "Nông học",
+      "Khoa học cây trồng",
+      "Bảo vệ thực vật",
+      "Công nghệ rau hoa quả và cảnh quan",
+      "Kinh doanh nông nghiệp",
+      "Kinh tế nông nghiệp",
+      "Nuôi trồng thủy sản",
+      "Bệnh học thủy sản",
+      "Quản lý thủy sản",
+      "Thú y",
+      "Hóa dược"
+    ],
+    "kien_truc_xay_dung": [
+      "Kiến trúc",
+      "Quy hoạch vùng và đô thị",
+      "Kỹ thuật xây dựng",
+      "Kỹ thuật xây dựng công trình thủy",
+      "Kỹ thuật xây dựng công trình giao thông",
+      "Kỹ thuật cấp thoát nước",
+      "Quản lý xây dựng"
+    ],
+    "du_lich_moi_truong": [
+      "Du lịch",
+      "Quản trị dịch vụ du lịch và lữ hành",
+      "Quản lý tài nguyên và môi trường",
+      "Kinh tế tài nguyên thiên nhiên",
+      "Quản lý đất đai"
+    ]
+  }
+}
