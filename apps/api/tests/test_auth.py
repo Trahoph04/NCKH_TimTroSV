@@ -108,10 +108,25 @@ def test_verify_local_none_hash():
         verify_local(None, "any-pw")
 
 
-# ── providers.verify_ctu (stub) ──
-def test_verify_ctu_raises_stub():
+# ── providers.verify_ctu ──
+# Không còn là stub: tài khoản MSSV được app.matching.import_survey cấp trước từ
+# phản hồi khảo sát, xác thực cục bộ bằng user_identities.secret_hash (chưa phải
+# SSO CTU thật — xem docstring verify_ctu).
+def test_verify_ctu_dung_mat_khau_thi_khong_raise():
+    h = hash_password("ma-dung-nhat-1-lan")
+    verify_ctu(h, "ma-dung-nhat-1-lan")          # không raise = đạt
+
+
+def test_verify_ctu_sai_mat_khau():
+    h = hash_password("ma-dung")
     with pytest.raises(AuthError):
-        asyncio.run(verify_ctu("mssv123", "pw"))
+        verify_ctu(h, "ma-sai")
+
+
+def test_verify_ctu_chua_dat_ma_dang_nhap():
+    """secret_hash NULL (vd identity google) không được đi qua đường MSSV."""
+    with pytest.raises(AuthError):
+        verify_ctu(None, "bat-ky")
 
 
 # ── providers.verify_google ──

@@ -1,0 +1,35 @@
+{
+  "ads": [
+    {
+      "account_name": "Chị Hạnh",
+      "ad_id": 177809617,
+      "area": 27,
+      "area_name": "Quận Ninh Kiều",
+      "area_v2": 502701,
+      "body": "CHO THUÊ 1 PHÒNG *** – TRUNG TÂM TP. CẦN THƠ\n📍 Địa chỉ: 85/26 Phạm Ngũ Lão, TP. Cần Thơ (gần Nhà thờ Lộ 19)\n\nThông tin phòng:\n•\tDiện tích: hơn 12m²\n•\tỞ cùng chủ nhưng lối sinh hoạt tách biệt, riêng tư\n•\tKhu vực an ninh, yên tĩnh\n•\tHẻm xe hơi, thuận tiện đi lại\n💰 Giá thuê: 2tr/tháng\n•\tĐiện 3.500đ/kWh, nước 20k/người\n•\tChỉ nhận nữ, giờ giấc tự do\n📞 Liên hệ:\n•\tChị Hà: ***",
+      "category": 1050,
+      "category_name": "Phòng trọ",
+      "date": "60 phút trước",
+      "deposit": 2000000,
+      "images": [
+        "https://cdn.chotot.com/SNubjgwANDIitTk-Oju67wcqBRB-odVNIktI6e8Z0zI/preset:view/plain/c267.jpg",
+        "https://cdn.chotot.com/frLZnTHOJTiLLH-Ifbaxn8KvshZO5-kmeRsZ0P6RDmg/preset:view/plain/cdf8.jpg"
+      ],
+      "latitude": 10.045173,
+      "list_id": 133867371,
+      "list_time": 1789284330607,
+      "location": "10.045173,105.7752218",
+      "longitude": 105.77522,
+      "price": 2000000,
+      "price_string": "2 triệu/tháng",
+      "region_name": "Cần Thơ",
+      "region_v2": 5027,
+      "size": 12,
+      "street_name": "Đường Phạm Ngũ Lão",
+      "street_number": "85/26 ",
+      "subject": "CHO THUÊ 1 PHÒNG *** – TRUNG TÂM TP. CẦN THƠ",
+      "ward_name": "Phường Thới Bình"
+    }
+  ],
+  "total": 682
+}
