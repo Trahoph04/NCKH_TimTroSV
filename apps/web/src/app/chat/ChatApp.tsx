@@ -20,6 +20,7 @@ type Thread = { items: Message[]; hasMore: boolean; loaded: boolean };
 
 const POLL_MS = 3000; // fallback khi WebSocket rớt (khớp thiết kế ban đầu: polling 3s)
 const TYPING_TTL_MS = 6000;
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024; // = settings.chat_max_image_mb phía API
 
 /** Gộp tin mới vào thread: bỏ trùng theo id, thay bản optimistic cùng client_id. */
 function merge(items: Message[], incoming: Message[]): Message[] {
@@ -487,8 +488,13 @@ export default function ChatApp({ me, initialConversationId }: { me: Me; initial
   const sendImages = (files: File[]) => {
     if (activeId == null || files.length === 0) return;
     const id = activeId;
-    const picked = files.slice(0, 4);
-    if (files.length > 4) flash("Mỗi lần gửi tối đa 4 ảnh — đã lấy 4 ảnh đầu.");
+    // Kiểm dung lượng TRƯỚC khi tải lên (khớp settings.chat_max_image_mb = 8): ảnh quá
+    // cỡ upload hết rồi mới bị 422 là phí cả phút trên 4G — và kéo cả lô ảnh hợp lệ chết theo.
+    const ok = files.filter((f) => f.size <= MAX_IMAGE_BYTES);
+    if (ok.length < files.length) flash(`Bỏ ${files.length - ok.length} ảnh lớn hơn 8 MB.`);
+    if (ok.length === 0) return;
+    const picked = ok.slice(0, 4);
+    if (ok.length > 4) flash("Mỗi lần gửi tối đa 4 ảnh — đã lấy 4 ảnh đầu.");
     const local = picked.map((f) => URL.createObjectURL(f));
     sendWith(id, { kind: "image", body: null, payload: null, local_images: local }, (cid) =>
       chatApi.sendImages(id, picked, cid),
