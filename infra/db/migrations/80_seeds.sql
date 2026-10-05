@@ -3,7 +3,8 @@
 -- Dữ liệu mẫu chuẩn cho Đại học Cần Thơ (CTU Khu 1, Khu 2, Khu 3)
 -- ====================================================================
 
--- 1. SEED USERS & IDENTITIES (Mật khẩu mặc định: '123456' - bcrypt hash)
+-- 1. SEED USERS & IDENTITIES (Mật khẩu mặc định: 'secret' - bcrypt hash)
+--    (KHÔNG phải '123456' — hash bên dưới là hash mẫu của passlib cho chuỗi 'secret')
 -- Hash: $2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW
 INSERT INTO users (id, email, name, role, email_verified, phone)
 VALUES 

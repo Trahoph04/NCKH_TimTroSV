@@ -99,6 +99,15 @@ ORDINAL_RANGE: dict[str, int] = {
 
 GENDERS = ("nam", "nu")
 
+# Câu E1 (thời điểm cần phòng) → số tháng tính từ lúc khảo sát. Chỉ cần đủ để
+# so LỆCH giữa hai người, không cần chính xác theo lịch. "Chưa gấp" = linh hoạt
+# ⇒ không đưa vào map ⇒ None ⇒ không bao giờ bị loại vì thời điểm.
+NEED_FROM_MONTHS: dict[str, int] = {
+    "Càng sớm càng tốt (trong tháng này)": 0,
+    "Trong 2–3 tháng tới": 2,
+    "Đầu học kỳ tới": 3,
+}
+
 
 @dataclass(slots=True)
 class Profile:
@@ -125,6 +134,7 @@ class Profile:
     deal_breakers: frozenset[str] = field(default_factory=frozenset)
     persona: str | None = None
     bio: str | None = None
+    need_from: str | None = None
     is_simulated: bool = False
 
     @property
@@ -137,6 +147,11 @@ class Profile:
         if not self.hanh_vi:
             return None
         return 1 if HANH_VI_SHARE in self.hanh_vi else 0
+
+    @property
+    def need_month(self) -> int | None:
+        """Thời điểm cần phòng quy ra tháng; None = linh hoạt / không khai."""
+        return NEED_FROM_MONTHS.get((self.need_from or "").strip())
 
     @property
     def noisy(self) -> bool:
@@ -183,5 +198,6 @@ class Profile:
             deal_breakers=arr("deal_breakers", DEAL_BREAKER, DEAL_BREAKER_NONE),
             persona=r.get("persona"),
             bio=r.get("bio"),
+            need_from=r.get("need_from"),
             is_simulated=bool(r.get("is_simulated") or False),
         )

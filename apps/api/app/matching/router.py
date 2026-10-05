@@ -6,6 +6,11 @@
     POST /matching/swipe     : thích / bỏ qua; 2 chiều thích ⇒ match + hội thoại
     GET  /matching/likes     : tab "Lời mời" — ai đã thích mình, mình chưa quyết
     GET  /matching/passed    : thẻ đã bỏ qua (pass KHÔNG vĩnh viễn)
+    POST /matching/invite                 : gửi lời mời kèm lời nhắn (= like + note)
+    GET  /matching/invites                : lời mời đang chờ (nhận được + đã gửi)
+    POST /matching/invites/{id}/respond   : nhận / từ chối lời mời
+    GET  /matching/rate      : 5 thẻ chấm điểm làm mù (3 thuật toán + 2 ngẫu nhiên)
+    POST /matching/rate      : chấm 1–5 một thẻ
 
 Thuật toán: filters.py (lọc cứng 2 tầng) · score.py (Gower + harmonic mean) ·
 weights.py (trọng số dẫn từ khảo sát) · stable.py (Stable Roommates, dùng ở eval).
@@ -22,6 +27,7 @@ from sqlalchemy.engine import Engine
 from ..auth import get_current_user
 from ..auth.schemas import UserOut
 from ..chat.hub import ChatHub
+from ..ratelimit import check_rate
 from .profile import DEAL_BREAKER, GENDERS, HANH_VI
 from .repo import MatchError, MatchRepo
 
@@ -93,6 +99,20 @@ def _only_known(v: list[str] | None, allowed: tuple[str, ...], what: str):
     return sorted(set(v))
 
 
+class InviteIn(BaseModel):
+    target_id: int
+    note: str | None = Field(default=None, max_length=300)
+
+
+class RespondIn(BaseModel):
+    accept: bool
+
+
+class RateIn(BaseModel):
+    card_code: str = Field(min_length=4, max_length=8)
+    rating: int = Field(ge=1, le=5)
+
+
 class SwipeIn(BaseModel):
     target_id: int
     decision: Literal["like", "pass"]
@@ -148,27 +168,114 @@ def deck(
     return repo.deck(user.id, limit=limit, mode=mode, weights_ver=weights_ver)
 
 
+def _publish_swipe(user_id: int, target_id: int, decision: str, res: dict) -> None:
+    """Đẩy sự kiện realtime sau swipe / lời mời. Hub chết không được chặn luồng chính."""
+    if res.get("unmatch_conversation_id") is not None and _engine is not None:
+        # 'pass' một người đang ghép = huỷ ghép: dùng ĐÚNG đường của nút "Huỷ
+        # ghép" trong chat (xoá cứng hội thoại + ảnh, báo cho cả hai bên).
+        # import muộn: chat.repo import matching.repo ở cấp module ⇒ import ở đầu
+        # file này là vòng import (chat.repo → matching → router → chat.repo).
+        from ..chat.media import delete_files
+        from ..chat.repo import ChatRepo
+
+        conv_id = res["unmatch_conversation_id"]
+        members, media = ChatRepo(_engine).unmatch(conv_id, user_id)
+        delete_files(media)
+        if _hub is not None:
+            _hub.publish(members, {"type": "conversation.removed",
+                                   "conversation_id": conv_id, "by_user_id": user_id})
+    if _hub is None:
+        return
+    if res["matched"] and res["created"]:
+        _hub.publish(
+            [user_id, target_id],
+            {"type": "match.new", "conversation_id": res["conversation_id"]},
+        )
+    elif decision == "like" and not res["matched"]:
+        # chỉ báo "có người thích bạn", KHÔNG nói là ai — tab Lời mời tự tải lại
+        _hub.publish([target_id], {"type": "like.new"})
+
+
 @router.post("/swipe")
 def swipe(
     body: SwipeIn,
     user: UserOut = Depends(get_current_user),
     repo: MatchRepo = Depends(get_repo),
 ):
+    check_rate("swipe", user.id)
     try:
         res = repo.swipe(user.id, body.target_id, body.decision)
     except MatchError as e:
         raise HTTPException(e.status, e.detail)
+    _publish_swipe(user.id, body.target_id, body.decision, res)
+    out = {"matched": res["matched"], "conversation_id": res["conversation_id"]}
+    if res.get("unmatch_conversation_id") is not None:
+        out["unmatched"] = True  # chỉ có khi pass người đang ghép — giữ nguyên shape cũ
+    return out
 
-    if _hub is not None:
-        if res["matched"] and res["created"]:
-            _hub.publish(
-                [user.id, body.target_id],
-                {"type": "match.new", "conversation_id": res["conversation_id"]},
-            )
-        elif body.decision == "like" and not res["matched"]:
-            # chỉ báo "có người thích bạn", KHÔNG nói là ai — tab Lời mời tự tải lại
-            _hub.publish([body.target_id], {"type": "like.new"})
+
+@router.post("/invite")
+def invite(
+    body: InviteIn,
+    user: UserOut = Depends(get_current_user),
+    repo: MatchRepo = Depends(get_repo),
+):
+    """Gửi lời mời kèm lời nhắn. Người kia đã thích mình ⇒ thành đôi ngay."""
+    check_rate("invite", user.id)
+    try:
+        res = repo.invite(user.id, body.target_id, body.note)
+    except MatchError as e:
+        raise HTTPException(e.status, e.detail)
+    _publish_swipe(user.id, body.target_id, "like", res)
+    return {"matched": res["matched"], "conversation_id": res["conversation_id"],
+            "invite_id": res["invite_id"]}
+
+
+@router.get("/invites")
+def invites(
+    limit: int = Query(default=50, ge=1, le=200),
+    user: UserOut = Depends(get_current_user),
+    repo: MatchRepo = Depends(get_repo),
+):
+    return repo.invites(user.id, limit=limit)
+
+
+@router.post("/invites/{invite_id}/respond")
+def respond_invite(
+    invite_id: int,
+    body: RespondIn,
+    user: UserOut = Depends(get_current_user),
+    repo: MatchRepo = Depends(get_repo),
+):
+    check_rate("swipe", user.id)
+    try:
+        res = repo.respond_invite(user.id, invite_id, body.accept)
+    except MatchError as e:
+        raise HTTPException(e.status, e.detail)
+    _publish_swipe(user.id, res["from_user"], "like" if body.accept else "pass", res)
     return {"matched": res["matched"], "conversation_id": res["conversation_id"]}
+
+
+@router.get("/rate")
+def rating_cards(
+    user: UserOut = Depends(get_current_user),
+    repo: MatchRepo = Depends(get_repo),
+):
+    """Thẻ chấm điểm làm mù. Không có score/arm trong response — có chủ đích."""
+    return repo.rating_cards(user.id)
+
+
+@router.post("/rate", status_code=204)
+def rate(
+    body: RateIn,
+    user: UserOut = Depends(get_current_user),
+    repo: MatchRepo = Depends(get_repo),
+):
+    check_rate("rate", user.id)
+    try:
+        repo.rate(user.id, body.card_code, body.rating)
+    except MatchError as e:
+        raise HTTPException(e.status, e.detail)
 
 
 @router.get("/likes")

@@ -26,3 +26,5 @@ COPY migrations/91_contact_address.sql /docker-entrypoint-initdb.d/91-contact-ad
 COPY migrations/92_matching_chat.sql /docker-entrypoint-initdb.d/92-matching-chat.sql
 # deck log (server ghi vị trí/điểm đã hiển thị — không tin FE) + 2 cột lọc cứng còn thiếu
 COPY migrations/93_matching_deck.sql /docker-entrypoint-initdb.d/93-matching-deck.sql
+# đánh giá ghép bạn: deck_log.explore, ghép lại không mất vết unmatched, chấm điểm 1–5
+COPY migrations/94_matching_eval.sql /docker-entrypoint-initdb.d/94-matching-eval.sql

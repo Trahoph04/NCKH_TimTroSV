@@ -49,6 +49,14 @@ HARD_DEAL_BREAKERS: frozenset[str] = frozenset({DB_SMOKE_IN_ROOM, DB_DIRTY})
 SOFT_DEAL_BREAKERS: frozenset[str] = frozenset(DEAL_BREAKER) - HARD_DEAL_BREAKERS
 
 BUDGET_MAX_GAP = 1      # 1 bậc ≈ nửa triệu: còn thuê chung được phòng ở giữa
+# Lệch > 2 tháng thì một người phải ở không/đóng tiền phòng trống chờ người kia —
+# "Càng sớm càng tốt" vs "Đầu học kỳ tới" (0 vs 3) bị loại, 0 vs 2 vẫn qua.
+NEED_FROM_MAX_GAP = 2
+
+# Lý do loại thuộc về KHẢ THI (lệch ngân sách, lệch thời điểm), không phải AN
+# TOÀN. Chỉ những lý do này mới được nới cho deck "độ tản" của buổi thử nghiệm
+# (doc 3.6) — mọi lý do khác (giới tính, deal-breaker cứng) là tuyệt đối.
+FEASIBILITY_REASONS: frozenset[str] = frozenset({"budget_gap", "need_from_gap"})
 SCENARIO_ALONE = 1      # 1 = ở một mình · 2 = ghép 2 · 3 = ghép 3+
 
 
@@ -125,11 +133,31 @@ def hard_filter_reason(a: Profile, b: Profile) -> str | None:
     if a.scenario == SCENARIO_ALONE or b.scenario == SCENARIO_ALONE:
         return "scenario_alone"
 
+    # 5. Thời điểm cần phòng (câu E1). Kiểm SAU scenario để "ở một mình" luôn
+    #    báo đúng lý do. None (linh hoạt / chưa khai) ⇒ bỏ qua, như ngân sách.
+    ma, mb = a.need_month, b.need_month
+    if ma is not None and mb is not None and abs(ma - mb) > NEED_FROM_MAX_GAP:
+        return "need_from_gap"
+
     return None
 
 
 def passes_hard_filters(a: Profile, b: Profile) -> bool:
     return hard_filter_reason(a, b) is None
+
+
+def only_feasibility_gap(a: Profile, b: Profile) -> bool:
+    """Cặp bị loại CHỈ vì lý do khả thi (đã qua hết lọc an toàn).
+
+    hard_filter_reason dừng ở lý do đầu tiên theo thứ tự an toàn → khả thi, nên
+    lý do trả về thuộc FEASIBILITY_REASONS nghĩa là mọi kiểm an toàn đứng trước
+    đã qua. Riêng scenario_alone nằm GIỮA budget và need_from: budget_gap trả về
+    sớm có thể che mất scenario_alone ⇒ kiểm lại riêng.
+    """
+    why = hard_filter_reason(a, b)
+    if why not in FEASIBILITY_REASONS:
+        return False
+    return a.scenario != SCENARIO_ALONE and b.scenario != SCENARIO_ALONE
 
 
 def eligible_pool(me: Profile, others: list[Profile]) -> list[Profile]:

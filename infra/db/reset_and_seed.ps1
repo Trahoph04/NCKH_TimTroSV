@@ -27,9 +27,11 @@ docker compose up -d db --build
 
 # Chờ database sẵn sàng
 Write-Host "⏳ Đang đợi PostgreSQL khởi động và nạp dữ liệu mẫu..." -ForegroundColor Yellow
-$retries = 15
+# Hỏi qua TCP (127.0.0.1) + kiểm bảng của migration cuối: pg_isready qua unix
+# socket báo sẵn sàng khi server TẠM của entrypoint còn đang chạy migration.
+$retries = 60
 while ($retries -gt 0) {
-    $status = docker compose exec -T db pg_isready -U nckh -d nckh 2>$null
+    $status = docker compose exec -T db psql -h 127.0.0.1 -U nckh -d nckh -tAc "SELECT 1 FROM roommate_ratings LIMIT 0" 2>$null
     if ($LASTEXITCODE -eq 0) {
         break
     }
@@ -43,7 +45,7 @@ if ($retries -eq 0) {
 }
 
 Write-Host "✅ Database đã sẵn sàng với toàn bộ Migrations và Seed Data mẫu!" -ForegroundColor Green
-Write-Host "📊 Các tài khoản mẫu có thể dùng để test (Mật khẩu: 123456):" -ForegroundColor Cyan
+Write-Host "📊 Các tài khoản mẫu có thể dùng để test (Mật khẩu: secret):" -ForegroundColor Cyan
 Write-Host "   - Admin: admin@ctu.edu.vn"
 Write-Host "   - Sinh viên Nam: nguyenvana@ctu.edu.vn (MSSV: B2101234)"
 Write-Host "   - Sinh viên Nữ: tranthib@ctu.edu.vn (MSSV: B2205678)"
