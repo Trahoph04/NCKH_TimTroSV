@@ -353,16 +353,17 @@ def _recv_until(ws, typ: str, limit: int = 10) -> dict:
 def test_websocket_bad_ticket_closed_4401():
     from starlette.websockets import WebSocketDisconnect
 
-    with client.websocket_connect("/chat/ws?ticket=bogus") as ws:
-        with pytest.raises(WebSocketDisconnect) as e:
+    # Vé sai bị từ chối NGAY ở bước bắt tay (chưa accept) — không cấp socket
+    with pytest.raises(WebSocketDisconnect) as e:
+        with client.websocket_connect("/chat/ws?ticket=bogus") as ws:
             ws.receive_json()
     assert e.value.code == 4401
 
     # access token không dùng thay vé được (sai type)
     a = _user()
     token = a["h"]["Authorization"].split()[1]
-    with client.websocket_connect(f"/chat/ws?ticket={token}") as ws:
-        with pytest.raises(WebSocketDisconnect) as e:
+    with pytest.raises(WebSocketDisconnect) as e:
+        with client.websocket_connect(f"/chat/ws?ticket={token}") as ws:
             ws.receive_json()
     assert e.value.code == 4401
 

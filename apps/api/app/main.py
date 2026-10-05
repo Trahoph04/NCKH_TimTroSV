@@ -9,6 +9,7 @@ from .crawler import ListingRepo, build_scheduler, run_nhatot, run_source
 from .listings import init_listings, listings_router
 from .auth import AuthRepo, auth_router, init_auth, init_auth_deps
 from .chat import ChatHub, chat_router, init_chat
+from .chat.body_limit import ChatUploadLimit
 from .matching import init_matching, matching_router
 
 # psycopg3 sync engine; pre_ping avoids stale conns after db restart
@@ -37,6 +38,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="NCKH API", version="0.1.0", lifespan=lifespan)
+app.add_middleware(ChatUploadLimit)
 app.include_router(listings_router)
 app.include_router(auth_router)
 app.include_router(matching_router)

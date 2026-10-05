@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import time
 from datetime import datetime, timezone
 from typing import Literal
 
@@ -36,9 +37,10 @@ from ..auth.schemas import UserOut
 from ..auth.security import decode_token, make_ws_ticket
 from ..config import settings
 from ..matching.repo import MatchRepo
-from .hub import ChatHub, Connection, dumps
+from ..ratelimit import check_rate
+from .hub import MAX_SOCKETS_PER_USER, ChatHub, Connection, dumps
 from .media import MediaError, delete_files, media_path, process_image
-from .repo import ChatRepo
+from .repo import ChatRepo, ConversationGone
 
 log = logging.getLogger("chat.router")
 
@@ -49,6 +51,7 @@ _hub: ChatHub | None = None
 
 WS_TICKET_TTL_S = 60
 MAX_BODY = 2000
+TYPING_PEERS_TTL_S = 30.0
 
 
 def init_chat(engine: Engine, hub: ChatHub) -> None:
@@ -112,15 +115,27 @@ def unread(user: UserOut = Depends(get_current_user), repo: ChatRepo = Depends(g
 
 @router.get("/conversations")
 def list_conversations(
+    limit: int = Query(default=50, ge=1, le=200),
+    before: datetime | None = Query(default=None, description="last_message_at của dòng cuối trang trước"),
+    before_id: int | None = Query(default=None, ge=1),
     user: UserOut = Depends(get_current_user),
     repo: ChatRepo = Depends(get_repo),
     hub: ChatHub = Depends(get_hub),
 ):
-    items = repo.list_conversations(user.id)
+    """Trang hội thoại mới nhất. Trang sau: truyền `next` của trang trước
+    (before + before_id). `has_more=false` ⇒ đã hết."""
+    if (before is None) != (before_id is None):
+        raise HTTPException(422, "before và before_id phải đi cùng nhau")
+    items, has_more = repo.list_conversations(
+        user.id, limit=limit, before=(before, before_id) if before is not None else None
+    )
     online = hub.online_map(c["partner"]["id"] for c in items)
     for c in items:
         c["partner"]["online"] = online.get(c["partner"]["id"], False)
-    return {"items": items}
+    nxt = None
+    if has_more and items:
+        nxt = {"before": items[-1]["last_message_at"], "before_id": items[-1]["id"]}
+    return {"items": items, "has_more": has_more, "next": nxt}
 
 
 @router.get("/conversations/{conv_id}")
@@ -183,6 +198,7 @@ def send_message(
     hub: ChatHub = Depends(get_hub),
 ):
     _require_member(repo, conv_id, user.id)
+    check_rate("message", user.id)
     payload = None
     text_body = (body.body or "").strip() or None
     if body.kind == "text":
@@ -194,7 +210,10 @@ def send_message(
         payload = repo.listing_snapshot(body.listing_id)
         if payload is None:
             raise HTTPException(404, "Tin trọ không tồn tại hoặc đã ẩn")
-    msg, is_new = repo.create_message(conv_id, user.id, body.kind, text_body, payload, body.client_id)
+    try:
+        msg, is_new = repo.create_message(conv_id, user.id, body.kind, text_body, payload, body.client_id)
+    except ConversationGone:
+        raise HTTPException(404, "Không tìm thấy hội thoại")
     if is_new:
         _broadcast_message(repo, hub, conv_id, msg)
     return msg
@@ -211,6 +230,7 @@ def send_images(
     hub: ChatHub = Depends(get_hub),
 ):
     _require_member(repo, conv_id, user.id)
+    check_rate("upload", user.id)
     if not files:
         raise HTTPException(422, "Chưa chọn ảnh")
     if len(files) > settings.chat_max_images_per_message:
@@ -227,6 +247,9 @@ def send_images(
         msg, is_new = repo.create_message(
             conv_id, user.id, "image", (body or "").strip() or None, payload, client_id, media
         )
+    except ConversationGone:
+        delete_files([m["id"] for m in media])
+        raise HTTPException(404, "Không tìm thấy hội thoại")
     except Exception:
         delete_files([m["id"] for m in media])
         raise
@@ -261,7 +284,10 @@ def mark_read(
     hub: ChatHub = Depends(get_hub),
 ):
     _require_member(repo, conv_id, user.id)
-    pointer, changed = repo.mark_read(conv_id, user.id, body.message_id)
+    try:
+        pointer, changed = repo.mark_read(conv_id, user.id, body.message_id)
+    except ConversationGone:
+        raise HTTPException(404, "Không tìm thấy hội thoại")
     if changed:
         hub.publish(
             repo.member_ids(conv_id),
@@ -346,6 +372,7 @@ def report(
     repo: ChatRepo = Depends(get_repo),
 ):
     _require_member(repo, conv_id, user.id)
+    check_rate("report", user.id)
     others = [m for m in repo.member_ids(conv_id) if m != user.id]
     if not others:
         raise HTTPException(404, "Không tìm thấy người cần báo cáo")
@@ -360,9 +387,11 @@ async def chat_ws(websocket: WebSocket, ticket: str = ""):
 
     Server đẩy: hello · pong · message.new · read · typing · presence ·
     match.new · like.new · conversation.removed · contact.consent.
-    Đóng 4401 nếu vé sai/hết hạn ⇒ FE xin vé mới rồi nối lại.
+    Vé sai/hết hạn ⇒ từ chối NGAY ở bước bắt tay (HTTP 403, chưa accept): kiểm
+    vé chỉ tốn CPU, không có lý do gì cấp socket cho kẻ không có vé. FE không
+    dựa vào mã đóng — mỗi lần nối lại nó luôn xin vé mới (useChatSocket).
+    Quá MAX_SOCKETS_PER_USER ⇒ đóng 4429.
     """
-    await websocket.accept()
     try:
         user_id = int(decode_token(ticket, "ws")["sub"])
     except (jwt.InvalidTokenError, KeyError, ValueError):
@@ -371,8 +400,16 @@ async def chat_ws(websocket: WebSocket, ticket: str = ""):
     if _engine is None or _hub is None:
         await websocket.close(code=1013)
         return
+    if _hub.socket_count(user_id) >= MAX_SOCKETS_PER_USER:
+        await websocket.close(code=4429)
+        return
+    await websocket.accept()
 
     repo, hub = ChatRepo(_engine), _hub
+    # Cache "ai cùng hội thoại" cho frame typing: mỗi phím gõ là một frame, bản
+    # trước tốn 1 kết nối DB cho MỖI frame. TTL ngắn để huỷ ghép giữa chừng
+    # không tiếp tục báo "đang nhập" cho người đã bị huỷ quá lâu.
+    peers: dict[int, tuple[float, list[int]]] = {}
     conn = Connection(user_id=user_id, websocket=websocket, loop=asyncio.get_running_loop())
     conn.conv_ids = await run_in_threadpool(repo.conversation_ids, user_id)
     became_online = await run_in_threadpool(hub.register, conn)
@@ -402,12 +439,22 @@ async def chat_ws(websocket: WebSocket, ticket: str = ""):
                     cid = int(frame.get("conversation_id"))
                 except (TypeError, ValueError):
                     continue
-                if cid not in conn.conv_ids:  # hội thoại mới ghép sau khi mở socket
-                    conn.conv_ids = await run_in_threadpool(repo.conversation_ids, user_id)
-                    if cid not in conn.conv_ids:
+                now = time.monotonic()
+                cached = peers.get(cid)
+                if cached is not None and cached[0] > now:
+                    others = cached[1]
+                else:
+                    if cid not in conn.conv_ids:  # hội thoại mới ghép sau khi mở socket
+                        conn.conv_ids = await run_in_threadpool(repo.conversation_ids, user_id)
+                        if cid not in conn.conv_ids:
+                            continue
+                    members = await run_in_threadpool(repo.member_ids, cid)
+                    if user_id not in members:   # đã bị huỷ ghép
+                        conn.conv_ids.discard(cid)
+                        peers.pop(cid, None)
                         continue
-                members = await run_in_threadpool(repo.member_ids, cid)
-                others = [m for m in members if m != user_id]
+                    others = [m for m in members if m != user_id]
+                    peers[cid] = (now + TYPING_PEERS_TTL_S, others)
                 await run_in_threadpool(
                     hub.publish,
                     others,

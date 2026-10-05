@@ -34,6 +34,9 @@ log = logging.getLogger("chat.hub")
 
 CHANNEL_PREFIX = "chat:u:"
 PRESENCE_TTL_S = 90  # client ping 25s/lần; mất 3 nhịp liên tiếp mới coi là offline
+# Một người thật mở vài tab/thiết bị; hàng chục socket của một user là script
+# hoặc vòng reconnect lỗi — chặn để một client hỏng không giữ hết file descriptor.
+MAX_SOCKETS_PER_USER = 5
 
 
 def _json_default(o: Any):
@@ -71,31 +74,46 @@ class ChatHub:
         self._pubsub_thread = None
         self._redis_retry_at = 0.0
         self._lock = threading.RLock()
+        # Lock RIÊNG cho kết nối Redis: ping/psubscribe có thể mất tới vài giây
+        # khi Redis chậm, giữ self._lock lúc đó là chặn mọi publish/register.
+        self._redis_lock = threading.Lock()
         self._conns: dict[int, set[Connection]] = {}
         self._last_seen_local: dict[int, float] = {}
 
     # ------------------------------------------------------------------ redis
     def _get_redis(self) -> redis.Redis | None:
-        """Kết nối Redis lười + tự thử lại sau 30s nếu đang chết."""
+        """Kết nối Redis lười + tự thử lại sau 30s nếu đang chết.
+
+        Check-then-act phải nằm TRONG lock: bản trước kiểm `self._redis is None`
+        ngoài lock ⇒ hai thread (threadpool REST + event loop WS) cùng thấy None,
+        cùng kết nối và cùng psubscribe ⇒ mỗi envelope chéo process bị giao HAI
+        lần (tin nhắn hiện đôi bên người nhận).
+        """
         if not self._redis_url:
             return None
-        if self._redis is not None:
-            return self._redis
-        now = time.monotonic()
-        if now < self._redis_retry_at:
-            return None
-        try:
-            r = redis.from_url(self._redis_url, decode_responses=True,
-                               socket_connect_timeout=1, socket_timeout=2)
-            r.ping()
-            self._redis = r
-            self._start_listener(r)
-            log.info("chat hub: redis ok (origin=%s)", self.origin)
+        r = self._redis
+        if r is not None:
             return r
-        except Exception as exc:  # noqa: BLE001
-            self._redis_retry_at = now + 30
-            log.warning("chat hub: redis unavailable, local-only mode: %s", exc)
+        if time.monotonic() < self._redis_retry_at:
             return None
+        with self._redis_lock:
+            if self._redis is not None:          # thread khác vừa kết nối xong
+                return self._redis
+            now = time.monotonic()
+            if now < self._redis_retry_at:
+                return None
+            try:
+                r = redis.from_url(self._redis_url, decode_responses=True,
+                                   socket_connect_timeout=1, socket_timeout=2)
+                r.ping()
+                self._start_listener(r)
+                self._redis = r
+                log.info("chat hub: redis ok (origin=%s)", self.origin)
+                return r
+            except Exception as exc:  # noqa: BLE001
+                self._redis_retry_at = now + 30
+                log.warning("chat hub: redis unavailable, local-only mode: %s", exc)
+                return None
 
     def _drop_redis(self, exc: Exception) -> None:
         log.warning("chat hub: redis error, fallback local-only: %s", exc)
@@ -130,13 +148,24 @@ class ChatHub:
             env = json.loads(msg["data"])
         except (ValueError, KeyError, TypeError):
             return
+        if not isinstance(env, dict):
+            return
         if env.get("origin") == self.origin:
             return  # đã giao tại chỗ lúc publish
+        # Envelope do process khác (hoặc ai đó PUBLISH tay vào Redis) gửi tới —
+        # không được tin cấu trúc. Ném lỗi ở callback này là giết thread pubsub
+        # ⇒ _drop_redis ⇒ cả hub rơi về local-only vì MỘT tin hỏng.
+        text_ = env.get("text")
+        if not isinstance(text_, str):
+            return
         try:
-            uid = int(str(msg["channel"])[len(CHANNEL_PREFIX):])
+            uid = int(str(msg.get("channel", ""))[len(CHANNEL_PREFIX):])
         except ValueError:
             return
-        self._deliver_local([uid], env["text"])
+        try:
+            self._deliver_local([uid], text_)
+        except Exception:  # noqa: BLE001
+            log.exception("chat hub: deliver từ redis lỗi, bỏ qua envelope")
 
     # ------------------------------------------------------------ connections
     def register(self, conn: Connection) -> bool:
@@ -233,6 +262,10 @@ class ChatHub:
             except Exception as exc:  # noqa: BLE001
                 self._drop_redis(exc)
         return out
+
+    def socket_count(self, user_id: int) -> int:
+        with self._lock:
+            return len(self._conns.get(user_id, ()))
 
     def local_connection_count(self) -> int:
         with self._lock:

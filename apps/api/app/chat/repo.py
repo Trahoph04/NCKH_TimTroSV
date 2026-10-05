@@ -20,6 +20,10 @@ from ..matching.repo import PROFILE_COLS
 MSG_COLS = "id, conversation_id, sender_id, kind, body, payload, client_id, created_at"
 
 
+class ConversationGone(Exception):
+    """Hội thoại bị xoá (huỷ ghép) giữa lúc kiểm quyền và lúc ghi — router trả 404."""
+
+
 def _msg(row) -> dict:
     d = dict(row)
     if isinstance(d.get("payload"), str):
@@ -32,15 +36,20 @@ class ChatRepo:
         self.engine = engine
 
     # ---------------------------------------------------------------- quyền
+    # "Thành viên" = mình có trong hội thoại VÀ còn ít nhất một người khác. Đối
+    # phương xoá tài khoản ⇒ dòng member của họ bị CASCADE, hội thoại còn mỗi
+    # mình: get_conversation (JOIN đối phương) đã trả 404 nhưng các endpoint chỉ
+    # kiểm is_member thì vẫn đọc/ghi tin được — hai câu trả lời trái nhau.
+    _MEMBER_SQL = (
+        "SELECT 1 FROM conversation_members me "
+        "WHERE me.conversation_id = :c AND me.user_id = :u "
+        "  AND EXISTS (SELECT 1 FROM conversation_members p "
+        "              WHERE p.conversation_id = :c AND p.user_id <> :u)"
+    )
+
     def is_member(self, conv_id: int, user_id: int) -> bool:
         with self.engine.connect() as conn:
-            return conn.execute(
-                text(
-                    "SELECT 1 FROM conversation_members "
-                    "WHERE conversation_id = :c AND user_id = :u"
-                ),
-                {"c": conv_id, "u": user_id},
-            ).first() is not None
+            return conn.execute(text(self._MEMBER_SQL), {"c": conv_id, "u": user_id}).first() is not None
 
     def member_ids(self, conv_id: int) -> list[int]:
         with self.engine.connect() as conn:
@@ -133,13 +142,32 @@ class ChatRepo:
             "last_message": last,
         }
 
-    def list_conversations(self, user_id: int) -> list[dict]:
+    def list_conversations(
+        self,
+        user_id: int,
+        *,
+        limit: int = 50,
+        before: tuple[Any, int] | None = None,
+    ) -> tuple[list[dict], bool]:
+        """Trang hội thoại mới nhất. Phân trang keyset theo (last_message_at, id).
+
+        Bản trước không LIMIT: mỗi dòng kéo 2 subquery đếm + 1 LATERAL, nên chi
+        phí tăng tuyến tính theo số hội thoại MỖI LẦN mở trang chat. Keyset chứ
+        không OFFSET: hội thoại có tin mới nhảy lên đầu giữa hai trang thì OFFSET
+        sẽ lặp/bỏ sót dòng.
+        """
+        params: dict[str, Any] = {"u": user_id, "l": max(1, min(limit, 200)) + 1}
+        cond = ""
+        if before is not None:
+            cond = "AND (c.last_message_at, c.id) < (:bt, :bi) "
+            params["bt"], params["bi"] = before
         with self.engine.connect() as conn:
             rows = conn.execute(
-                text(self._CONV_SQL + "ORDER BY c.last_message_at DESC, c.id DESC"),
-                {"u": user_id},
+                text(self._CONV_SQL + cond + "ORDER BY c.last_message_at DESC, c.id DESC LIMIT :l"),
+                params,
             ).mappings().all()
-        return [self._conv(r) for r in rows]
+        has_more = len(rows) > params["l"] - 1
+        return [self._conv(r) for r in rows[: params["l"] - 1]], has_more
 
     def get_conversation(self, conv_id: int, user_id: int) -> dict | None:
         with self.engine.connect() as conn:
@@ -219,8 +247,21 @@ class ChatRepo:
         client_id: str | None = None,
         media: list[dict] | None = None,
     ) -> tuple[dict, bool]:
-        """Lưu tin. Trả (message, is_new). Trùng client_id ⇒ trả tin cũ (gửi lại an toàn)."""
+        """Lưu tin. Trả (message, is_new). Trùng client_id ⇒ trả tin cũ (gửi lại an toàn).
+
+        Ném ConversationGone khi hội thoại biến mất giữa lúc router kiểm quyền và
+        lúc ghi (đối phương bấm huỷ ghép đúng lúc đó). Bản trước rơi vào lỗi FK /
+        `.one()` ⇒ 500; giờ khoá dòng member ngay đầu transaction — DELETE
+        conversations (cascade xoá member) phải chờ transaction này xong, nên
+        giữa kiểm và ghi không còn khe hở. NO KEY UPDATE chứ không FOR SHARE:
+        cuối hàm UPDATE chính dòng này (con trỏ đã đọc), hai lần gửi song song
+        cùng giữ SHARE rồi cùng xin nâng khoá ⇒ deadlock.
+        """
         with self.engine.begin() as conn:
+            if conn.execute(
+                text(self._MEMBER_SQL + " FOR NO KEY UPDATE OF me"), {"c": conv_id, "u": sender_id}
+            ).first() is None:
+                raise ConversationGone()
             if client_id:
                 old = conn.execute(
                     text(
@@ -294,7 +335,9 @@ class ChatRepo:
                     "WHERE conversation_id = :c AND user_id = :u FOR UPDATE"
                 ),
                 {"c": conv_id, "u": user_id},
-            ).scalar_one()
+            ).scalar()
+            if before is None:  # huỷ ghép sau lúc router kiểm quyền (TOCTOU) ⇒ 404, không 500
+                raise ConversationGone()
             max_id = conn.execute(
                 text("SELECT COALESCE(max(id), 0) FROM messages WHERE conversation_id = :c"),
                 {"c": conv_id},
