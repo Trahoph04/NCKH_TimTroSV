@@ -77,3 +77,35 @@ Ghi quyết định kiến trúc quan trọng + LÝ DO. Không xóa cũ, chỉ a
 - **Quyết định**: KHÔNG làm cả 3. Giữ geocode 4 tầng Nominatim hiện có (trần cấp-phường/đường). Đảm bảo popup hiện **address text gốc verbatim** + nhãn confidence trung thực ("vị trí tương đối" cho pin low/medium). Chi tiết `docs/specs/Map_Routing.md` (Ràng buộc + Quyết định).
 - **Lý do**: (a) Trần chính xác nằm ở **string nguồn**, không ở engine — "hẻm 3 Hồ Bún Xáng" vô-thông-tin, KHÔNG engine nào (kể cả Google) định vị số nhà được. (b) Đếm data 2026-07-06 (446 tin): mọi từ khoá tần suất cao đã cover (Xuân Khánh 63, NVC 37, 3/2 20); Bún Xáng chỉ 4 tin; bug pin-in-school chỉ 1 tin → hand-add landmark = churn ROI thấp. (c) Nominatim test rỗng cho "Hồ Bún Xáng"/"chợ Xuân Khánh" → free map MÙ landmark local CT. (d) Use case SV = lọc khu (cấp phường đủ) → đọc text gốc → gọi chủ trọ → tới xem. KHÔNG đòi cấp số nhà. (e) Hand-map OSM: reindex chậm hàng ngày + kể cả có mốc thì "hẻm 3" vẫn chỉ ra cấp khu vực = bằng ward centroid đã có.
 - **Đánh đổi**: Chấp nhận trần cấp-phường + 1 tin pin-in-school. **Budget path khi thật cần** (UGC user đăng địa chỉ đầy đủ, hoặc hội đồng đòi): **Goong (goong.io) TRƯỚC** — data đường/hẻm/số nhà + kho POI local VN tốt hơn OSM, rẻ hơn Google; Google SAU (đắt nhất, đổi ràng buộc P1 cost=0đ). Lý do trả tiền = mua **kho landmark local**, KHÔNG phải mua độ chính xác số nhà (bất khả với string cụt).
+
+## ADR-012: Chat giữa SV đã ghép — WebSocket + Redis pub/sub, polling chỉ là dự phòng
+- **Ngày**: 2026-10-01
+- **Bối cảnh**: `Matching_Messaging_Design.md` (26/09) chọn polling 3s vì sợ socket rớt khi demo + đụng tầng auth. Mockup 06 và yêu cầu "chat realtime kiểu Tinder" cần đang nhập / online / đã xem tức thì — polling 3s làm các tín hiệu này trông giả.
+- **Quyết định**: WebSocket `/chat/ws` (FastAPI) chỉ để ĐẨY sự kiện; mọi thao tác GHI vẫn qua REST (lưu DB trước rồi publish). Fan-out nhiều worker qua Redis `chat:u:<id>`. Auth WS bằng vé JWT `type=ws` 60s xin qua Route Handler (không đụng `HTTPBearer` hiện có). FE tự chuyển polling 3s khi socket không mở. Chi tiết `docs/tech_specs/Chat_Realtime.md`.
+- **Lý do**: Giữ được cả hai: realtime thật (đo e2e ≈40ms) và rủi ro demo thấp như polling (rớt socket ⇒ banner + polling, không mất tin vì tin luôn ở DB; Redis chết ⇒ local-only). Lộ danh tính vẫn theo 3 tầng của thiết kế cũ: chỉ cặp đã thích 2 chiều mới có hội thoại.
+- **Đánh đổi**: Thêm 1 đường hạ tầng (WS + Redis) và cổng 8000 phải mở cho browser (đã mở sẵn). Không có metric NCKH mới. Lộ liên hệ T3, chat nhóm, push notification để sau.
+
+## ADR-013: Ghép bạn ở — Reciprocal Recommender (Gower + harmonic), KHÔNG collaborative filtering
+- **Ngày**: 2026-10-04
+- **Bối cảnh**: SRS FR-5.2 ghi "Weighted Cosine Similarity ≥ 0.7"; `03_ThietKe_KyThuat_Va_AI.md` ghi trọng số 25/20/15/15/10 không nguồn. Khảo sát thật thu được 33 phản hồi, trong đó **19 có phần lối sống** và **9 vừa có MSSV vừa có phần D** (nam 6 / nữ 3). Ma trận tương tác rỗng.
+- **Quyết định**: Dùng **Reciprocal Recommender System** — lọc cứng 2 tầng → khoảng cách Gower có trọng số theo kiểu dữ liệu → điểm CÓ HƯỚNG → gộp bằng **harmonic mean** [R12] → top-K kèm 3 lý do + 1 lưu ý. Thêm tầng **Stable Roommates** (Irving pha 1 + tìm kiếm vét chính xác ở n ≤ 20) cho đánh giá. Code: `apps/api/app/matching/{profile,filters,score,weights,stable}.py` (thuần, không chạm DB).
+- **Lý do**:
+  - **Bác CF**: ma trận `swipes` rỗng, item CHÍNH LÀ user (bài toán hai chiều), và N=19 thì không ước lượng được latent factor. Sai họ bài toán, không phải thiếu dữ liệu.
+  - **Bác cosine-ngưỡng-0.7** bằng SỐ ĐO trên 19 hồ sơ thật: cosine rơi vào [0.402, 0.991] (sd 0.106) và **ngưỡng 0.7 cho 93% cặp đi qua** ⇒ vô dụng làm bộ lọc. Gower có trọng số cho [0.134, 0.894], dải rộng hơn (0.76 vs 0.59).
+  - **Harmonic mean** chống cặp một chiều: đo được harmonic ≤ trung bình cộng ở **171/171 cặp**; cặp lệch nhất bị hạ 0.062.
+  - **Trọng số dẫn từ dữ liệu**: tần suất chọn deal-breaker trên 19 hồ sơ (ở bẩn 0.79, ồn khuya 0.63…). Chiều không có câu hỏi đo độ quan trọng được ghi rõ `source='design'` thay vì giả vờ là số đo; bù bằng kiểm tra độ nhạy ±20%.
+- **Đánh đổi**: `matching_vector VECTOR(384)` giữ cho tương thích lược đồ nhưng KHÔNG dùng tính điểm (nhúng 12 câu có cấu trúc sẽ phá tính thứ bậc và giết khả năng giải thích). Bỏ Elo/"độ hấp dẫn" kiểu Tinder: sai mục đích (ghép là tương thích cặp) và sai đạo đức.
+
+## ADR-014: Deal-breaker 2 tầng — chỉ an toàn mới là lọc CỨNG
+- **Ngày**: 2026-10-04
+- **Bối cảnh**: Thiết kế gốc coi mọi deal-breaker được khai là veto tuyệt đối. Đo trên 19 hồ sơ thật: chỉ **2,3% cặp có hướng đi qua**, **13/19 người pool RỖNG**. Nguyên nhân là số học — trung bình mỗi người khai **4,63/9** deal-breaker và tự khai làm **3,26** hành vi.
+- **Quyết định**: Tầng **CỨNG** chỉ gồm `Hút thuốc trong phòng` (cột `smoke_in_room`) và `Ở bẩn` (`cleanliness ≤ 2`). Sáu deal-breaker hành vi còn lại thành tầng **MỀM**: không loại, mà vào chiều `deal_breaker_soft` (trọng số cao nhất 0.85) và **hiện rõ chữ** trên thẻ ("bạn ấy có N điều bạn từng nói không chấp nhận: …").
+- **Lý do**: Tiêu chí chia tầng là *bản chất*, không phải tinh chỉnh ngưỡng cho đẹp số: khói thuốc là ngoại ứng sức khoẻ và vệ sinh là ngưỡng không thương lượng được trong thời gian thuê; còn "dẫn bạn về / người yêu ngủ lại / ồn khuya / nhậu / thú cưng / đi khuya" là **nội quy nhà mà bạn ở ghép thật vẫn thoả thuận được**. Kết quả đo: người có pool > 0 tăng **6/19 → 16/19**, tỉ lệ cặp đi qua 2,3% → **25,1%**. Quyền quyết định vẫn ở người dùng vì cảnh báo hiện rõ — trung thực hơn là im lặng loại họ khỏi pool.
+- **Đánh đổi**: Người khai nhiều deal-breaker sẽ thấy thẻ có cảnh báo thay vì không thấy thẻ nào. Cần nói rõ trong form (đã ghi ở `ProfileForm.tsx`). Bộ tầng cứng nằm ở `filters.HARD_DEAL_BREAKERS`, đổi được bằng một dòng nếu hội đồng muốn so sánh.
+
+## ADR-015: Telemetry deck do SERVER ghi (bảng `deck_log`), không nhận từ client
+- **Ngày**: 2026-10-04
+- **Bối cảnh**: `POST /matching/swipe` nhận `deck_position`/`deck_mode`/`score` từ body do FE gửi. Đó đúng là dữ liệu dùng để chứng minh đã khử thiên lệch vị trí (Matching_Messaging_Design.md 3.6).
+- **Quyết định**: `GET /matching/deck` ghi `deck_log` (vị trí, điểm, s_ab/s_ba, snapshot `{d_k}`, deck_mode, weights_ver); `POST /matching/swipe` ĐỌC lại từ đó và bỏ qua mọi trường client gửi. Migration `93_matching_deck.sql`.
+- **Lý do**: Để client tự khai vị trí thẻ thì bằng chứng khử thiên lệch mất giá trị và client sửa được số liệu nghiên cứu. `deck_log` đồng thời là nguồn đo **congestion** (số người đã thấy mỗi hồ sơ) — ở pool nhỏ vài hồ sơ "trung tính mọi chiều" hứng hết lời mời, nên deck hạ ưu tiên theo exposure (tham chiếu Fair Reciprocal Recommendation, RecSys 2024).
+- **Đánh đổi**: Mỗi lần phục vụ deck ghi thêm N dòng. Điểm HIỂN THỊ là điểm thật, còn THỨ TỰ áp hình phạt exposure — hai số có thể lệch nhau, phải nói rõ khi trình bày.

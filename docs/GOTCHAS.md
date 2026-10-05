@@ -81,3 +81,31 @@ Bẫy đã dính, tích lũy, KHÔNG xóa. Mỗi khi dính bẫy mới → appen
 - **Triệu chứng**: Tập data lẫn nhà/mặt bằng thương mại, không phải trọ SV.
 - **Nguyên nhân**: mogi ~83%, nhadatcantho247 ~84% là nhà/thương mại.
 - **Cách tránh/fix**: Lọc theo `listing_type=phong_tro` + `quality_score` trước khi train. Nguồn: `Crawler_Data_Quality_Assessment.md:39-50`.
+
+## pytest ghi thẳng vào DB dev — phải dọn sau mỗi lần chạy
+
+`apps/api/tests/` dùng **DATABASE_URL của chính app đang chạy** (không có DB test
+riêng, không rollback cuối test). Mỗi lần `pytest` chạy, `test_chat.py` và
+`test_matching.py` đăng ký ~60 user mới với email ngẫu nhiên — và **những user đó
+có hồ sơ ở ghép giống hệt nhau**, nên chúng lọt vào `GET /matching/deck` của người
+thật và đẩy "% tương thích" lên 100%.
+
+Phát hiện 04/10/2026: DB tích tụ **459 user test** (292 từ các phiên trước), pool
+ghép có 109 nam + 268 nữ trong khi dữ liệu thật chỉ có 6 nam + 3 nữ. Màn hình
+demo khi đó toàn thẻ "SV · 100% tương thích" — trông như lỗi thuật toán.
+
+Dọn sau mỗi lần chạy test (an toàn: chỉ khớp đúng 3 tiền tố email mà tests sinh ra (`mt_` test_matching, `chat_` test_chat, `t3_` test_chat_t3),
+và loại trừ tài khoản demo):
+
+```bash
+docker compose exec -T db psql -U nckh -d nckh -c \
+  "DELETE FROM users WHERE (email LIKE 'mt\_%@example.com' OR email LIKE 'chat\_%@example.com' \
+   OR email LIKE 't3\_%@example.com') AND email NOT LIKE '%.demo@example.com';"
+```
+
+Kiểm lại pool thật: `SELECT src, gender, count(*) FROM roommate_profiles WHERE gender IS NOT NULL GROUP BY 1,2;`
+— phải chỉ còn `form` (SV thật từ khảo sát) và `seed` (tài khoản demo).
+
+Cách sửa triệt để (chưa làm): cho tests một database riêng qua biến môi trường,
+hoặc bọc mỗi test trong transaction rollback. Cả hai đều đụng `conftest.py` và
+cách `app.main` tạo engine ở import-time, nên để sau nghiệm thu.
