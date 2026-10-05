@@ -5,9 +5,11 @@ from sqlalchemy import create_engine, text
 import redis
 
 from .config import settings
-from .crawler import ListingRepo, build_scheduler, run_source
+from .crawler import ListingRepo, build_scheduler, run_nhatot, run_source
 from .listings import init_listings, listings_router
 from .auth import AuthRepo, auth_router, init_auth, init_auth_deps
+from .chat import ChatHub, chat_router, init_chat
+from .matching import init_matching, matching_router
 
 # psycopg3 sync engine; pre_ping avoids stale conns after db restart
 engine = create_engine(settings.database_url, pool_pre_ping=True)
@@ -15,6 +17,10 @@ redis_client = redis.from_url(settings.redis_url, decode_responses=True)
 init_listings(engine)
 init_auth(engine)
 init_auth_deps(AuthRepo(engine))
+# hub realtime chat: WebSocket tại chỗ + Redis pub/sub cho nhiều worker (Redis chết ⇒ local-only)
+chat_hub = ChatHub(settings.redis_url)
+init_chat(engine, chat_hub)
+init_matching(engine, chat_hub)
 
 
 @asynccontextmanager
@@ -33,6 +39,8 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="NCKH API", version="0.1.0", lifespan=lifespan)
 app.include_router(listings_router)
 app.include_router(auth_router)
+app.include_router(matching_router)
+app.include_router(chat_router)
 
 
 @app.get("/health")
@@ -75,8 +83,13 @@ async def crawler_run(source: str = "phongtro123", mode: str = "incremental"):
     """Trigger thủ công 1 nguồn (Admin/test). mode: 'incremental' | 'full'."""
     if mode not in ("incremental", "full"):
         raise HTTPException(400, "mode phải là 'incremental' hoặc 'full'")
-    counts = await run_source(source, mode, ListingRepo(engine))
-    # làm sạch ngay để manual run cũng cho ra data 'cleaned' (không kẹt ở 'raw')
+    repo = ListingRepo(engine)
+    counts = await run_nhatot(repo, mode) if source == "nhatot" else await run_source(source, mode, repo)
+    # làm sạch ngay để manual run cũng cho ra data 'cleaned' (không kẹt ở 'raw').
+    # Qua threadpool vì cùng lý do ở crawler/scheduler.py: SQLAlchemy đồng bộ gọi
+    # thẳng trong `async def` sẽ chặn event loop đang giữ mọi WebSocket chat.
+    from starlette.concurrency import run_in_threadpool
+
     from .cleaner.pipeline import run_cleaner
-    run_cleaner(engine)
+    await run_in_threadpool(run_cleaner, engine)
     return {"source": source, "mode": mode, **counts}
