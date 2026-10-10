@@ -106,6 +106,9 @@ export type ListingOut = {
   quality_score: number | null;
   last_seen: string | null;
   route_time_campus: number[] | null; // [khuI, khuII, khuIII] phút, null = chưa route
+  listing_type: string | null; // phong_tro | nha_mini | ...
+  offer_kind: string | null; // "lease_transfer" = pass phòng / sang nhượng
+  location_precise: boolean | null; // false = toạ độ cấp phường (điểm mặc định của sàn) → bản đồ ẩn mặc định
 };
 
 export type SearchResult = {
@@ -122,6 +125,7 @@ export type SearchListingsParams = {
   min_area?: number;
   district?: string;
   max_distance_ctu?: number;
+  housing?: string; // phong_tro | nha_mini; bỏ trống = cả hai
   sort?: string;
   page?: number;
   size?: number;
@@ -156,8 +160,13 @@ export function getListing(id: number | string): Promise<ListingOut> {
   return apiFetch<ListingOut>(`/listings/${id}`);
 }
 
-export function getNearby(lat: number, lng: number, radius: number): Promise<ListingOut[]> {
-  return apiFetch<ListingOut[]>(`/listings/nearby${buildQuery({ lat, lng, radius })}`);
+export function getNearby(
+  lat: number,
+  lng: number,
+  radius: number,
+  housing?: string,
+): Promise<ListingOut[]> {
+  return apiFetch<ListingOut[]>(`/listings/nearby${buildQuery({ lat, lng, radius, housing })}`);
 }
 
 // campus: 0=khu I, 1=khu II, 2=khu III. Trả polyline [lat,lng] campus→tin (FR-M.8).
@@ -165,8 +174,46 @@ export function getListingRoute(id: number | string, campus: number): Promise<nu
   return apiFetch<number[][]>(`/listings/${id}/route${buildQuery({ campus })}`);
 }
 
-export function getMyListings(token: string): Promise<ListingOut[]> {
-  return apiFetch<ListingOut[]>("/listings/mine", {
+// Liên hệ của 1 tin — endpoint riêng, chỉ gọi khi người dùng mở đúng tin đó.
+export type ContactOut = {
+  phone: string | null;
+  zalo: string | null;
+  facebook: string | null;
+  source: string;
+  source_url: string | null;
+};
+
+export function getListingContact(id: number | string): Promise<ContactOut> {
+  return apiFetch<ContactOut>(`/listings/${id}/contact`);
+}
+
+// ---- Tiện ích OSM (apps/api/app/pois) ----
+
+export type PoiOut = {
+  id: number;
+  category: string;
+  name: string | null;
+  lat: number;
+  lng: number;
+  distance_m: number; // đường chim bay
+};
+
+export type PoiSummary = {
+  radius: number;
+  categories: { category: string; label: string; count: number; nearest: PoiOut | null }[];
+};
+
+export function getPois(lat: number, lng: number, radius: number): Promise<PoiOut[]> {
+  return apiFetch<PoiOut[]>(`/pois${buildQuery({ lat, lng, radius })}`);
+}
+
+export function getPoiSummary(lat: number, lng: number, radius: number): Promise<PoiSummary> {
+  return apiFetch<PoiSummary>(`/pois/summary${buildQuery({ lat, lng, radius })}`);
+}
+
+// tin admin nhập tay (trang Quản lý nhà trọ) — sinh viên không đăng tin (ADR-024)
+export function getManagedListings(token: string): Promise<ListingOut[]> {
+  return apiFetch<ListingOut[]>("/listings/managed", {
     headers: { Authorization: `Bearer ${token}` },
   });
 }

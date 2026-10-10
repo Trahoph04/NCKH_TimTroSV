@@ -245,6 +245,28 @@ class ListingRepo:
                     {"t": times, "id": listing_id},
                 )
 
+    def mark_shared_coords(self, source: str) -> int:
+        """Hạ 'high' → 'medium' cho toạ độ mà ≥ 2 tin cùng nguồn dùng chung. Trả số tin bị hạ.
+
+        Chợ Tốt trả toạ độ cho MỌI tin nhưng tin không được người đăng ghim nhận điểm mặc định của
+        phường: đo 07/10, 610 tin nhatot nằm trên 61 điểm, 1 điểm Hưng Lợi gom 183 tin. Điểm chung
+        đó tương đương tầng 'medium' (toạ độ phường) của geocode.py — bản đồ phải hiện "vị trí tương
+        đối". Điểm chỉ 1 tin dùng = người đăng tự ghim → giữ 'high'.
+        """
+        with self.engine.begin() as conn:
+            return conn.execute(
+                text(
+                    """
+                    UPDATE aggregated_listings a SET geocode_confidence = 'medium'
+                    FROM (SELECT geom FROM aggregated_listings
+                          WHERE source = :s AND geom IS NOT NULL
+                          GROUP BY geom HAVING count(*) >= 2) g
+                    WHERE a.source = :s AND a.geom = g.geom AND a.geocode_confidence = 'high'
+                    """
+                ),
+                {"s": source},
+            ).rowcount
+
     def refresh_scores(self) -> None:
         """Tính lại freshness_score theo tuổi last_seen (gọi định kỳ)."""
         with self.engine.begin() as conn:

@@ -57,3 +57,6 @@ apps/web/tsconfig.tsbuildinfo
 # ── Rác / xuất tạm (không version) ──
 _to_delete/
 exports/
+
+# gói dữ liệu Chợ Tốt bàn giao nội bộ (image 245 MB, source_rights=UNVERIFIED) — nạp qua app.crawler.import_catalog
+student-housing-789-Docker-INTERNAL/

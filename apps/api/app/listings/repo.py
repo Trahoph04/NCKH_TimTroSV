@@ -2,6 +2,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Engine
 
 from .schemas import (
+    HousingType,
     ListingOut,
     SearchParams,
     SortBy,
@@ -14,7 +15,7 @@ _COLS = (
     "id, title, price, area, address, district, description, "
     "ST_Y(geom) AS lat, ST_X(geom) AS lng, distance_to_ctu, images, "
     "source, source_url, risk_score, geocode_confidence, freshness_score, "
-    "quality_score, last_seen, route_time_campus"
+    "quality_score, last_seen, route_time_campus, listing_type, offer_kind, location_precise"
 )
 
 _SORT_SQL = {
@@ -28,16 +29,28 @@ _SORT_SQL = {
 }
 
 
+def visible_clause(housing: HousingType | None) -> str:
+    """Tin SV xem được: đã làm sạch + là chỗ ở cho thuê (ẩn nhà nguyên căn/mặt bằng/raw/rejected).
+
+    Tin user tự đăng (source='user') chưa qua cleaner nhưng form đăng là phòng trọ → hiện khi không
+    lọc hoặc lọc phòng trọ. Dùng chung cho search() và nearby() để map = list.
+    """
+    if housing is None:
+        return ("(source = 'user' OR (cleaning_status = 'cleaned' "
+                "AND listing_type IN ('phong_tro', 'nha_mini')))")
+    if housing == HousingType.phong_tro:
+        return "(source = 'user' OR (cleaning_status = 'cleaned' AND listing_type = 'phong_tro'))"
+    return "(source <> 'user' AND cleaning_status = 'cleaned' AND listing_type = 'nha_mini')"
+
+
 def build_filters(p: SearchParams) -> tuple[str, dict]:
     """Dựng mệnh đề WHERE + params. Tách riêng để unit-test không cần DB.
 
     Luôn ẩn tin status='expired' (FR-2.8) và 'hidden' (user tự ẩn).
-    Mặc định chỉ trả tin phòng trọ đã làm sạch (ẩn nhà/mặt bằng + tin raw/rejected)
-    — trừ tin user tự đăng (source='user', chưa qua cleaner nhưng là trọ do user khai).
     """
     clauses = [
         "status NOT IN ('expired', 'hidden')",
-        "(source = 'user' OR (cleaning_status = 'cleaned' AND listing_type = 'phong_tro'))",
+        visible_clause(p.housing),
     ]
     params: dict = {}
 
@@ -108,16 +121,15 @@ class ListingQueryRepo:
             ).mappings().first()
         return _to_out(row) if row else None
 
-    def by_owner(self, user_id: int) -> list[ListingOut]:
-        """Tin do 1 user tự đăng (trang "Tin của tôi"). Ẩn tin đã xoá mềm ('hidden')."""
+    def managed(self) -> list[ListingOut]:
+        """Tin admin nhập tay (trang "Quản lý nhà trọ"). Ẩn tin đã xoá mềm ('hidden')."""
         with self.engine.connect() as conn:
             rows = conn.execute(
                 text(
                     f"SELECT {_COLS} FROM aggregated_listings "
-                    "WHERE posted_by = :uid AND status <> 'hidden' "
+                    "WHERE source = 'user' AND status <> 'hidden' "
                     "ORDER BY last_seen DESC"
                 ),
-                {"uid": user_id},
             ).mappings().all()
         return [_to_out(r) for r in rows]
 
@@ -133,8 +145,42 @@ class ListingQueryRepo:
             ).mappings().first()
         return _to_out(row) if row else None
 
-    def nearby(self, lat: float, lng: float, radius_m: float, limit: int = 300) -> list[ListingOut]:
-        """Tin trong bán kính (FR-2.5) — PostGIS ST_DWithin trên geography."""
+    def contact(self, listing_id: int) -> dict | None:
+        """SĐT/Zalo/Facebook công khai trong tin (crawler/contact.py) hoặc nhóm khảo sát thu — chỉ tin đang hiển thị."""
+        with self.engine.connect() as conn:
+            row = conn.execute(
+                text(
+                    "SELECT contact_phone AS phone, contact_zalo AS zalo, contact_facebook AS facebook, "
+                    "source, source_url FROM aggregated_listings "
+                    "WHERE id = :id AND status NOT IN ('expired', 'hidden')"
+                ),
+                {"id": listing_id},
+            ).mappings().first()
+        return dict(row) if row else None
+
+    def get_many(self, ids: list[int]) -> dict[int, ListingOut]:
+        """Nhiều tin theo id (giữ cả tin đã ẩn — thẻ đánh giá cũ vẫn phải hiển thị được)."""
+        if not ids:
+            return {}
+        with self.engine.connect() as conn:
+            rows = conn.execute(
+                text(f"SELECT {_COLS} FROM aggregated_listings WHERE id = ANY(:ids)"), {"ids": list(ids)}
+            ).mappings().all()
+        return {r["id"]: _to_out(r) for r in rows}
+
+    def nearby(
+        self,
+        lat: float,
+        lng: float,
+        radius_m: float,
+        limit: int = 1000,
+        housing: HousingType | None = None,
+    ) -> list[ListingOut]:
+        """Tin trong bán kính (FR-2.5) — PostGIS ST_DWithin trên geography.
+
+        limit 1000 (trước 300): sau khi nạp gói Chợ Tốt, 3 km quanh khu II đã vượt 300 tin → bản đồ
+        cắt mất tin mà không báo. MapLibre vẽ GPU nên 1000 điểm không thành vấn đề.
+        """
         with self.engine.connect() as conn:
             rows = conn.execute(
                 text(
@@ -143,7 +189,7 @@ class ListingQueryRepo:
                     "FROM aggregated_listings "
                     "WHERE status NOT IN ('expired', 'hidden') AND geom IS NOT NULL "
                     # đồng bộ filter sạch với search() (build_filters): map = list
-                    "AND (source = 'user' OR (cleaning_status = 'cleaned' AND listing_type = 'phong_tro')) "
+                    f"AND {visible_clause(housing)} "
                     "AND ST_DWithin(geom::geography, ST_SetSRID(ST_MakePoint(:lng,:lat),4326)::geography, :r) "
                     "ORDER BY dist ASC LIMIT :limit"
                 ),
@@ -202,10 +248,10 @@ class ListingWriteRepo:
         return new_id
 
     def get_owner(self, listing_id: int):
-        """Trả row {posted_by, status} hoặc None nếu id không tồn tại (dùng cho check 404/403)."""
+        """Trả row {posted_by, status, source} hoặc None nếu id không tồn tại (dùng cho check 404/409)."""
         with self.engine.connect() as conn:
             row = conn.execute(
-                text("SELECT posted_by, status FROM aggregated_listings WHERE id = :id"),
+                text("SELECT posted_by, status, source FROM aggregated_listings WHERE id = :id"),
                 {"id": listing_id},
             ).mappings().first()
         return row
@@ -253,3 +299,62 @@ class ListingWriteRepo:
                 ),
                 {"id": listing_id},
             )
+
+
+class RouteCacheRepo:
+    """Đường đi ORS đã tính (bảng route_cache, migration 95) — khoá = toạ độ gốc làm tròn 5 chữ số."""
+
+    def __init__(self, engine: Engine):
+        self.engine = engine
+
+    def get(self, lat: float, lng: float, campus: int, profile: str) -> list[list[float]] | None:
+        with self.engine.connect() as conn:
+            row = conn.execute(
+                text(
+                    "SELECT path FROM route_cache WHERE origin_lat = round(CAST(:lat AS NUMERIC), 5) "
+                    "AND origin_lng = round(CAST(:lng AS NUMERIC), 5) AND campus = :c AND profile = :p"
+                ),
+                {"lat": lat, "lng": lng, "c": campus, "p": profile},
+            ).first()
+        return row.path if row else None
+
+    def put(self, lat: float, lng: float, campus: int, profile: str, path: list[list[float]]) -> None:
+        import json
+
+        with self.engine.begin() as conn:
+            conn.execute(
+                text(
+                    "INSERT INTO route_cache (origin_lat, origin_lng, campus, profile, path) "
+                    "VALUES (round(CAST(:lat AS NUMERIC), 5), round(CAST(:lng AS NUMERIC), 5), :c, :p, "
+                    "CAST(:path AS JSONB)) "
+                    "ON CONFLICT (origin_lat, origin_lng, campus, profile) "
+                    "DO UPDATE SET path = EXCLUDED.path, fetched_at = now()"
+                ),
+                {"lat": lat, "lng": lng, "c": campus, "p": profile, "path": json.dumps(path)},
+            )
+
+    def missing_origins(self, *profiles: str) -> list[tuple[float, float, int]]:
+        """(lat, lng, campus) của tin đang hiển thị mà chưa có đường đi trong cache theo BẤT KỲ profile nào cho trước."""
+        with self.engine.connect() as conn:
+            rows = conn.execute(
+                text(
+                    f"""
+                    WITH o AS (
+                        SELECT DISTINCT round(CAST(ST_Y(geom) AS NUMERIC), 5) AS lat,
+                                        round(CAST(ST_X(geom) AS NUMERIC), 5) AS lng
+                        FROM aggregated_listings
+                        WHERE geom IS NOT NULL AND status NOT IN ('expired', 'hidden')
+                          AND {visible_clause(None)}
+                    )
+                    SELECT o.lat, o.lng, c.campus FROM o CROSS JOIN generate_series(0, 2) AS c(campus)
+                    WHERE NOT EXISTS (
+                        SELECT 1 FROM route_cache r WHERE r.origin_lat = o.lat AND r.origin_lng = o.lng
+                          AND r.campus = c.campus AND r.profile = ANY(:p))
+                    -- khu II (mặc định của bản đồ) và điểm gần trường trước: quota ORS Directions có
+                    -- thể cạn giữa chừng, phần quan trọng cho demo phải xong trước.
+                    ORDER BY (c.campus <> 1), (o.lat - 10.0322) ^ 2 + (o.lng - 105.7683) ^ 2, c.campus
+                    """
+                ),
+                {"p": list(profiles)},
+            ).all()
+        return [(float(r.lat), float(r.lng), r.campus) for r in rows]

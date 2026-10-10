@@ -14,7 +14,7 @@ CAMPUSES: list[tuple[float, float]] = [
 ]
 
 _BASE = "https://api.openrouteservice.org/v2"
-_PROFILE = "driving-car"  # ponytail: xấp xỉ xe máy, đủ để rank; đổi khi cần chính xác tuyệt đối
+PROFILE = "driving-car"  # ponytail: xấp xỉ xe máy, đủ để rank; đổi khi cần chính xác tuyệt đối
 
 
 def _matrix_body(points: list[tuple[float, float]]) -> dict:
@@ -44,7 +44,7 @@ async def matrix_minutes(
     body = _matrix_body(points)
     async with httpx.AsyncClient(timeout=60.0) as client:
         resp = await client.post(
-            f"{_BASE}/matrix/{_PROFILE}",
+            f"{_BASE}/matrix/{PROFILE}",
             json=body,
             headers={"Authorization": settings.ors_api_key},
         )
@@ -64,13 +64,34 @@ async def route_geometry(
     body = {"coordinates": [[origin[1], origin[0]], [dest[1], dest[0]]]}
     async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.post(
-            f"{_BASE}/directions/{_PROFILE}/geojson",
+            f"{_BASE}/directions/{PROFILE}/geojson",
             json=body,
             headers={"Authorization": settings.ors_api_key},
         )
         resp.raise_for_status()
         coords = resp.json()["features"][0]["geometry"]["coordinates"]  # [lng,lat]
     return [[lat, lng] for lng, lat in coords]
+
+
+# Dự phòng khi ORS hết quota Directions (403 cả ngày 07/10): máy chủ OSRM công khai — cùng dữ liệu OpenStreetMap, không
+# cần key, chỉ dành cho lưu lượng nhẹ (~1 request/giây) nên mọi kết quả đều được lưu vào route_cache.
+OSRM_BASE = "https://router.project-osrm.org"
+OSRM_PROFILE = "osrm-driving"  # khoá cache riêng: không ghi đường OSRM dưới tên profile của ORS
+_UA = {"User-Agent": "TroCTU-NCKH/1.0 (contact: phub2303891@student.ctu.edu.vn)"}
+
+
+async def route_geometry_osrm(
+    origin: tuple[float, float], dest: tuple[float, float]
+) -> list[list[float]]:
+    """Như route_geometry nhưng qua OSRM. origin/dest là (lat, lng); OSRM nhận lng,lat trong URL."""
+    url = f"{OSRM_BASE}/route/v1/driving/{origin[1]},{origin[0]};{dest[1]},{dest[0]}"
+    async with httpx.AsyncClient(timeout=20.0, headers=_UA) as client:
+        resp = await client.get(url, params={"overview": "full", "geometries": "geojson"})
+        resp.raise_for_status()
+        data = resp.json()
+    if data.get("code") != "Ok" or not data.get("routes"):
+        raise RuntimeError(f"OSRM: {data.get('code')} {data.get('message', '')}")
+    return [[lat, lng] for lng, lat in data["routes"][0]["geometry"]["coordinates"]]
 
 
 if __name__ == "__main__":

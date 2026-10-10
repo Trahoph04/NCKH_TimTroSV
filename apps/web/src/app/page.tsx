@@ -53,6 +53,7 @@ export default async function Home({
       max_distance_ctu: searchParams.max_distance_ctu
         ? Number(searchParams.max_distance_ctu)
         : undefined,
+      housing: searchParams.housing,
       sort: searchParams.sort,
       page,
       size: PAGE_SIZE,
@@ -95,7 +96,8 @@ export default async function Home({
       searchParams.min_price ||
       searchParams.max_price ||
       searchParams.min_area ||
-      searchParams.max_distance_ctu,
+      searchParams.max_distance_ctu ||
+      searchParams.housing,
   );
 
   return (
@@ -174,6 +176,9 @@ export default async function Home({
               {searchParams.max_distance_ctu && (
                 <input type="hidden" name="max_distance_ctu" value={searchParams.max_distance_ctu} />
               )}
+              {searchParams.housing && (
+                <input type="hidden" name="housing" value={searchParams.housing} />
+              )}
               {searchParams.sort && <input type="hidden" name="sort" value={searchParams.sort} />}
               <button
                 type="submit"
@@ -195,6 +200,13 @@ export default async function Home({
                 </Link>
               ))}
             </div>
+
+            <Link
+              href="/goi-y"
+              className="mt-5 inline-flex items-center gap-2 rounded-[11px] bg-white px-4 py-2.5 text-[14.5px] font-semibold text-primary transition hover:bg-[#eaf3fb]"
+            >
+              Chưa biết chọn gì? Nhận gợi ý theo nhu cầu của bạn →
+            </Link>
           </div>
 
           {/* Panel dữ liệu hệ thống */}
@@ -228,10 +240,11 @@ export default async function Home({
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <h2 className="text-[22px] font-bold tracking-[-0.01em] text-ink">
-                {result.total} phòng trọ {hasFilter ? "phù hợp bộ lọc" : "tại Cần Thơ"}
+                {result.total} {searchParams.housing === "nha_mini" ? "nhà mini" : "phòng trọ"}{" "}
+                {hasFilter ? "phù hợp bộ lọc" : "tại Cần Thơ"}
               </h2>
               <p className="mt-1 text-sm text-ink-muted">
-                Đã ẩn tin hết hạn, tin trùng và tin không phải phòng trọ
+                Đã ẩn tin hết hạn, tin trùng và nhà nguyên căn / mặt bằng
               </p>
             </div>
             <SortSelect current={searchParams} />
@@ -266,8 +279,8 @@ export default async function Home({
             <Link href="/map" className="transition hover:text-white">
               Bản đồ
             </Link>
-            <Link href="/listings/new" className="transition hover:text-white">
-              Đăng tin
+            <Link href="/cam-nang" className="transition hover:text-white">
+              Cẩm nang
             </Link>
           </span>
         </div>

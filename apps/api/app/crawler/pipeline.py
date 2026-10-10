@@ -63,6 +63,29 @@ def merge_detail(n: NormalizedListing, detail: dict, base_url: str = "") -> Norm
     return n
 
 
+async def auto_route(repo: ListingRepo, source: str) -> int:
+    """Phút tới 3 khu cho tin có geom nhưng chưa route_time_campus (tin mới, hoặc tin cũ lỡ sót), 1 call ORS
+    Matrix. KHÔNG route lại toàn bộ. Thiếu key/lỗi mạng → skip êm, không làm hỏng cả crawl job. Dùng chung cho
+    crawler HTML và nhatot (trước 07/10 nhatot không gọi ⇒ 126 tin Chợ Tốt mới không có "X phút tới trường")."""
+    from ..config import settings as _settings
+    if not _settings.ors_api_key:
+        log.info("ORS_API_KEY rỗng — skip auto-route source=%s", source)
+        return 0
+    pending = repo.pending_route()
+    if not pending:
+        return 0
+    try:
+        from ..listings.routing import matrix_minutes
+        times = await matrix_minutes([(r["lat"], r["lng"]) for r in pending])
+    except Exception as exc:  # noqa: BLE001 — routing lỗi không crash crawl job
+        log.warning("auto-route fail source=%s: %s", source, exc)
+        return 0
+    updates = [(r["id"], t) for r, t in zip(pending, times) if t is not None]
+    repo.set_route_times(updates)
+    log.info("auto-route source=%s routed=%d/%d", source, len(updates), len(pending))
+    return len(updates)
+
+
 async def run_source(
     source: str,
     mode: str,
@@ -151,27 +174,7 @@ async def run_source(
 
         repo.refresh_scores()
 
-        # auto-route (VIỆC 4, Map & Routing): tin có geom nhưng chưa route_time_campus
-        # (tin mới, hoặc tin cũ lỡ sót) → tính qua ORS Matrix, 1 batch call.
-        # KHÔNG route lại toàn bộ — chỉ những dòng route_time_campus IS NULL.
-        # Thiếu key/lỗi mạng → skip êm, không làm hỏng cả crawl job.
-        from ..config import settings as _settings
-        if _settings.ors_api_key:
-            pending = repo.pending_route()
-            if pending:
-                try:
-                    from ..listings.routing import matrix_minutes
-                    points = [(r["lat"], r["lng"]) for r in pending]
-                    times = await matrix_minutes(points)
-                    updates = [
-                        (r["id"], t) for r, t in zip(pending, times) if t is not None
-                    ]
-                    repo.set_route_times(updates)
-                    log.info("auto-route source=%s routed=%d/%d", source, len(updates), len(pending))
-                except Exception as exc:  # noqa: BLE001 — routing lỗi không crash crawl job
-                    log.warning("auto-route fail source=%s: %s", source, exc)
-        else:
-            log.info("ORS_API_KEY rỗng — skip auto-route source=%s", source)
+        await auto_route(repo, source)
     except Exception as exc:  # noqa: BLE001 — ghi lỗi vào run rồi re-raise cho scheduler log
         counts["error"] = str(exc)
         repo.finish_run(run_id, **counts)

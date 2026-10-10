@@ -8,7 +8,8 @@ import ChatNavLink from "./ChatNavLink";
 const NAV = [
   { href: "/", label: "Tìm trọ" },
   { href: "/map", label: "Bản đồ" },
-  { href: "/listings/mine", label: "Tin của tôi" },
+  { href: "/goi-y", label: "Gợi ý" },
+  { href: "/cam-nang", label: "Cẩm nang" },
 ];
 
 function isActive(pathname: string, href: string): boolean {
@@ -18,7 +19,7 @@ function isActive(pathname: string, href: string): boolean {
 export default function SiteHeader() {
   const pathname = usePathname();
   // cookie là httpOnly nên phải hỏi server; null = chưa biết, false = chưa đăng nhập
-  const [me, setMe] = useState<{ name: string | null; email: string } | false | null>(null);
+  const [me, setMe] = useState<{ name: string | null; email: string; role: string } | false | null>(null);
   useEffect(() => {
     fetch("/api/auth/me", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : false))
@@ -28,12 +29,11 @@ export default function SiteHeader() {
 
   return (
     <header className="flex h-[76px] shrink-0 items-center justify-between border-b border-line bg-white px-5 sm:px-10">
-      <Link href="/" className="flex items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-primary text-lg font-extrabold text-white">
-          T
-        </span>
-        <span className="flex flex-col leading-tight">
-          <span className="text-lg font-extrabold tracking-tight text-ink">Trọ CTU</span>
+      {/* logo tách từ ảnh gốc của nhóm: hình ngôi nhà + chữ (public/brand) — chữ là ảnh để giữ đúng font/màu logo */}
+      <Link href="/" className="flex shrink-0 items-center gap-2.5">
+        <img src="/brand/logo-mark.png" alt="" width={253} height={256} className="h-9 w-auto sm:h-11" />
+        <span className="flex flex-col gap-1 leading-tight">
+          <img src="/brand/logo-wordmark.png" alt="NhàTrọ CTU" width={529} height={96} className="h-[18px] w-auto sm:h-[22px]" />
           <span className="text-xs text-ink-muted">Tìm phòng trọ gần trường</span>
         </span>
       </Link>
@@ -89,12 +89,14 @@ export default function SiteHeader() {
             Đăng nhập
           </Link>
         ) : null}
-        <Link
-          href="/listings/new"
-          className="rounded-[10px] bg-primary px-4 py-2.5 text-[15px] font-semibold text-white transition hover:bg-navy"
-        >
-          Đăng tin miễn phí
-        </Link>
+        {me && me.role === "admin" && (
+          <Link
+            href="/quan-ly/nha-tro"
+            className="hidden text-[15px] font-medium text-ink-soft transition hover:text-primary lg:block"
+          >
+            Quản lý
+          </Link>
+        )}
       </div>
     </header>
   );

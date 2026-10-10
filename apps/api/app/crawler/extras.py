@@ -75,8 +75,10 @@ def _to_vnd(num: str, unit: str | None) -> int | None:
 
 
 # ── điện ──────────────────────────────────────────────────────────────────────
+# Bỏ dấu làm "diện tích" / "điện thoại" / "điện máy" trùng mặt chữ "dien" ⇒ "Diện tích: 5x5m" từng bị đọc thành
+# tiền điện 5.000đ (tin 1598, 07/10). Loại các cụm đó bằng lookahead.
 _ELEC = re.compile(
-    r"dien[^\d\n]{0,25}?" + _NUM + r"\s*" + _UNIT_MONEY + r"\s*(?:/|\s|1)?\s*(kwh|kw|so|ki|ky|chu|dien)?",
+    r"dien(?! ?(?:tich|thoai|may))[^\d\n]{0,25}?" + _NUM + r"\s*" + _UNIT_MONEY + r"\s*(?:/|\s|1)?\s*(kwh|kw|so|ki|ky|chu|dien)?",
 )
 _ELEC_STATE = re.compile(r"(dien|nuoc|dien nuoc)[^.\n]{0,20}(gia nha nuoc|gia dan|theo gia dien luc|gia dien luc|gia sinh hoat|theo dong ho)")
 
@@ -191,7 +193,10 @@ def extract_gender(t: str) -> str | None:
 
 
 # ── giờ giấc ──────────────────────────────────────────────────────────────────
-_FREE = re.compile(r"gio giac tu do|tu do gio giac|khong gioi nghiem|ko gioi nghiem|khong khoa cong|24/24|24h")
+_FREE = re.compile(
+    r"gio giac tu do|tu do gio giac|khong gioi nghiem|ko gioi nghiem|khong khoa cong|24/24|24h"
+    r"|khong quan ly gio( giac)?|khong gioi han gio( giac)?"
+)
 _CURFEW = re.compile(r"(khoa|dong|gioi nghiem|dong cua)\s*(cong|cua)?[^\d\n]{0,12}?(\d{1,2})\s*(h|g|gio)\b")
 
 
@@ -203,7 +208,8 @@ def extract_hours(t: str) -> tuple[int | None, bool | None]:
             return h % 24, False
     if _FREE.search(t):
         return None, True
-    if re.search(r"gioi nghiem|khoa cong", t):
+    # "chìa khoá cổng riêng" (mỗi phòng tự mở cổng) KHÔNG phải giới nghiêm — từng gắn nhầm free_hours=False
+    if re.search(r"gioi nghiem|(?<!chia )khoa cong", t):
         return None, False
     return None, None
 

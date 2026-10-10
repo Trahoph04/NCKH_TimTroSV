@@ -39,7 +39,7 @@ export async function POST(req: Request) {
   } catch (e) {
     const err = e as ApiError;
     return NextResponse.json(
-      { detail: err.detail ?? "Đăng tin thất bại" },
+      { detail: err.detail ?? "Thêm nhà trọ thất bại" },
       { status: err.status ?? 500 },
     );
   }

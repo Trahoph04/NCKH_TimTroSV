@@ -1,10 +1,11 @@
 import Link from "next/link";
 import type { ListingOut } from "@/lib/api";
-import { formatArea, formatDistance, formatPriceShort, riskBadge } from "@/lib/format";
+import { formatArea, formatDistance, formatPriceShort, listingTags, riskBadge } from "@/lib/format";
 
 // Card tin theo mockup 01 UI_NCKH.html: ảnh + badge, giá xanh to, meta, footer phút tới khu II.
 export default function ListingCard({ listing }: { listing: ListingOut }) {
   const badge = riskBadge(listing.risk_level);
+  const tags = listingTags(listing);
   const cover = listing.images[0];
   const minutes = listing.route_time_campus?.[1]; // khu II — khu chính gần nhất với đa số tin
 
@@ -27,6 +28,15 @@ export default function ListingCard({ listing }: { listing: ListingOut }) {
         >
           {badge.label}
         </span>
+        {tags.length > 0 && (
+          <span className="absolute right-3 top-3 flex gap-1.5">
+            {tags.map((t) => (
+              <span key={t.label} className={`rounded-lg px-2.5 py-1 text-[12.5px] font-semibold ${t.className}`}>
+                {t.label}
+              </span>
+            ))}
+          </span>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col gap-2 p-4">

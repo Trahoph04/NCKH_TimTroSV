@@ -15,6 +15,14 @@ const DISTANCE_OPTIONS = [
 
 const AREA_OPTIONS = ["15", "20", "25"];
 
+// Khớp HousingType backend (listings/schemas.py). Bỏ trống = cả hai — mặc định hiện cả nhà mini
+// vì 41 tin đang thấy được phân loại lại thành nhà mini (docs/specs/Map_MapLibre_POI.md).
+export const HOUSING_OPTIONS = [
+  { value: "", label: "Tất cả" },
+  { value: "phong_tro", label: "Phòng trọ" },
+  { value: "nha_mini", label: "Nhà mini" },
+];
+
 export const SORT_OPTIONS = [
   { value: "newest", label: "Mới nhất" },
   { value: "price_asc", label: "Giá thấp → cao" },
@@ -30,6 +38,7 @@ export type HomeParams = {
   max_price?: string;
   min_area?: string;
   max_distance_ctu?: string;
+  housing?: string;
   sort?: string;
 };
 
@@ -55,6 +64,7 @@ export function HomeFilters({ current }: { current: HomeParams }) {
   const [district, setDistrict] = useState(current.district ?? "");
   const [distance, setDistance] = useState(current.max_distance_ctu ?? "");
   const [minArea, setMinArea] = useState(current.min_area ?? "");
+  const [housing, setHousing] = useState(current.housing ?? "");
 
   function apply() {
     const toVnd = (trieu: string) => {
@@ -69,6 +79,7 @@ export function HomeFilters({ current }: { current: HomeParams }) {
       max_price: toVnd(maxTrieu),
       min_area: minArea,
       max_distance_ctu: distance,
+      housing,
     });
     router.push(`/?${params.toString()}`);
   }
@@ -93,6 +104,22 @@ export function HomeFilters({ current }: { current: HomeParams }) {
         >
           Xóa hết
         </button>
+      </div>
+
+      <div className="flex flex-col gap-2.5">
+        <span className={sectionLabel}>Loại chỗ ở</span>
+        <div className="flex gap-2">
+          {HOUSING_OPTIONS.map((opt) => (
+            <button
+              key={opt.value || "all"}
+              type="button"
+              onClick={() => setHousing(opt.value)}
+              className={chip(housing === opt.value)}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="flex flex-col gap-2.5">

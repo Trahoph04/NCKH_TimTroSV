@@ -1,6 +1,7 @@
-import { notFound, redirect } from "next/navigation";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import { getListing, type ApiError } from "@/lib/api";
-import { getCurrentUser, reauthUrl } from "@/lib/current-user";
+import { requireAdminPage } from "@/lib/current-user";
 import ListingForm from "../../ListingForm";
 
 export const dynamic = "force-dynamic";
@@ -10,10 +11,7 @@ export default async function EditListingPage({
 }: {
   params: { id: string };
 }) {
-  const user = await getCurrentUser();
-  if (!user) {
-    redirect(reauthUrl(`/listings/${params.id}/edit`));
-  }
+  await requireAdminPage(`/listings/${params.id}/edit`);
 
   let listing;
   try {
@@ -21,6 +19,24 @@ export default async function EditListingPage({
   } catch (e) {
     if ((e as ApiError).status === 404) notFound();
     throw e;
+  }
+
+  // API trả 409 cho tin crawl/khảo sát (pipeline sẽ ghi đè) — báo trước thay vì để form lỗi khi lưu
+  if (listing.source !== "user") {
+    return (
+      <main className="min-h-screen bg-slate-50 p-4 sm:p-8">
+        <div className="mx-auto max-w-2xl rounded-lg border border-slate-200 bg-white p-6 text-slate-700 shadow-sm">
+          <h1 className="text-xl font-bold text-slate-800">Không sửa tay được tin này</h1>
+          <p className="mt-3 text-sm">
+            Tin lấy từ crawl hoặc khảo sát thực địa được cập nhật qua pipeline nhập dữ liệu — sửa tay sẽ bị ghi đè ở lần
+            nạp sau. Hãy sửa ở nguồn (file khảo sát) rồi nạp lại, hoặc ẩn tin ở trang chi tiết.
+          </p>
+          <Link href={`/listings/${listing.id}`} className="mt-4 inline-block text-sm font-medium text-primary">
+            ← Về trang tin
+          </Link>
+        </div>
+      </main>
+    );
   }
 
   return (

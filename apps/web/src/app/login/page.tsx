@@ -4,7 +4,10 @@ import LoginForm from "./LoginForm";
 
 export default function LoginPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
+    <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-slate-50 p-4">
+      <Link href="/" aria-label="NhàTrọ CTU — về trang chủ">
+        <img src="/brand/logo.png" alt="NhàTrọ CTU" width={640} height={525} className="h-28 w-auto" />
+      </Link>
       <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
         <h1 className="text-2xl font-bold text-slate-800">Đăng nhập</h1>
 

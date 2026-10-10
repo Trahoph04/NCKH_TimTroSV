@@ -23,7 +23,7 @@ echo "⏳ Đang đợi PostgreSQL khởi động và nạp dữ liệu mẫu..."
 # migration còn đang chạy (race). Server tạm không nghe TCP, nên hỏi qua
 # 127.0.0.1 rồi kiểm luôn bảng của migration CUỐI đã tồn tại.
 until docker compose exec -T db psql -h 127.0.0.1 -U nckh -d nckh -tAc \
-        "SELECT 1 FROM roommate_ratings LIMIT 0" > /dev/null 2>&1; do
+        "SELECT location_precise FROM aggregated_listings LIMIT 0" > /dev/null 2>&1; do
     sleep 2
 done
 

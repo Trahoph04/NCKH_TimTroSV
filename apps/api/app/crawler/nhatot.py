@@ -1,8 +1,9 @@
 """Nguồn nhatot.com (Chợ Tốt) qua JSON gateway công khai — KHÔNG parse HTML.
 
 Vì sao nguồn này đáng giá nhất:
-  - có `latitude/longitude` THẬT do người đăng ghim → geocode_confidence='high'
-    (các nguồn HTML khác chỉ ra được cấp phường, xem ADR-011)
+  - có `latitude/longitude` cho mọi tin → geocode_confidence='high', NHƯNG tin không được người
+    đăng ghim nhận điểm mặc định của phường → repo.mark_shared_coords hạ về 'medium' sau mỗi run
+    (đo 07/10: 610 tin / 61 điểm). Các nguồn HTML khác chỉ ra được cấp phường, xem ADR-011.
   - có `deposit` (tiền cọc) là field riêng
   - `body` dài, chủ trọ hay ghi điện/nước/giới tính → extras.py trích được
   - 1 request = 50 tin, không cần fetch detail từng tin (≈14 request cho cả Cần Thơ)
@@ -179,7 +180,11 @@ async def run_nhatot(repo, mode: str = "incremental") -> dict:
 
         if mode == "full":
             counts["expired_count"] = repo.mark_misses("nhatot", seen_ids)
+        # upsert vừa ghi lại 'high' cho mọi tin → hạ lại các điểm mặc định của phường
+        repo.mark_shared_coords("nhatot")
         repo.refresh_scores()
+        from .pipeline import auto_route  # import trong hàm: pipeline import nhatot gián tiếp qua __init__
+        await auto_route(repo, "nhatot")
     except Exception as exc:  # noqa: BLE001
         counts["error"] = str(exc)
         repo.finish_run(run_id, **counts)

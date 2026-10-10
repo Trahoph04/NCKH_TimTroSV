@@ -14,7 +14,7 @@ eval/
 
 | Notebook | Module | Metric | Ngưỡng đạt |
 |---|---|---|---|
-| `01_recommendation_eval.ipynb` | Recommendation | Precision@10, NDCG@10, ILS | ≥0.6 / ≥0.65 / ≤0.7 |
+| `01_recommendation_eval.ipynb` | Recommendation (sinh từ `tools/build_nb01.py`, gọi `recommend_lib.py`) | Precision@10, NDCG@10, ILS | ≥0.6 / ≥0.65 / ≤0.7 |
 | `02_dedup_eval.ipynb` | Dedup | recall, false-merge | ≥90% / ≤5% |
 | `03_geocoding_eval.ipynb` | Geocoding | %confidence≥medium, sai >1km | ≥80% / 0 trên 50 mẫu |
 | `04_risk_eval.ipynb` | Risk | recall scam | ≥85% |

@@ -3,13 +3,15 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.engine import Engine
 
-from ..auth import get_current_user
+from ..auth import require_admin
 from ..auth.schemas import UserOut
 from ..config import settings
 from ..crawler.geocode import Geocoder, haversine_m, CTU_LAT, CTU_LNG
-from .repo import ListingQueryRepo, ListingWriteRepo
-from .routing import CAMPUSES, matrix_minutes, route_geometry
-from .schemas import ListingCreate, ListingOut, ListingUpdate, SearchParams, SearchResult, SortBy
+from .repo import ListingQueryRepo, ListingWriteRepo, RouteCacheRepo
+from .routing import CAMPUSES, OSRM_PROFILE, PROFILE, matrix_minutes, route_geometry, route_geometry_osrm
+from .schemas import (
+    ContactOut, HousingType, ListingCreate, ListingOut, ListingUpdate, SearchParams, SearchResult, SortBy,
+)
 
 log = logging.getLogger("listings.router")
 
@@ -70,16 +72,20 @@ def search_listings(
     district: str | None = None,
     amenities: list[str] = Query(default_factory=list),
     max_distance_ctu: float | None = None,
+    housing: HousingType | None = None,
     sort: SortBy = SortBy.newest,
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
     repo: ListingQueryRepo = Depends(get_repo),
 ):
-    """Tìm kiếm + lọc + sắp xếp + phân trang (FR-2.1/2.2/2.3). Ẩn tin expired."""
+    """Tìm kiếm + lọc + sắp xếp + phân trang (FR-2.1/2.2/2.3). Ẩn tin expired.
+
+    housing: phong_tro | nha_mini; bỏ trống = cả hai.
+    """
     params = SearchParams(
         q=q, min_price=min_price, max_price=max_price, min_area=min_area,
         district=district, amenities=amenities, max_distance_ctu=max_distance_ctu,
-        sort=sort, page=page, size=size,
+        housing=housing, sort=sort, page=page, size=size,
     )
     total, items = repo.search(params)
     return SearchResult(total=total, page=page, size=size, items=items)
@@ -90,19 +96,20 @@ def nearby_listings(
     lat: float,
     lng: float,
     radius: float = Query(2000, gt=0, le=20000),
+    housing: HousingType | None = None,
     repo: ListingQueryRepo = Depends(get_repo),
 ):
-    """Tìm theo bán kính trên bản đồ (FR-2.5). radius: mét."""
-    return repo.nearby(lat, lng, radius)
+    """Tìm theo bán kính trên bản đồ (FR-2.5). radius: mét. housing như GET /listings."""
+    return repo.nearby(lat, lng, radius, housing=housing)
 
 
-@router.get("/mine", response_model=list[ListingOut])
-def my_listings(
-    user: UserOut = Depends(get_current_user),
+@router.get("/managed", response_model=list[ListingOut])
+def managed_listings(
+    _admin: UserOut = Depends(require_admin),
     repo: ListingQueryRepo = Depends(get_repo),
 ):
-    """Tin do user tự đăng ("Tin của tôi"). Phải khai báo TRƯỚC /{listing_id}."""
-    return repo.by_owner(user.id)
+    """Tin nhập tay qua trang quản lý (source='user', của mọi admin). Phải khai báo TRƯỚC /{listing_id}."""
+    return repo.managed()
 
 
 @router.get("/{listing_id}", response_model=ListingOut)
@@ -112,6 +119,15 @@ def get_listing(listing_id: int, repo: ListingQueryRepo = Depends(get_repo)):
     if item is None:
         raise HTTPException(404, "Không tìm thấy tin")
     return item
+
+
+@router.get("/{listing_id}/contact", response_model=ContactOut)
+def get_contact(listing_id: int, repo: ListingQueryRepo = Depends(get_repo)):
+    """Liên hệ của 1 tin: số điện thoại nếu tin có, không thì link trang nguồn (FE hiện "Xem tin gốc")."""
+    c = repo.contact(listing_id)
+    if c is None:
+        raise HTTPException(404, "Không tìm thấy tin")
+    return c
 
 
 @router.get("/{listing_id}/route", response_model=list[list[float]])
@@ -127,30 +143,42 @@ async def get_route_geometry(
     item = repo.get_visible(listing_id)
     if item is None or item.lat is None or item.lng is None:
         raise HTTPException(404, "Không tìm thấy tin hoặc tin chưa có toạ độ")
-    if not settings.ors_api_key:
-        raise HTTPException(503, "Routing chưa cấu hình (ORS_API_KEY)")
-    try:
-        return await route_geometry(CAMPUSES[campus], (item.lat, item.lng))
-    except Exception as exc:  # noqa: BLE001 — lỗi ORS → 502, không lộ trace
-        raise HTTPException(502, f"Không lấy được route: {exc}") from exc
+    # Thứ tự: cache (ORS rồi OSRM) → ORS → OSRM. Nhiều tin chung 1 toạ độ cấp phường + demo không được phụ thuộc
+    # quota/mạng; ORS Directions từng hết quota cả ngày (403) làm bản đồ mất đường đi ở mọi tin chưa có trong cache.
+    cache = RouteCacheRepo(_engine)
+    for profile in (PROFILE, OSRM_PROFILE):
+        cached = cache.get(item.lat, item.lng, campus, profile)
+        if cached is not None:
+            return cached
+    errors = []
+    engines = ([(PROFILE, route_geometry)] if settings.ors_api_key else []) + [(OSRM_PROFILE, route_geometry_osrm)]
+    for profile, fetch in engines:
+        try:
+            path = await fetch(CAMPUSES[campus], (item.lat, item.lng))
+        except Exception as exc:  # noqa: BLE001 — engine này lỗi thì thử engine sau
+            errors.append(f"{profile}: {exc}")
+            log.warning("route %s fail #%s: %s", profile, listing_id, exc)
+            continue
+        try:
+            cache.put(item.lat, item.lng, campus, profile, path)
+        except Exception as exc:  # noqa: BLE001 — ghi cache hỏng không chặn trả đường đi
+            log.warning("route cache put fail: %s", exc)
+        return path
+    raise HTTPException(502, "Không lấy được route: " + " | ".join(errors)[:300])
 
 
-def _check_owner(owner_row, user: UserOut) -> None:
-    """404 nếu tin không tồn tại, 403 nếu không phải chủ tin và không phải admin (FR-3)."""
-    if owner_row is None:
-        raise HTTPException(404, "Không tìm thấy tin")
-    if user.id != owner_row["posted_by"] and user.role != "admin":
-        raise HTTPException(403, "Không có quyền sửa/xoá tin này")
+# Sinh viên KHÔNG đăng tin (ADR-024): dữ liệu chỉ từ crawl (có link gốc), khảo sát thực địa và admin nhập tay.
+# Tin do người lạ tự đăng là chỗ dễ lừa đảo nhất mà hệ thống không có kiểm duyệt/chấm rủi ro cho nó.
 
 
 @router.post("", response_model=ListingOut, status_code=201)
 async def create_listing(
     body: ListingCreate,
-    user: UserOut = Depends(get_current_user),
+    user: UserOut = Depends(require_admin),
     repo: ListingQueryRepo = Depends(get_repo),
     write: ListingWriteRepo = Depends(get_write_repo),
 ):
-    """Đăng tin UGC (FR-3.1)."""
+    """Admin nhập tin tay (source='user', posted_by = admin)."""
     lat, lng, conf, dist = await _geocode_address(body.address)
     new_id = write.create(body.model_dump(), user.id, lat, lng, conf, dist)
     times = await _route_one(lat, lng)
@@ -163,13 +191,16 @@ async def create_listing(
 async def update_listing(
     listing_id: int,
     body: ListingUpdate,
-    user: UserOut = Depends(get_current_user),
+    _admin: UserOut = Depends(require_admin),
     repo: ListingQueryRepo = Depends(get_repo),
     write: ListingWriteRepo = Depends(get_write_repo),
 ):
-    """Sửa tin UGC — chỉ chủ tin hoặc admin (FR-3.2)."""
+    """Admin sửa tin nhập tay. Tin crawl/khảo sát không sửa tay được: lần crawl/import sau sẽ ghi đè."""
     owner_row = write.get_owner(listing_id)
-    _check_owner(owner_row, user)
+    if owner_row is None:
+        raise HTTPException(404, "Không tìm thấy tin")
+    if owner_row["source"] != "user":
+        raise HTTPException(409, "Tin crawl/khảo sát được cập nhật bởi pipeline — sửa ở nguồn rồi nạp lại")
 
     fields = body.model_dump(exclude_unset=True)
     lat, lng, conf, dist = None, None, None, None
@@ -187,10 +218,10 @@ async def update_listing(
 @router.delete("/{listing_id}", status_code=204)
 def delete_listing(
     listing_id: int,
-    user: UserOut = Depends(get_current_user),
+    _admin: UserOut = Depends(require_admin),
     write: ListingWriteRepo = Depends(get_write_repo),
 ):
-    """Xoá (ẩn) tin UGC — chỉ chủ tin hoặc admin (FR-3.3)."""
-    owner_row = write.get_owner(listing_id)
-    _check_owner(owner_row, user)
+    """Admin ẩn tin bất kỳ (status='hidden', không xoá). Crawler upsert không bật lại tin 'hidden' (ADR-022)."""
+    if write.get_owner(listing_id) is None:
+        raise HTTPException(404, "Không tìm thấy tin")
     write.soft_delete(listing_id)

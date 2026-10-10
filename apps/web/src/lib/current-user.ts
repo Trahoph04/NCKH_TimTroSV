@@ -1,3 +1,4 @@
+import { notFound, redirect } from "next/navigation";
 import { getMe, refresh, type ApiError, type User } from "./api";
 import {
   getAccessToken,
@@ -42,4 +43,13 @@ export async function getCurrentUser(
 // /login → next → /login… vô hạn.
 export function reauthUrl(next: string): string {
   return `/login?reauth=1&next=${encodeURIComponent(next)}`;
+}
+
+// Trang quản trị: chưa đăng nhập ⇒ về login; đăng nhập mà không phải admin ⇒ 404 (không quảng cáo là có trang này).
+// Backend vẫn tự chặn bằng require_admin — đây chỉ là UX.
+export async function requireAdminPage(next: string): Promise<User> {
+  const user = await getCurrentUser();
+  if (!user) redirect(reauthUrl(next));
+  if (user.role !== "admin") notFound();
+  return user;
 }

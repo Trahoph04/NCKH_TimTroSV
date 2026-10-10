@@ -225,7 +225,7 @@ export default function ListingForm({
         disabled={isSubmitting}
         className="w-full rounded bg-emerald-600 px-4 py-2 font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {isSubmitting ? "Đang xử lý..." : mode === "create" ? "Đăng tin" : "Lưu thay đổi"}
+        {isSubmitting ? "Đang xử lý..." : mode === "create" ? "Thêm nhà trọ" : "Lưu thay đổi"}
       </button>
     </form>
   );

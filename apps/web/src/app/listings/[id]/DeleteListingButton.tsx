@@ -9,14 +9,15 @@ export default function DeleteListingButton({ id }: { id: number }) {
   const [error, setError] = useState<string | null>(null);
 
   const handleDelete = async () => {
-    if (!confirm("Xóa tin này? Hành động không thể hoàn tác.")) return;
+    // ẩn (status='hidden'), không xoá — khôi phục được bằng SQL, crawler không tự bật lại
+    if (!confirm("Ẩn tin này khỏi tìm kiếm, bản đồ và gợi ý?")) return;
     setLoading(true);
     setError(null);
     try {
       const res = await fetch(`/api/listings/${id}`, { method: "DELETE" });
       if (!res.ok) {
         const body = (await res.json().catch(() => ({}))) as { detail?: string };
-        setError(body.detail ?? "Xóa tin thất bại");
+        setError(body.detail ?? "Ẩn tin thất bại");
         setLoading(false);
         return;
       }
@@ -36,7 +37,7 @@ export default function DeleteListingButton({ id }: { id: number }) {
         disabled={loading}
         className="rounded bg-rose-600 px-4 py-2 font-medium text-white hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {loading ? "Đang xử lý..." : "Xóa"}
+        {loading ? "Đang xử lý..." : "Ẩn tin"}
       </button>
       {error && <p className="mt-2 text-sm text-rose-600">{error}</p>}
     </div>

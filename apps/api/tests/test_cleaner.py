@@ -31,6 +31,14 @@ def test_classify_khac_default():
     assert classify("Sang nhượng gấp giá tốt", 5_000_000, 45) == "khac"
 
 
+def test_classify_survey_name_only_title_is_phong_tro():
+    # tin khảo sát chỉ có tên trọ, không đo diện tích — nguồn khác vẫn 'khac'
+    assert classify("TT HOME – 3/2 ĐOẠN GẦN CẦU ĐẦU SẤU", 2_400_000, None, "survey") == "phong_tro"
+    assert classify("TT HOME – 3/2 ĐOẠN GẦN CẦU ĐẦU SẤU", 2_400_000, None, "nhatot") == "khac"
+    # luật theo tiêu đề vẫn thắng
+    assert classify("MINIHOUSE KDC 91B", 2_500_000, None, "survey") == "nha_mini"
+
+
 # ── T2: validate ──
 def test_validate_phong_tro_valid():
     assert validate("phong_tro", 5_000_000) == (True, None)

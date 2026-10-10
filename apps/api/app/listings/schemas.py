@@ -4,6 +4,13 @@ from enum import Enum
 from pydantic import BaseModel, Field
 
 
+class HousingType(str, Enum):
+    """Loại chỗ ở SV thuê được — khớp cleaner.pipeline.HOUSING_TYPES."""
+
+    phong_tro = "phong_tro"
+    nha_mini = "nha_mini"
+
+
 class SortBy(str, Enum):
     price_asc = "price_asc"
     price_desc = "price_desc"
@@ -51,6 +58,7 @@ class SearchParams(BaseModel):
     district: str | None = None
     amenities: list[str] = Field(default_factory=list)
     max_distance_ctu: float | None = None        # mét
+    housing: HousingType | None = None            # None = phòng trọ + nhà mini
     sort: SortBy = SortBy.newest
     page: int = Field(default=1, ge=1)
     size: int = Field(default=20, ge=1, le=100)
@@ -78,6 +86,20 @@ class ListingOut(BaseModel):
     quality_score: float | None = None
     last_seen: datetime | None = None
     route_time_campus: list[float] | None = None  # [khuI, khuII, khuIII] phút, None = chưa route
+    listing_type: str | None = None  # phong_tro | nha_mini | ... (tin user tự đăng có thể chưa phân loại)
+    offer_kind: str | None = None    # 'lease_transfer' = pass phòng/sang nhượng → FE hiện nhãn riêng
+    location_precise: bool | None = None  # app.cleaner.audit: False = toạ độ cấp phường (bản đồ ẩn mặc định)
+
+
+class ContactOut(BaseModel):
+    """Liên hệ của 1 tin — endpoint riêng, KHÔNG nằm trong ListingOut: số chỉ trả khi người dùng mở đúng 1 tin,
+    không lấy hàng loạt được qua /listings hay /nearby. Không có số ⇒ FE đưa người dùng sang trang nguồn."""
+
+    phone: str | None = None
+    zalo: str | None = None
+    facebook: str | None = None
+    source: str
+    source_url: str | None = None
 
 
 class SearchResult(BaseModel):

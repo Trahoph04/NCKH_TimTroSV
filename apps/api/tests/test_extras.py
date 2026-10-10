@@ -113,3 +113,20 @@ def test_unit_letter_not_glued_to_next_word():
     assert extract_extras("Đặt cọc 1,500,000 khi nhận phòng").deposit_amount == 1_500_000
     assert extract_extras("Điện 3.500 kwh, nước 15.000 khối").electricity_price == 3500
     assert extract_extras("Cọc 2 triệu khi ký hợp đồng").deposit_amount == 2_000_000
+
+
+def test_free_hours_negated_management_and_own_gate_key():
+    from app.crawler.extras import extract_extras
+
+    t = "Mỗi phòng có chìa khóa cổng rào riêng. Không quản lý giờ giấc; Wf tốc độ cao"
+    assert extract_extras(t).free_hours is True
+    assert extract_extras("Có chìa khoá cổng riêng cho từng phòng").free_hours is None
+    assert extract_extras("Khoá cổng lúc 23h").free_hours is False
+
+
+def test_electricity_not_confused_with_area_or_phone():
+    from app.crawler.extras import extract_extras
+
+    t = "Diện tích: 5x5m có gác\nđiện 3.500đ/kw\nnước 10.000đ/m3"
+    assert extract_extras(t).electricity_price == 3500
+    assert extract_extras("Diện tích 5m x 5m, điện thoại 0909 123 456").electricity_price is None
