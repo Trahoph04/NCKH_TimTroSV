@@ -1,0 +1,57 @@
+{
+  "source": {
+    "id": "supplement-s12-word",
+    "title": "Cảnh giác mạo danh Fanpage khách sạn nhà hàng đặt cọc trực tuyến dịp Lễ hội Thành Tuyên 2026 — Cổng Thông tin điện tử Bộ Công an bài Công an tỉnh Tuyên Quang",
+    "category": "criminal_law",
+    "path": "docs/legal_word_supplement_corpus_v8_20261005/S12-publisher-text.docx",
+    "sha256": "4dc0802b7844f38970c017a60d43088a6855d5499cf80f7edbe3f6a3b7133926",
+    "source_url": "https://bocongan.gov.vn/bai-viet/canh-giac-thu-doan-lua-dao-mao-danh-fanpage-khach-san-nha-hang-dat-coc-truc-tuyen-dip-le-hoi-thanh-tuyen-2026-1790041513",
+    "publisher": "Cổng Thông tin điện tử Bộ Công an bài Công an tỉnh Tuyên Quang",
+    "publication_date": "2026-09-22",
+    "page_kind": "logical_document",
+    "pages": 1,
+    "ocr_used": false,
+    "extraction": "Native DOCX XML; literal publisher text, no OCR or PDF",
+    "source_content_kind": "publisher_guidance_word_conversion",
+    "source_scope_warning": "Hướng dẫn/khuyến cáo của Cổng Thông tin điện tử Bộ Công an bài Công an tỉnh Tuyên Quang; không phải điều luật. Tình huống gốc là đặt khách sạn tại Tuyên Quang. Áp dụng tham khảo cho chứng cứ giao dịch trực tuyến, không gọi là vụ thuê trọ CTU; không phải danh mục hồ sơ bắt buộc hoặc hướng dẫn soạn đơn tập thể.",
+    "not_exhaustive": true,
+    "source_policy": "Literal publisher text; never assistant summary, reference answer, form or drafted agreement.",
+    "original_html_sha256": "cf2554f7d36443147f2f0f1d040f53aebd5b24c8f7ba994b54d1bcebb4518684",
+    "original_block_indices": [
+      12,
+      14,
+      15,
+      16,
+      17
+    ],
+    "conversion": "Whitespace normalization only; selected exact DOM blocks converted to DOCX",
+    "retrieved_at_utc": "2026-10-05T15:27:13.268236+00:00"
+  },
+  "provisions": [
+    {
+      "provision_id": "S12:web-block:12",
+      "article": null,
+      "clause": null,
+      "heading": "Cảnh giác mạo danh Fanpage khách sạn nhà hàng đặt cọc trực tuyến dịp Lễ hội Thành Tuyên 2026 | Đoạn nguyên văn 12",
+      "content": "Để tạo lòng tin, chúng sao chép hình ảnh, logo, địa chỉ, số điện thoại, nội dung giới thiệu từ trang thật; sử dụng tương tác ảo, tài khoản giả để bình luận tích cực, đánh giá 5 sao. Một số fanpage còn chạy quảng cáo trả phí để tiếp cận người có nhu cầu du lịch.\n\nKhi khách liên hệ, các đối tượng tư vấn nhanh, đưa ra giá thấp hơn thị trường, kèm khuyến mãi “giới hạn” nhằm thúc ép chuyển tiền đặt cọc hoặc thanh toán trước để “giữ phòng”. Sau đó, chúng có thể gửi xác nhận đặt phòng giả, hoặc tiếp tục yêu cầu khách chuyển thêm tiền với lý do sai nội dung chuyển khoản, cần “kế toán xác nhận” để hoàn tiền. Sau nhiều lần nhận tiền, các đối tượng chặn liên lạc, chiếm đoạt toàn bộ số tiền. Nạn nhân thường chỉ phát hiện bị lừa khi đến nơi lưu trú, cơ sở dịch vụ nhưng không có thông tin đặt phòng nào được ghi nhận.\n\nCơ quan Công an khuyến cáo người dân và du khách cần nâng cao cảnh giác, thực hiện nghiêm túc các quy tắc xác minh thông tin trước khi thực hiện giao dịch chuyển tiền.\n\nKhi phát hiện các Fanpage có dấu hiệu giả mạo, lừa đảo, lập tức thực hiện thao tác \"Báo cáo\" (Report) trang đó với nền tảng Facebook, đồng thời lưu lại bằng chứng (hình ảnh tin nhắn, tài khoản ngân hàng, phiếu giao dịch).\n\nKhi nghi ngờ hoặc trở thành nạn nhân của các thủ đoạn lừa đảo trực tuyến, người dân cần nhanh chóng thu thập toàn bộ chứng cứ và báo ngay cho Cơ quan Công an nơi gần nhất để được hướng dẫn, tiếp nhận và xử lý kịp thời theo đúng quy định của pháp luật.",
+      "source_start": 0,
+      "source_end": 1459,
+      "points": [],
+      "exceptions": [],
+      "cross_references": [],
+      "kind": "publisher_guidance",
+      "article_context": "",
+      "content_sha256": "6f3ae330497cda719b07ae72121400efa349bbb9f3eebb5530067f7a638c66fb",
+      "page_from": 1,
+      "page_to": 1,
+      "original_block_indices": [
+        12,
+        14,
+        15,
+        16,
+        17
+      ],
+      "extraction_text_sha256": "6f3ae330497cda719b07ae72121400efa349bbb9f3eebb5530067f7a638c66fb"
+    }
+  ]
+}

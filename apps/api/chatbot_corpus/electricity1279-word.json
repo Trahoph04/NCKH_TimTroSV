@@ -1,0 +1,100 @@
+{
+  "source": {
+    "id": "electricity1279-word",
+    "title": "Biểu giá điện 1279/QĐ-BCT — bản Word cung cấp",
+    "category": "electricity",
+    "path": "Data/electricity/Quyết-định-1279-QĐ-BCT.docx",
+    "sha256": "1d243991970650c5dc4bcf2bea1cb21289444f6eace2fcf183a6bae299724486",
+    "original_sha256": "1d243991970650c5dc4bcf2bea1cb21289444f6eace2fcf183a6bae299724486",
+    "source_url": "https://vanban.chinhphu.vn/?classid=2&docid=213617&pageid=27160",
+    "page_kind": "logical_document",
+    "pages": 1,
+    "extraction": "Native Word XML/antiword text; no PDF or OCR execution",
+    "source_content_kind": "provided_word_excerpt",
+    "verification": "Word bytes and extracted content retained; supplied excerpts are not certified verbatim official originals.",
+    "source_policy": "Literal text from the supplied Word; context notes removed by article selection; no authored answers.",
+    "scope": "Basic accommodation questions only; no forms, agreement drafting, filing or specialised legal procedure.",
+    "source_scope_warning": "Nguồn là bản Word/trích tuyển được cung cấp, chưa xác minh toàn bộ câu chữ với bản chính thức; không coi ghi chú biên tập là quy định pháp luật.",
+    "not_exhaustive": true,
+    "ocr_used": false
+  },
+  "provisions": [
+    {
+      "provision_id": "1d243991970650c5dc4b:1132:body",
+      "article": "1",
+      "clause": null,
+      "heading": "Điều 1. Ban hành giá bán lẻ điện cho các nhóm khách hàng sử dụng điện và giá bán điện cho các đơn vị bán lẻ điện tại Phụ lục kèm theo Quyết định này. Giá bán điện quy định tại Phụ lục kèm theo Quyết định này chưa bao gồm thuế giá trị gia tăng.",
+      "content": "Điều 1. Ban hành giá bán lẻ điện cho các nhóm khách hàng sử dụng điện và giá bán điện cho các đơn vị bán lẻ điện tại Phụ lục kèm theo Quyết định này. Giá bán điện quy định tại Phụ lục kèm theo Quyết định này chưa bao gồm thuế giá trị gia tăng.",
+      "source_start": 1132,
+      "source_end": 1377,
+      "points": [],
+      "exceptions": [],
+      "cross_references": [
+        "Điều 1"
+      ],
+      "kind": "legal_provision",
+      "article_context": "",
+      "content_sha256": "e09e340b091807cfcd1ac9d010effda2ca28d6b41117714da50fcc234e8e180f",
+      "page_from": 1,
+      "page_to": 1,
+      "extraction_text_sha256": "b602aabceb86234cb63d72fd87649350a1dcd1268936b568ca9bcff243a81f41"
+    },
+    {
+      "provision_id": "1d243991970650c5dc4b:1377:body",
+      "article": "2",
+      "clause": null,
+      "heading": "Điều 2. Mức giá bán lẻ điện bình quân là 2.204,0655 đồng/kWh (chưa bao gồm thuế giá trị gia tăng).",
+      "content": "Điều 2. Mức giá bán lẻ điện bình quân là 2.204,0655 đồng/kWh (chưa bao gồm thuế giá trị gia tăng).",
+      "source_start": 1377,
+      "source_end": 1477,
+      "points": [],
+      "exceptions": [],
+      "cross_references": [
+        "Điều 2"
+      ],
+      "kind": "legal_provision",
+      "article_context": "",
+      "content_sha256": "d77a90656527e7225143de6110a6a758ef216a43ae1b18c805bebd3978c84da5",
+      "page_from": 1,
+      "page_to": 1,
+      "extraction_text_sha256": "b602aabceb86234cb63d72fd87649350a1dcd1268936b568ca9bcff243a81f41"
+    },
+    {
+      "provision_id": "1d243991970650c5dc4b:1477:body",
+      "article": "3",
+      "clause": null,
+      "heading": "Điều 3. Thời gian áp dụng giá bán điện: từ ngày 10 tháng 5 năm 2025.",
+      "content": "Điều 3. Thời gian áp dụng giá bán điện: từ ngày 10 tháng 5 năm 2025.\n\nPhụ lục\n\nGIÁ BÁN ĐIỆN\n\n(Ban hành kèm theo Quyết định số 1279/QĐ-BCT\n\nngày 09 tháng 5 năm 2025 của Bộ Công Thương)\n\n4\n\nGiá bán lẻ điện cho sinh hoạt\n\n4.1\n\nGiá bán lẻ điện sinh hoạt\n\nBậc 1: Cho kWh từ 0 - 50\n\n1.984\n\nBậc 2: Cho kWh từ 51 - 100\n\n2.050\n\nBậc 3: Cho kWh từ 101 - 200\n\n2.380\n\nBậc 4: Cho kWh từ 201 - 300\n\n2.998\n\nBậc 5: Cho kWh từ 301 - 400\n\n3.350\n\nBậc 6: Cho kWh từ 401 trở lên\n\n3.460\n\n4.2\n\nGiá bán lẻ điện sinh hoạt dùng công tơ thẻ trả trước\n\n2.909",
+      "source_start": 1477,
+      "source_end": 2006,
+      "points": [],
+      "exceptions": [],
+      "cross_references": [
+        "Điều 3"
+      ],
+      "kind": "legal_provision",
+      "article_context": "",
+      "content_sha256": "3268963ce3b03a4b72b0ae0c23a8214f62a4ac71e2bdfe5902b030d89b2b9336",
+      "page_from": 1,
+      "page_to": 1,
+      "extraction_text_sha256": "b602aabceb86234cb63d72fd87649350a1dcd1268936b568ca9bcff243a81f41"
+    },
+    {
+      "provision_id": "electricity1279-word:table:4f08c6d9120cbe9cc5eb",
+      "article": null,
+      "clause": null,
+      "heading": "Bảng giá trong Word — thứ tự đoạn/ô, cần đối chiếu bố cục gốc",
+      "content": "Phụ lục\n\nGIÁ BÁN ĐIỆN\n\n(Ban hành kèm theo Quyết định số 1279/QĐ-BCT\n\nngày 09 tháng 5 năm 2025 của Bộ Công Thương)\n\n4\n\nGiá bán lẻ điện cho sinh hoạt\n\n4.1\n\nGiá bán lẻ điện sinh hoạt\n\nBậc 1: Cho kWh từ 0 - 50\n\n1.984\n\nBậc 2: Cho kWh từ 51 - 100\n\n2.050\n\nBậc 3: Cho kWh từ 101 - 200\n\n2.380\n\nBậc 4: Cho kWh từ 201 - 300\n\n2.998\n\nBậc 5: Cho kWh từ 301 - 400\n\n3.350\n\nBậc 6: Cho kWh từ 401 trở lên\n\n3.460\n\n4.2\n\nGiá bán lẻ điện sinh hoạt dùng công tơ thẻ trả trước\n\n2.909",
+      "content_sha256": "4f08c6d9120cbe9cc5ebf591975d231150c16b5840c4d92ea5618ce9aff5847f",
+      "page_from": 1,
+      "page_to": 1,
+      "kind": "source_table",
+      "points": [],
+      "exceptions": [],
+      "cross_references": [],
+      "article_context": "",
+      "source_start": 1546,
+      "source_end": 2006
+    }
+  ]
+}

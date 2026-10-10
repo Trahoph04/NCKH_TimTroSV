@@ -1,0 +1,45 @@
+{
+  "source": {
+    "id": "google-lens-word",
+    "title": "Google Lens: kiểm tra nguồn hình ảnh — Google Search Help",
+    "category": "ecommerce_platform",
+    "path": "docs/legal_word_focus3_corpus_v10_20261006/google-lens-publisher-excerpts.docx",
+    "sha256": "5fa8abfe627c4f2f3a902bfbc0b5aeabdc6d422a74dfc23d6d76106e9aedd6d7",
+    "source_url": "https://support.google.com/websearch/answer/1325808?co=GENIE.Platform%3DDesktop&hl=vi",
+    "publisher": "Google Search Help",
+    "publication_date": null,
+    "page_kind": "logical_document",
+    "pages": 1,
+    "ocr_used": false,
+    "extraction": "Native DOCX XML; short exact publisher excerpts, no OCR/PDF",
+    "source_content_kind": "publisher_guidance_word_conversion",
+    "original_html_sha256": "fa0168e63fc33e89c4970a96ae42e3bd69dc4a7c17a3653aaf9f60010d10f73f",
+    "retrieved_at_utc": "2026-10-05T18:12:25.904523+00:00",
+    "source_scope_warning": "Hướng dẫn công cụ Google Lens, không phải điều luật. Kết quả ảnh tương tự là đầu mối để đối chiếu, không tự chứng minh tin đăng giả hoặc danh tính người cho thuê.",
+    "source_policy": "Only literal public publisher excerpts; no reference answers or authored guidance embedded."
+  },
+  "provisions": [
+    {
+      "provision_id": "google-lens:publisher-excerpts",
+      "article": null,
+      "clause": null,
+      "heading": "Google Lens — tìm ảnh và trang chứa ảnh tương tự",
+      "content": "Trang web có hình ảnh đó hoặc có hình ảnh tương tự\n\nnhấp vào Tìm bằng Google Ống kính.",
+      "source_segments": [
+        "Trang web có hình ảnh đó hoặc có hình ảnh tương tự",
+        "nhấp vào Tìm bằng Google Ống kính."
+      ],
+      "source_start": 0,
+      "source_end": 86,
+      "content_sha256": "4240f96f7000f39133343b7fc14a95092c524b7859e44c9f1f86c28c8b5fd869",
+      "extraction_text_sha256": "4240f96f7000f39133343b7fc14a95092c524b7859e44c9f1f86c28c8b5fd869",
+      "points": [],
+      "exceptions": [],
+      "cross_references": [],
+      "kind": "publisher_guidance",
+      "article_context": "",
+      "page_from": 1,
+      "page_to": 1
+    }
+  ]
+}

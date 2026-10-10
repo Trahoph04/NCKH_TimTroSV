@@ -1,0 +1,43 @@
+{
+  "source": {
+    "id": "evn-cantho-transparency-word",
+    "title": "Công khai cách tính tiền điện nhà trọ — PC TP Cần Thơ / EVNSPC",
+    "category": "electricity",
+    "path": "docs/legal_word_priority7_corpus_v13_20261006/evn-cantho-transparency-word.docx",
+    "sha256": "359c6a4a5b812def00aef480e967fb65261d289a9b47f791e86f4d906d19c8a5",
+    "source_url": "https://cskh.evnspc.vn/TinTuc/TinTucChiTiet?LoaiTinBai=ALL&MaTinBai=3103",
+    "publication_date": "2026-09-21",
+    "publisher": "PC TP Cần Thơ / EVNSPC",
+    "page_kind": "logical_document",
+    "pages": 1,
+    "ocr_used": false,
+    "extraction": "Native DOCX XML; verified literal publisher excerpt, no OCR/PDF",
+    "source_content_kind": "publisher_guidance_word_conversion",
+    "source_scope_warning": "Hướng dẫn kiểm tra nhà trọ Cần Thơ đăng ngày 21/09/2026; không phải điều luật hoặc quy định một mẫu bảng kê bắt buộc. Trích đoạn ngắn về công khai cách tính và hóa đơn; không tự suy ra mọi chi tiết kê khai.",
+    "original_html_sha256": "dbe014fdda06c64ed8341ea8701f1f3ecceb4b2cbdf0dad89c3309d447bd10fd",
+    "source_policy": "Exact source text only; no reference answer."
+  },
+  "provisions": [
+    {
+      "provision_id": "evn-cantho-transparency-word:excerpt",
+      "article": null,
+      "clause": null,
+      "heading": "Công khai cách tính tiền điện nhà trọ — PC TP Cần Thơ / EVNSPC",
+      "content": "công khai cách tính và thu tiền điện theo đúng hóa đơn do Điện lực phát hành",
+      "source_segments": [
+        "công khai cách tính và thu tiền điện theo đúng hóa đơn do Điện lực phát hành"
+      ],
+      "source_start": 0,
+      "source_end": 76,
+      "content_sha256": "51873abac0b505e5073c78794229346862c7dd4dc9029816fc059c02d46766c3",
+      "extraction_text_sha256": "51873abac0b505e5073c78794229346862c7dd4dc9029816fc059c02d46766c3",
+      "points": [],
+      "exceptions": [],
+      "cross_references": [],
+      "kind": "publisher_guidance",
+      "article_context": "",
+      "page_from": 1,
+      "page_to": 1
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "source": {
+    "id": "residence154-official-word",
+    "title": "Nghị định 154/2024/NĐ-CP — Word Công báo",
+    "category": "residence",
+    "path": "docs/legal_word_repair_corpus_v16_20261006/nd154.doc",
+    "sha256": "37abbb60ec035337511284974b37a5734a0e9a348cc55b85acd978378e4767b8",
+    "original_sha256": "37abbb60ec035337511284974b37a5734a0e9a348cc55b85acd978378e4767b8",
+    "source_url": "https://congbao.chinhphu.vn/van-ban/nghi-dinh-so-154-2024-nd-cp-43275.htm",
+    "publisher": "Công báo Chính phủ",
+    "effective_date": "2025-01-10",
+    "page_kind": "logical_document",
+    "pages": 1,
+    "ocr_used": false,
+    "extraction": "Native official Word XML/antiword; no PDF or OCR",
+    "source_content_kind": "published_word",
+    "source_scope_warning": "Chỉ giữ khoản 1 Điều 5 về khai thác thông tin và yêu cầu giấy tờ khi không khai thác được dữ liệu. Không giữ điểm a khoản 3 Điều 5 và Điều 10 bản cũ vì đã sửa bởi Nghị định 58/2026/NĐ-CP.",
+    "not_exhaustive": true,
+    "source_policy": "Exact official Word clauses, no answer keys or authored legal summaries."
+  },
+  "provisions": [
+    {
+      "provision_id": "37abbb60ec0353375112:6475:1",
+      "article": "5",
+      "clause": "1",
+      "heading": "Điều 5. Giấy tờ, tài liệu, thông tin chứng minh chỗ ở hợp pháp | Khoản 1",
+      "content": "1. Công dân cung cấp thông tin chứng minh về chỗ ở hợp pháp cho cơ quan\nđăng ký cư trú khi nộp hồ sơ đăng ký cư trú, cơ quan đăng ký cư trú có\ntrách nhiệm khai thác thông tin này trong căn cước điện tử, tài khoản định\ndanh điện tử trên hệ thống định danh và xác thực điện tử qua Ứng dụng định\ndanh quốc gia hoặc trong Cơ sở dữ liệu quốc gia về dân cư, Cơ sở dữ liệu về\ncư trú, Kho quản lý dữ liệu điện tử tổ chức, cá nhân trên Cổng dịch vụ công\nquốc gia, Hệ thống thông tin giải quyết thủ tục hành chính cấp bộ, cấp tỉnh\nhoặc cơ sở dữ liệu quốc gia, cơ sở dữ liệu chuyên ngành khác.\n Trường hợp không khai thác được thông tin chứng minh về chỗ ở hợp pháp\ntrong cơ sở dữ liệu, hệ thống thông tin hoặc Ứng dụng định danh quốc gia\nthì cơ quan đăng ký cư trú có trách nhiệm kiểm tra, xác minh để giải quyết\nthủ tục về cư trú; công dân có trách nhiệm cung cấp bản sao, bản chụp, bản\nđiện tử một trong các giấy tờ, tài liệu chứng minh về chỗ ở hợp pháp khi cơ\nquan đăng ký cư trú có yêu cầu.",
+      "source_start": 6539,
+      "source_end": 7526,
+      "points": [],
+      "exceptions": [],
+      "cross_references": [],
+      "kind": "legal_provision",
+      "article_context": "",
+      "content_sha256": "3cab456932ffb558138f9335f40c530d56eda1b93530218d2a23813157b448fd",
+      "page_from": 1,
+      "page_to": 1,
+      "extraction_text_sha256": "295a8617a3e460f341900294eff1df17aed305a18b8cfb41e8223bd64460f415"
+    }
+  ]
+}

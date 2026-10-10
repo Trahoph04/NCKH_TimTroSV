@@ -28,7 +28,11 @@ services:
       retries: 10
 
   api:
-    build: ./apps/api
+    build:
+      context: ./apps/api
+      args:
+        # torch + sentence-transformers cho chatbot (E5). false = image nhẹ, chatbot chỉ BM25
+        INSTALL_ML: ${INSTALL_ML:-true}
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-nckh}:${POSTGRES_PASSWORD:-nckh}@db:5432/${POSTGRES_DB:-nckh}
       REDIS_URL: redis://redis:6379/0
@@ -40,10 +44,33 @@ services:
       ORS_API_KEY: ${ORS_API_KEY:-}
       GOOGLE_PLACES_API_KEY: ${GOOGLE_PLACES_API_KEY:-}
       MEDIA_DIR: /app/media
+      # chatbot (ADR-023) — mặc định trùng app/config.py; key Gemini chỉ đặt trong .env
+      HF_HOME: /models
+      CHATBOT_LLM_PROVIDER: ${CHATBOT_LLM_PROVIDER:-auto}
+      CHATBOT_LEGAL_SCHEMA: ${CHATBOT_LEGAL_SCHEMA:-legal_ctu_v1}
+      CHATBOT_AGENTS_ENABLED: ${CHATBOT_AGENTS_ENABLED:-false}
+      CHATBOT_LLM_TIMEOUT_SECONDS: ${CHATBOT_LLM_TIMEOUT_SECONDS:-60}
+      CHATBOT_LEGAL_TIMEOUT_SECONDS: ${CHATBOT_LEGAL_TIMEOUT_SECONDS:-180}
+      CHATBOT_MAX_OUTPUT_TOKENS: ${CHATBOT_MAX_OUTPUT_TOKENS:-1024}
+      CHATBOT_WARMUP_ENABLED: ${CHATBOT_WARMUP_ENABLED:-true}
+      # Ollama chạy trên máy host (`ollama serve`), không trong compose: cần GPU/Metal của host
+      OLLAMA_BASE_URL: ${OLLAMA_DOCKER_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:7b-instruct}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_API_KEY_1: ${GEMINI_API_KEY_1:-}
+      GEMINI_API_KEY_2: ${GEMINI_API_KEY_2:-}
+      GEMINI_API_KEY_3: ${GEMINI_API_KEY_3:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash-lite}
+      GEMINI_FALLBACK_MODEL: ${GEMINI_FALLBACK_MODEL:-gemini-3.1-flash-lite}
+      GEMINI_BASE_URL: ${GEMINI_BASE_URL:-https://generativelanguage.googleapis.com/v1beta}
     ports:
       - "8000:8000"
     volumes:
       - media:/app/media   # ảnh gửi trong chat (đã xoá EXIF) — xoá volume = xoá ảnh
+      - models:/models     # cache model E5 (~470 MB) — xoá volume thì index_corpus tải lại
+    # Linux không tự có host.docker.internal như Docker Desktop (Mac/Windows)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       db:
         condition: service_healthy
@@ -74,3 +101,4 @@ services:
 volumes:
   pgdata:
   media:
+  models:

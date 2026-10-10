@@ -1,0 +1,55 @@
+{
+  "source": {
+    "id": "supplement-s02-word",
+    "title": "Kinh nghiệm tìm nhà trọ cho tân sinh viên — Thư viện Đại học Bách khoa Hà Nội",
+    "category": "housing_contract",
+    "path": "docs/legal_word_supplement_corpus_v8_20261005/S02-publisher-text.docx",
+    "sha256": "873d379e92bfd3e6854f1298f4afc7ab622d7d5f64698624251c462ab01784c0",
+    "source_url": "https://library.hust.edu.vn/vi/node/822",
+    "publisher": "Thư viện Đại học Bách khoa Hà Nội",
+    "publication_date": null,
+    "page_kind": "logical_document",
+    "pages": 1,
+    "ocr_used": false,
+    "extraction": "Native DOCX XML; literal publisher text, no OCR or PDF",
+    "source_content_kind": "publisher_guidance_word_conversion",
+    "source_scope_warning": "Hướng dẫn/khuyến cáo của Thư viện Đại học Bách khoa Hà Nội; không phải điều luật. Chỉ lấy phần kiểm tra thuê phòng; thông tin ký túc xá, xe buýt và địa bàn Hà Nội không áp dụng cho CTU. Không có ngày công bố hiển thị trong nội dung đã đọc; đây không phải quy định pháp luật.",
+    "not_exhaustive": true,
+    "source_policy": "Literal publisher text; never assistant summary, reference answer, form or drafted agreement.",
+    "original_html_sha256": "01ca7ad58d9e7c2caa8287fb55801a14c714fd69107fa52e2a62ba4b4b5c8c13",
+    "original_block_indices": [
+      23,
+      24,
+      25,
+      30
+    ],
+    "conversion": "Whitespace normalization only; selected exact DOM blocks converted to DOCX",
+    "retrieved_at_utc": "2026-10-05T15:27:13.161001+00:00"
+  },
+  "provisions": [
+    {
+      "provision_id": "S02:web-block:23",
+      "article": null,
+      "clause": null,
+      "heading": "Kinh nghiệm tìm nhà trọ cho tân sinh viên | Đoạn nguyên văn 23",
+      "content": "Làm hợp đồng khi thuê nhà\n\nKhi thuê nhà bạn cần thuê tại những nơi có hợp đồng thuê trọ rõ ràng, được ký xác nhận và mỗi bên giữ một bản. Trước khi ký vào bản hợp đồng đó, bạn cần đọc kỹ các điều khoản của hợp đồng về quyền lợi, trách nhiệm cũng như giá thuê phòng trọ, tiền đặt cọc, giá điện nước, intenet và các dịch vụ đi kèm.\n\nMột điều lưu ý là bạn cần kiểm tra những tài sản được trang bị cho nơi ở có khớp với hợp đồng hay không và đừng quên kiểm tra tình trạng của những thiết bị này nếu có hư hỏng cần yêu cầu chủ nhà sửa chữa hoặc thay thế. Cuối cùng hãy chốt số điện, nước trên đồng hồ đo trước khi vào ở.\n\nAn toàn phòng chống cháy nổ cũng là vấn đề cần lưu ý trong việc lựa chọn nơi ở, các bạn cần lựa chọn những phòng trọ, khu trọ đảm bảo về phòng cháy chữa cháy.",
+      "source_start": 0,
+      "source_end": 806,
+      "points": [],
+      "exceptions": [],
+      "cross_references": [],
+      "kind": "publisher_guidance",
+      "article_context": "",
+      "content_sha256": "6f97285691a66206fe9bbab178d903262945b55a414559455bf7d97876af4470",
+      "page_from": 1,
+      "page_to": 1,
+      "original_block_indices": [
+        23,
+        24,
+        25,
+        30
+      ],
+      "extraction_text_sha256": "6f97285691a66206fe9bbab178d903262945b55a414559455bf7d97876af4470"
+    }
+  ]
+}

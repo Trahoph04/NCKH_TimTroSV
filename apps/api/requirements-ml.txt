@@ -1,0 +1,7 @@
+# Embedding E5 cho chatbot (room_service/chatbot) — cài khi build với INSTALL_ML=true (mặc định trong compose).
+# Thiếu file này API vẫn chạy: chatbot rơi về BM25 + bộ lọc và báo `degraded`.
+# Index CPU: x86_64 lấy bản 2.5.1+cpu (khỏi kéo ~2 GB CUDA); arm64 (Mac M-series) vốn chỉ có bản CPU.
+# Không ghim "+cpu" như branch PHUC — arm64 không có wheel mang nhãn đó.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.5.1
+sentence-transformers==3.3.1

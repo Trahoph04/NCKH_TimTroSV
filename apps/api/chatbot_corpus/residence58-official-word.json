@@ -1,0 +1,131 @@
+{
+  "source": {
+    "id": "residence58-official-word",
+    "title": "Nghị định 58/2026/NĐ-CP — Word Công báo",
+    "category": "residence",
+    "path": "docs/legal_word_repair_corpus_v16_20261006/nd58.docx",
+    "sha256": "29e1926e3c275405d7bb4268449c0b0c504d815a40e61c5b1f796254c44d4872",
+    "original_sha256": "29e1926e3c275405d7bb4268449c0b0c504d815a40e61c5b1f796254c44d4872",
+    "source_url": "https://congbao.chinhphu.vn/van-ban/nghi-dinh-so-58-2026-nd-cp-468975/62899.htm",
+    "publisher": "Công báo Chính phủ",
+    "effective_date": "2026-03-15",
+    "page_kind": "logical_document",
+    "pages": 1,
+    "ocr_used": false,
+    "extraction": "Native official Word XML/antiword; no PDF or OCR",
+    "source_content_kind": "published_word",
+    "source_scope_warning": "Khoản 2, 5, 7 Điều 4 sửa điểm a khoản 3 Điều 5, khoản 5 Điều 8 và Điều 10 Nghị định 154/2024/NĐ-CP. Giữ nguyên điều kiện, chủ thể và dẫn chiếu; không coi mọi chuyển trọ đều phải nộp hồ sơ xóa trong 7 ngày. Khoản 2 Điều 6 có mốc hiệu lực riêng cho người chưa thành niên, phần đó không được trích tuyển ở đây.",
+    "not_exhaustive": true,
+    "source_policy": "Exact official Word clauses, no answer keys or authored legal summaries."
+  },
+  "provisions": [
+    {
+      "provision_id": "29e1926e3c275405d7bb:56015:2",
+      "article": "4",
+      "clause": "2",
+      "heading": "Điều 4. Sửa đổi, bổ sung một số điều của Nghị định số 154/2024/NĐ-CP quy định chi tiết một số điều và biện pháp thi hành Luật Cư trú (sau đây viết gọn là Nghị định số 154/2024/NĐ-CP) | Khoản 2",
+      "content": "2. Sửa đổi, bổ sung điểm a khoản 3 Điều 5 như sau:\n\n“a) Một trong những giấy tờ, tài liệu quy định tại khoản 2 Điều này, trừ trường hợp đăng ký tạm trú vào chỗ ở hợp pháp do thuê, mượn, ở nhờ thì giấy tờ, tài liệu chứng minh chỗ ở hợp pháp là văn bản cho thuê, cho mượn, cho ở nhờ chỗ ở hợp pháp của cơ quan, tổ chức, cá nhân và văn bản đó không phải công chứng hoặc chứng thực;”.",
+      "source_start": 56674,
+      "source_end": 57056,
+      "points": [],
+      "exceptions": [
+        "“a) Một trong những giấy tờ, tài liệu quy định tại khoản 2 Điều này, trừ trường hợp đăng ký tạm trú vào chỗ ở hợp pháp do thuê, mượn, ở nhờ thì giấy tờ, tài liệu chứng minh chỗ ở hợp pháp là văn bản cho thuê, cho mượn, cho ở nhờ chỗ ở hợp pháp của cơ quan, tổ chức, cá nhân và văn bản đó không phải công chứng hoặc chứng thực;"
+      ],
+      "cross_references": [
+        "khoản 3 Điều 5"
+      ],
+      "kind": "legal_provision",
+      "article_context": "",
+      "content_sha256": "be498c4c57f07826da665784bece5f44f53aba5737bb14bd884fff2d8c34291f",
+      "page_from": 1,
+      "page_to": 1,
+      "extraction_text_sha256": "4dbd5d3db12ac02f02686555d799a1b9ade1a3901c76933391a0a1d75ef07290"
+    },
+    {
+      "provision_id": "29e1926e3c275405d7bb:56015:5",
+      "article": "4",
+      "clause": "5",
+      "heading": "Điều 4. Sửa đổi, bổ sung một số điều của Nghị định số 154/2024/NĐ-CP quy định chi tiết một số điều và biện pháp thi hành Luật Cư trú (sau đây viết gọn là Nghị định số 154/2024/NĐ-CP) | Khoản 5",
+      "content": "5. Sửa đổi, bổ sung khoản 5 Điều 8 như sau:\n\n“5. Việc lấy ý kiến đồng ý của chủ hộ, chủ sở hữu chỗ ở hợp pháp, người đại diện hợp pháp, người thừa kế theo quy định pháp luật, cha, mẹ, người giám hộ, thành viên hộ gia đình được thực hiện bằng một trong các hình thức sau:\n\na) Ghi rõ nội dung đồng ý và ký, ghi rõ họ tên vào Tờ khai thay đổi thông tin cư trú;\n\nb) Xác nhận nội dung đồng ý thông qua Ứng dụng định danh quốc gia (VNeID) hoặc dịch vụ công trực tuyến hoặc cơ quan đăng ký cư trú trao đổi, lấy ý kiến trực tiếp thông qua việc kiểm tra, xác minh cư trú;\n\nc) Có ý kiến đồng ý bằng văn bản.”.",
+      "source_start": 59209,
+      "source_end": 59810,
+      "points": [
+        "a",
+        "b",
+        "c"
+      ],
+      "exceptions": [],
+      "cross_references": [
+        "khoản 5 Điều 8"
+      ],
+      "kind": "legal_provision",
+      "article_context": "",
+      "content_sha256": "8063179a7a8e32a343de249e0e605c0596e4866e9f27ec23ae8926a922a8d834",
+      "page_from": 1,
+      "page_to": 1,
+      "extraction_text_sha256": "4dbd5d3db12ac02f02686555d799a1b9ade1a3901c76933391a0a1d75ef07290"
+    },
+    {
+      "provision_id": "29e1926e3c275405d7bb:56015:7",
+      "article": "4",
+      "clause": "7",
+      "heading": "Điều 4. Sửa đổi, bổ sung một số điều của Nghị định số 154/2024/NĐ-CP quy định chi tiết một số điều và biện pháp thi hành Luật Cư trú (sau đây viết gọn là Nghị định số 154/2024/NĐ-CP) | Khoản 7",
+      "content": "7. Sửa đổi, bổ sung Điều 10 như sau:\n\n“Điều 10. Hồ sơ, thủ tục xóa đăng ký tạm trú\n\n1. Trong thời hạn 01 ngày kể từ ngày nhận được quyết định hủy bỏ đăng ký tạm trú của thủ trưởng cấp trên trực tiếp hoặc ngay sau khi ra quyết định hủy bỏ đăng ký tạm trú đối với công dân, cơ quan đăng ký cư trú thực hiện việc xóa đăng ký tạm trú đối với công dân và cập nhật việc xóa đăng ký tạm trú vào Cơ sở dữ liệu về cư trú, Cơ sở dữ liệu quốc gia về dân cư.\n\n2. Trong thời hạn 01 ngày làm việc, kể từ ngày hệ thống Cơ sở dữ liệu quốc gia về dân cư, cơ quan đăng ký cư trú tiếp nhận thông tin quy định tại điểm a, d, đ khoản 1 Điều 29 Luật Cư trú thông qua kết nối, chia sẻ, đồng bộ dữ liệu từ cơ sở dữ liệu quốc gia, cơ sở dữ liệu chuyên ngành, cơ sở dữ liệu khác do cơ quan, tổ chức quản lý, cơ quan đăng ký cư trú có trách nhiệm kiểm tra, xác minh, thực hiện xóa đăng ký tạm trú đối với công dân và cập nhật việc xóa đăng ký tạm trú vào Cơ sở dữ liệu về cư trú, Cơ sở dữ liệu quốc gia về dân cư.\n\n3. Trong thời hạn 07 ngày, kể từ ngày hộ gia đình có người thuộc diện xóa đăng ký tạm trú theo quy định tại điểm c, e, g, h khoản 1 Điều 29 Luật Cư trú thì người thuộc diện xóa đăng ký tạm trú hoặc đại diện hộ gia đình hoặc người đại diện hợp pháp có trách nhiệm thực hiện thủ tục xóa đăng ký tạm trú.\n\na) Hồ sơ xóa đăng ký tạm trú gồm: Tờ khai thay đổi thông tin cư trú và giấy tờ, tài liệu chứng minh thuộc một trong các trường hợp xóa đăng ký tạm trú.\n\nb) Người thực hiện thủ tục nộp 01 hồ sơ trực tuyến qua Cổng dịch vụ công quốc gia hoặc Ứng dụng định danh quốc gia (VNeID) đến cơ quan đăng ký cư trú.\n\n4. Trường hợp người bị đề nghị xóa đăng ký tạm trú có thông tin trong Cơ sở dữ liệu quốc gia về dân cư nhưng không đầy đủ, chính xác thì cơ quan đăng ký cư trú có trách nhiệm cập nhật, điều chỉnh thông tin vào Cơ sở dữ liệu quốc gia về dân cư.\n\n5. Trong thời hạn 03 ngày làm việc, kể từ ngày nhận được hồ sơ hợp lệ thì cơ quan đăng ký cư trú phải xóa đăng ký tạm trú đối với công dân và cập nhật việc xóa đăng ký tạm trú vào Cơ sở dữ liệu về cư trú, Cơ sở dữ liệu quốc gia về dân cư.\n\n6. Trường hợp thuộc diện xóa đăng ký tạm trú theo quy định tại điểm c, e, g, h khoản 1 Điều 29 Luật Cư trú mà hộ gia đình chỉ có 01 người hoặc người thuộc diện xóa đăng ký tạm trú hoặc đại diện hộ gia đình hoặc người đại diện hợp pháp không thực hiện thủ tục xóa đăng ký tạm trú thì cơ quan đăng ký cư trú có trách nhiệm kiểm tra, xác minh, lập biên bản về việc công dân, đại diện hộ gia đình không thực hiện thủ tục xóa đăng ký tạm trú và thực hiện xóa đăng ký tạm trú đối với công dân.\n\n7. Cơ quan, đơn vị quản lý người học tập, công tác, làm việc trong lực lượng vũ trang nhân dân có văn bản đề nghị cơ quan đăng ký cư trú trên địa bàn đóng quân xóa đăng ký tạm trú đối với người thuộc đơn vị mình quản lý. Văn bản đề nghị cần nêu rõ họ, chữ đệm và tên khai sinh; ngày, tháng, năm sinh; số định danh cá nhân của người cần xóa đăng ký tạm trú; lý do đề nghị xóa đăng ký tạm trú.\n\n8. Sau khi thực hiện việc xóa đăng ký tạm trú, cơ quan đăng ký cư trú thông báo bằng văn bản giấy hoặc bản điện tử hoặc hình thức điện tử khác cho người bị xóa đăng ký tạm trú hoặc đại diện hộ gia đình.”.",
+      "source_start": 63011,
+      "source_end": 66180,
+      "points": [
+        "a",
+        "b"
+      ],
+      "exceptions": [],
+      "cross_references": [
+        "Điều 10",
+        "khoản 1 Điều 29"
+      ],
+      "kind": "legal_provision",
+      "article_context": "",
+      "content_sha256": "05c1a042bca6645e4606ed340b8f8f27d66f8fff529ca5f0809757a6cd0ea517",
+      "page_from": 1,
+      "page_to": 1,
+      "extraction_text_sha256": "4dbd5d3db12ac02f02686555d799a1b9ade1a3901c76933391a0a1d75ef07290"
+    },
+    {
+      "provision_id": "29e1926e3c275405d7bb:90936:1",
+      "article": "6",
+      "clause": "1",
+      "heading": "Điều 6. Hiệu lực thi hành và quy định chuyển tiếp | Khoản 1",
+      "content": "1. Nghị định này có hiệu lực thi hành từ ngày 15 tháng 3 năm 2026, trừ quy định tại khoản 2 Điều này.",
+      "source_start": 90987,
+      "source_end": 91090,
+      "points": [],
+      "exceptions": [],
+      "cross_references": [],
+      "kind": "legal_provision",
+      "article_context": "",
+      "content_sha256": "53c451c6e2d89a40b11556b402cd13654bb6f81cdb7b515ac256bacd3f21be2e",
+      "page_from": 1,
+      "page_to": 1,
+      "extraction_text_sha256": "4dbd5d3db12ac02f02686555d799a1b9ade1a3901c76933391a0a1d75ef07290"
+    },
+    {
+      "provision_id": "29e1926e3c275405d7bb:90936:2",
+      "article": "6",
+      "clause": "2",
+      "heading": "Điều 6. Hiệu lực thi hành và quy định chuyển tiếp | Khoản 2",
+      "content": "2. Quy định tại khoản 4 Điều 4 của Nghị định này có hiệu lực thi hành từ ngày 01 tháng 7 năm 2026.",
+      "source_start": 91090,
+      "source_end": 91190,
+      "points": [],
+      "exceptions": [],
+      "cross_references": [
+        "khoản 4 Điều 4"
+      ],
+      "kind": "legal_provision",
+      "article_context": "",
+      "content_sha256": "a9efd58eb3e03ab2fe13519a03606f83b3cdaf1f940cf8ef00ec289c03ad7bfa",
+      "page_from": 1,
+      "page_to": 1,
+      "extraction_text_sha256": "4dbd5d3db12ac02f02686555d799a1b9ade1a3901c76933391a0a1d75ef07290"
+    }
+  ]
+}

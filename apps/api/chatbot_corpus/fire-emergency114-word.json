@@ -1,0 +1,43 @@
+{
+  "source": {
+    "id": "fire-emergency114-word",
+    "title": "Báo cháy 114 — Công an tỉnh Phú Thọ",
+    "category": "fire_safety",
+    "path": "docs/legal_word_priority7_corpus_v13_20261006/fire-emergency114-word.docx",
+    "sha256": "3f96c1ca65a50001efc0830e665f151fca6f52e4d57217ebc0e928a90b741de9",
+    "source_url": "https://congan.phutho.gov.vn/article/Tang-cuong-bao-dam-an-toan-phong-chay-chua-chay-27208-57",
+    "publication_date": null,
+    "publisher": "Công an tỉnh Phú Thọ",
+    "page_kind": "logical_document",
+    "pages": 1,
+    "ocr_used": false,
+    "extraction": "Native DOCX XML; verified literal publisher excerpt, no OCR/PDF",
+    "source_content_kind": "publisher_guidance_word_conversion",
+    "source_scope_warning": "Khuyến cáo khi phát hiện cháy; gọi 114 trong tình huống cháy/khẩn cấp, không trình bày là số tiếp nhận mọi tranh chấp thuê trọ.",
+    "original_html_sha256": "55a656a3f752db9ce7c2155474ed7bba551297818e36f3168c9c78a6b1a23260",
+    "source_policy": "Exact source text only; no reference answer."
+  },
+  "provisions": [
+    {
+      "provision_id": "fire-emergency114-word:excerpt",
+      "article": null,
+      "clause": null,
+      "heading": "Báo cháy 114 — Công an tỉnh Phú Thọ",
+      "content": "đồng thời gọi ngay lực lượng Cảnh sát PCCC và CNCH theo số 114.",
+      "source_segments": [
+        "đồng thời gọi ngay lực lượng Cảnh sát PCCC và CNCH theo số 114."
+      ],
+      "source_start": 0,
+      "source_end": 63,
+      "content_sha256": "6ab0136be397cbc2235916928c521cab58c788508bbcae6d5eb7cdb8ac9d8741",
+      "extraction_text_sha256": "6ab0136be397cbc2235916928c521cab58c788508bbcae6d5eb7cdb8ac9d8741",
+      "points": [],
+      "exceptions": [],
+      "cross_references": [],
+      "kind": "publisher_guidance",
+      "article_context": "",
+      "page_from": 1,
+      "page_to": 1
+    }
+  ]
+}

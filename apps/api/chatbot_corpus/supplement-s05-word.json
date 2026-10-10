@@ -1,0 +1,57 @@
+{
+  "source": {
+    "id": "supplement-s05-word",
+    "title": "Hướng dẫn tra cứu hóa đơn điện tử — CANTHOWASSCO Công ty Cổ phần Cấp thoát nước Cần Thơ",
+    "category": "water_cantho",
+    "path": "docs/legal_word_supplement_corpus_v8_20261005/S05-publisher-text.docx",
+    "sha256": "52349eed9cd79ce223aa985d694dd161efb4f2756ac5f152d8443808d2f0fa19",
+    "source_url": "https://hddt.ctn-cantho.com.vn/huong-dan",
+    "publisher": "CANTHOWASSCO Công ty Cổ phần Cấp thoát nước Cần Thơ",
+    "publication_date": null,
+    "page_kind": "logical_document",
+    "pages": 1,
+    "ocr_used": false,
+    "extraction": "Native DOCX XML; literal publisher text, no OCR or PDF",
+    "source_content_kind": "publisher_guidance_word_conversion",
+    "source_scope_warning": "Hướng dẫn/khuyến cáo của CANTHOWASSCO Công ty Cổ phần Cấp thoát nước Cần Thơ; không phải điều luật. Chỉ áp dụng hóa đơn CANTHOWASSCO, không mặc định mọi phòng ở Cần Thơ dùng cùng nhà cung cấp. Tra cứu cần thông tin hóa đơn phù hợp; không có công thức bắt buộc chia nước giữa các phòng. Không tải hóa đơn khách hàng trong đợt tìm nguồn này.",
+    "not_exhaustive": true,
+    "source_policy": "Literal publisher text; never assistant summary, reference answer, form or drafted agreement.",
+    "original_html_sha256": "7019ebaf9f80745166146a3f0735c0012bd698f5eb8bdd740bdefb21fccbb6ed",
+    "original_block_indices": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "conversion": "Whitespace normalization only; selected exact DOM blocks converted to DOCX",
+    "retrieved_at_utc": "2026-10-05T15:27:13.167038+00:00"
+  },
+  "provisions": [
+    {
+      "provision_id": "S05:web-block:0",
+      "article": null,
+      "clause": null,
+      "heading": "Hướng dẫn tra cứu hóa đơn điện tử | Đoạn nguyên văn 0",
+      "content": "Hướng dẫn tra cứu hóa đơn điện tử\n\nBước 1: Truy cập vào website tra cứu hóa đơn tại https://hddt.ctn-cantho.com.vn\n\nBước 2: Nhập thông tin của hóa đơn cần tra cứu vào các ô tương ứng như: IDKH, Mã xác nhận trên Biên nhận thanh toán.\n\nBước 3: Nhấn vào nút Tra cứu hóa đơn để tra cứu hóa đơn với thông tin đã nhập\n\nBước 4: Màn hình sẽ hiển thị thông tin chi tiết về hóa đơn và sẽ cho phép tải 2 tệp hóa đơn đính kèm định dạng .ZIP (bao gồm có PDF và file XML) và .PDF",
+      "source_start": 0,
+      "source_end": 465,
+      "points": [],
+      "exceptions": [],
+      "cross_references": [],
+      "kind": "publisher_guidance",
+      "article_context": "",
+      "content_sha256": "79fefbd8c88c6f03886a292116a0dac44e3f6adfc758753917bb20bb91d6883a",
+      "page_from": 1,
+      "page_to": 1,
+      "original_block_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "extraction_text_sha256": "79fefbd8c88c6f03886a292116a0dac44e3f6adfc758753917bb20bb91d6883a"
+    }
+  ]
+}

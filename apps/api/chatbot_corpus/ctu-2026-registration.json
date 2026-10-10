@@ -1,0 +1,56 @@
+{
+  "source": {
+    "id": "ctu-2026-registration",
+    "source_url": "https://ssc.ctu.edu.vn/thong-bao/226-dang-ky-o-ky-tuc-xa-hoc-ky-1-nam-hoc-2026-2027.html",
+    "resolved_url": "https://ssc.ctu.edu.vn/thong-bao/226-dang-ky-o-ky-tuc-xa-hoc-ky-1-nam-hoc-2026-2027.html",
+    "path": "docs/source_grounded_originals_20261004/ctu-2026-registration.html",
+    "sha256": "4efb8c9cb1dd2f49e42912bbb00e47e8f74ef5caf594e335b1ec6495af2a3e4d",
+    "retrieved_at_utc": "2026-10-04T16:13:48.124708+00:00",
+    "http_status": 200,
+    "bytes": 24075,
+    "category": "student_housing",
+    "verification": "Primary publisher original; text extraction, no authored answers",
+    "title": "Đăng ký ở Ký túc xá học kỳ 1 năm học 2026-2027",
+    "pages": 1,
+    "page_kind": "web_excerpt",
+    "extraction": "Native article HTML text grouped without paraphrase",
+    "original_sha256": "4efb8c9cb1dd2f49e42912bbb00e47e8f74ef5caf594e335b1ec6495af2a3e4d",
+    "not_exhaustive": false
+  },
+  "provisions": [
+    {
+      "provision_id": "ctu-2026-registration:ebe2992af258d2e82271",
+      "article": null,
+      "clause": null,
+      "heading": "Thông tin KTX công bố bởi CTU",
+      "content": "Đăng ký ở Ký túc xá học kỳ 1 năm học 2026-2027\n(Trích nội dung Thông báo số: 307 /TB-CTSV, ngày 21 tháng 7 năm 2026 về việc Đăng ký ở Ký túc xá học kỳ 1 năm học 2026-2027, tóm tắt)\nXem nội dung thông báo chi tiết tại đây.\nPhòng Công tác Sinh viên (CTSV) thông báo đến toàn thể sinh viên, học viên, học sinh đang ở nội trú tại Ký túc xá (KTX)\ngọi chung là SV\nthời gian đăng ký và thu phí ở KTX học kỳ 1 năm học 2026 – 2027 như sau:\n1. Thời gian ở KTX\nHọc kỳ 1 năm học 2026–2027: từ\n07/9/2026 đến 18/12/2026\n(3,5 tháng).\n2. Nộp phí ở KTX\nThời gian nộp: từ ngày\n04/8 – 07/8/2026\n, đóng cho cả kỳ.\nHình thức:\n-\nĐóng qua QRCode thông qua Hệ thống Quản lý KTX.\n-\nChuyển khoản qua HD Bank\n+ STK: 0077 0407 0013 608\n+ Người thụ hưởng: Đại học Cần Thơ\n+ Nội dung (cú pháp): Mã SV – Tên SV – SĐT – KTX\nNếu sau 2 ngày\n(ngày làm việc)\nchưa cập nhật, gửi biên lai về email:\nThis email address is being protected from spambots. You need JavaScript enabled to view it.\nđể được cập nhật.\n3. Phí điện nước, gửi xe tại KTX\nĐiện nước:\nPhòng nộp hàng tháng theo thực tế sử dụng.\nGửi xe:\nNộp phí tại Văn phòng KTX từ\n04/8 – 14/8/2026\n(xe đạp được cập nhật miễn phí)\n.\n4. Đăng ký ở KTX\nSinh viên đang ở cũ:\nchỉ cần nộp phí đúng thời gian trong thông báo, không đăng ký lại.\nSinh viên đăng ký ở mới:\nđăng ký qua Hệ thống Quản lý KTX, đăng ký qua email\nThis email address is being protected from spambots. You need JavaScript enabled to view it.\n, hoặc trực tiếp tại Văn phòng TT. PVSV.\nCó thể ghi nguyện vọng ở, đăng ký theo nhóm.\nTT. PVSV ưu tiên nhóm đủ số lượng phòng, nộp phí đúng hạn.\nSinh viên học hết chương trình đào tạo, chuẩn bị xét tốt nghiệp thì không cần phải nộp phí cũng như đăng ký ở tiếp, chủ động trả chỗ tránh việc chậm nhận được quyết định tốt nghiệp do còn ở KTX thì HTQL còn báo nợ.\n5. Chuyển đổi, trả chỗ (xem chi tiết thông báo)\nXin chuyển chỗ: quét mã Qr code điền mẫu từ\n04/8/2026\n, kết quả trước\n21/8/2026\n.\nTrả chỗ trước hạn không hoàn phí\n(trừ trường hợp trả trong 7 ngày kể từ ngày duyệt chỗ ở qua Hệ thống quản lý và có lý do chính đáng)\n.\nSV nghỉ học, tốt nghiệp phải trả chỗ trước\n21/8/2026\n.\n6. Nhận chỗ ở\nSV mới đăng ký:\nnhận từ\n07/9/2026\n.\nSV đang ở:\ndi dời theo sắp xếp từ\n24/8/2026 (Phải thực hiện đúng để chuẩn bị đón Tân SV)\n.\n📞 Liên hệ\nEmail:",
+      "content_sha256": "ebe2992af258d2e82271af31b45f06de3c362d4b4301bf8048aee463d63a3744",
+      "page_from": 1,
+      "page_to": 1,
+      "kind": "official_information",
+      "points": [],
+      "exceptions": [],
+      "cross_references": [],
+      "article_context": "",
+      "source_start": null,
+      "source_end": null
+    },
+    {
+      "provision_id": "ctu-2026-registration:05570b2db3d2f5cdb9df",
+      "article": null,
+      "clause": null,
+      "heading": "Thông tin KTX công bố bởi CTU",
+      "content": "This email address is being protected from spambots. You need JavaScript enabled to view it.\nĐiện thoại: Khu A: (02923) 872 178; Khu B: (02923) 872 275.",
+      "content_sha256": "05570b2db3d2f5cdb9dfb84f352191f0b398f83a93f760559a1c9c9f94d0fd3f",
+      "page_from": 1,
+      "page_to": 1,
+      "kind": "official_information",
+      "points": [],
+      "exceptions": [],
+      "cross_references": [],
+      "article_context": "",
+      "source_start": null,
+      "source_end": null
+    }
+  ]
+}

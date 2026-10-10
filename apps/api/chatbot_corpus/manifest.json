@@ -1,0 +1,416 @@
+{
+  "schema": "legal_ctu_v1",
+  "documents": [
+    {
+      "id": "housing79-word",
+      "file": "housing79-word.json",
+      "sha256": "4e772e1ad67e439ba172647425d70d7e1ab5040dd8032cc901eb208df715a522",
+      "category": "housing_contract",
+      "provisions": 37,
+      "title": "Luật Nhà ở — 79/VBHN-VPQH — bản Word cung cấp",
+      "origin": "PHUC:docs/legal_word_corpus_v7_20261005/housing79-word.json"
+    },
+    {
+      "id": "consumer19-word",
+      "file": "consumer19-word.json",
+      "sha256": "46fef57cb35dd6b84c88e47a7d33cd17c1240b461b187d92758cd007661fc2e0",
+      "category": "housing_contract",
+      "provisions": 29,
+      "title": "Luật Bảo vệ quyền lợi người tiêu dùng — bản Word cung cấp",
+      "origin": "PHUC:docs/legal_word_corpus_v7_20261005/consumer19-word.json"
+    },
+    {
+      "id": "electricity61-word",
+      "file": "electricity61-word.json",
+      "sha256": "b352839423ef7a40af8f33abb08292cc1e720e2cc71ecf8d45b59fdcbcd835e8",
+      "category": "electricity",
+      "provisions": 26,
+      "title": "Luật Điện lực 61/2024/QH15 — bản Word cung cấp",
+      "origin": "PHUC:docs/legal_word_corpus_v7_20261005/electricity61-word.json"
+    },
+    {
+      "id": "electricity60-word",
+      "file": "electricity60-word.json",
+      "sha256": "3440c692ff3f6fd4125b6da7769a98bd3562cc49fd8043a141a6610f74241255",
+      "category": "electricity",
+      "provisions": 10,
+      "title": "Thông tư 60/2025/TT-BCT — bản Word trích tuyển cung cấp",
+      "origin": "PHUC:docs/legal_word_corpus_v7_20261005/electricity60-word.json"
+    },
+    {
+      "id": "electricity1279-word",
+      "file": "electricity1279-word.json",
+      "sha256": "7526af4b95d6c259714fcc6f21502ca19a19677af4a6351a6098bb294313c781",
+      "category": "electricity",
+      "provisions": 4,
+      "title": "Biểu giá điện 1279/QĐ-BCT — bản Word cung cấp",
+      "origin": "PHUC:docs/legal_word_corpus_v7_20261005/electricity1279-word.json"
+    },
+    {
+      "id": "fire105-word",
+      "file": "fire105-word.json",
+      "sha256": "6dd889d4ad987b5652e064fa0bdf191b98b07dacca8b525955a4f1f0a76b6c22",
+      "category": "fire_safety",
+      "provisions": 2,
+      "title": "Nghị định 105/2025/NĐ-CP — bản Word cung cấp",
+      "origin": "PHUC:docs/legal_word_corpus_v7_20261005/fire105-word.json"
+    },
+    {
+      "id": "broker29-word",
+      "file": "broker29-word.json",
+      "sha256": "8a2aa1aa6920f7ab0ee902615efc67c56a14abca322b022fa25b732fa2fcb102",
+      "category": "real_estate_brokerage",
+      "provisions": 15,
+      "title": "Luật Kinh doanh bất động sản 29/2023/QH15 — bản Word cung cấp",
+      "origin": "PHUC:docs/legal_word_corpus_v7_20261005/broker29-word.json"
+    },
+    {
+      "id": "identity26-word",
+      "file": "identity26-word.json",
+      "sha256": "7e73edf87b0b6d9c498978d7c180dcf87c08268793c559823131a2a524b14f68",
+      "category": "privacy_data",
+      "provisions": 19,
+      "title": "Luật Căn cước 26/2023/QH15 — bản Word cung cấp",
+      "origin": "PHUC:docs/legal_word_corpus_v7_20261005/identity26-word.json"
+    },
+    {
+      "id": "privacy91-word",
+      "file": "privacy91-word.json",
+      "sha256": "a38b2d8d52c7ef5d2db770a70aabed0194e25b18dd1dcfbd0d7df42dcab4ad77",
+      "category": "privacy_data",
+      "provisions": 42,
+      "title": "Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 — bản Word cung cấp",
+      "origin": "PHUC:docs/legal_word_corpus_v7_20261005/privacy91-word.json"
+    },
+    {
+      "id": "privacy356-word",
+      "file": "privacy356-word.json",
+      "sha256": "6620dcd1fd959929da2bd55de8095684613c73942ca0edaaa31853590765f787",
+      "category": "privacy_data",
+      "provisions": 15,
+      "title": "Nghị định 356/2025/NĐ-CP — bản Word cung cấp",
+      "origin": "PHUC:docs/legal_word_corpus_v7_20261005/privacy356-word.json"
+    },
+    {
+      "id": "water215-word",
+      "file": "water215-word.json",
+      "sha256": "b83cb98b2a87245459d8d53b83f8c7178131fa8952e27d2c0211314704dc045b",
+      "category": "water_cantho",
+      "provisions": 6,
+      "title": "Giá nước Cần Thơ 215/QĐ-UBND — bản Word cung cấp",
+      "origin": "PHUC:docs/legal_word_corpus_v7_20261005/water215-word.json"
+    },
+    {
+      "id": "criminal135-word",
+      "file": "criminal135-word.json",
+      "sha256": "943efa4d5647962fa36777eb486e7e40a3aa151e30c159ec88caa450f9d03a2a",
+      "category": "criminal_law",
+      "provisions": 10,
+      "title": "Bộ luật Hình sự 135/VBHN-VPQH — bản Word trích tuyển cung cấp",
+      "origin": "PHUC:docs/legal_word_corpus_v7_20261005/criminal135-word.json"
+    },
+    {
+      "id": "procedure17-word",
+      "file": "procedure17-word.json",
+      "sha256": "83ecf0c62c34090ec3d5f8a3802fd35f022157b9bb6cc62e80dffc4205eb2cbf",
+      "category": "criminal_law",
+      "provisions": 15,
+      "title": "Bộ luật Tố tụng hình sự 17/VBHN-VPQH — bản Word trích tuyển cung cấp",
+      "origin": "PHUC:docs/legal_word_corpus_v7_20261005/procedure17-word.json"
+    },
+    {
+      "id": "civil91-word",
+      "file": "civil91-word.json",
+      "sha256": "6ed1e3d491214a17feb1abd7cc9b9b85b637136f08c65dd5286049b743392fa5",
+      "category": "housing_contract",
+      "provisions": 46,
+      "title": "Bộ luật Dân sự 91/2015/QH13 — Word do cơ quan nhà nước công bố",
+      "origin": "PHUC:docs/legal_word_repair_corpus_v14_20261006/civil91-word.json"
+    },
+    {
+      "id": "fire55-word",
+      "file": "fire55-word.json",
+      "sha256": "1e7cf6d0dec7ae7e6cad1ed827b7eafa8ed3f547072e67ec555eeecfe9414714",
+      "category": "fire_safety",
+      "provisions": 25,
+      "title": "Luật PCCC 55/2024/QH15 — Word Công báo",
+      "origin": "PHUC:docs/legal_word_corpus_v7_20261005/fire55-word.json"
+    },
+    {
+      "id": "residence68-word",
+      "file": "residence68-word.json",
+      "sha256": "e2f6897b80b403f81753f70eec11d99775222eae05c5aa7fc23cb1c84df05195",
+      "category": "residence",
+      "provisions": 46,
+      "title": "Luật Cư trú 68/2020/QH14 — Word Công báo",
+      "origin": "PHUC:docs/legal_word_repair_corpus_v16_20261006/residence68-word.json"
+    },
+    {
+      "id": "supplement-s01-word",
+      "file": "supplement-s01-word.json",
+      "sha256": "a8b9da2fbfe0f43af4948ea11da1247a2036f24846921e87dc2d0d65700171c9",
+      "category": "housing_contract",
+      "provisions": 2,
+      "title": "Mẹo khi thuê phòng — Trợ Giúp Chợ Tốt",
+      "origin": "PHUC:docs/legal_word_supplement_corpus_v8_20261005/supplement-s01-word.json"
+    },
+    {
+      "id": "supplement-s02-word",
+      "file": "supplement-s02-word.json",
+      "sha256": "828d4469b373d68f49bdfab57a8330d6249e5204ef9654f7d4e3476be55f68e0",
+      "category": "housing_contract",
+      "provisions": 1,
+      "title": "Kinh nghiệm tìm nhà trọ cho tân sinh viên — Thư viện Đại học Bách khoa Hà Nội",
+      "origin": "PHUC:docs/legal_word_supplement_corpus_v8_20261005/supplement-s02-word.json"
+    },
+    {
+      "id": "supplement-s03-word",
+      "file": "supplement-s03-word.json",
+      "sha256": "543d834ce434905bdd5d7e56f9ad16a0fc5c6975a750b31bdf3f732ad0900b54",
+      "category": "electricity",
+      "provisions": 1,
+      "title": "Thông tin giá điện — Trung tâm Chăm sóc khách hàng Điện lực miền Nam EVNSPC",
+      "origin": "PHUC:docs/legal_word_supplement_corpus_v8_20261005/supplement-s03-word.json"
+    },
+    {
+      "id": "supplement-s04-word",
+      "file": "supplement-s04-word.json",
+      "sha256": "5e94a9f3124fec73326618b3dfc33400272f8d9932a4e77099f3d8ae716f8ae0",
+      "category": "ecommerce_platform",
+      "provisions": 1,
+      "title": "Cơ chế giải quyết tranh chấp của Chợ Tốt — Trợ Giúp Chợ Tốt",
+      "origin": "PHUC:docs/legal_word_supplement_corpus_v8_20261005/supplement-s04-word.json"
+    },
+    {
+      "id": "supplement-s05-word",
+      "file": "supplement-s05-word.json",
+      "sha256": "383bfce5e15586f31d2dc3936006e9d4a9ae8af9da1cc9a0f6a3b7e754510137",
+      "category": "water_cantho",
+      "provisions": 1,
+      "title": "Hướng dẫn tra cứu hóa đơn điện tử — CANTHOWASSCO Công ty Cổ phần Cấp thoát nước Cần Thơ",
+      "origin": "PHUC:docs/legal_word_supplement_corpus_v8_20261005/supplement-s05-word.json"
+    },
+    {
+      "id": "supplement-s06-word",
+      "file": "supplement-s06-word.json",
+      "sha256": "505b5549ffcd0621feaf792f354e12aea3f596c808ddee77964161a47ad8c462",
+      "category": "water_cantho",
+      "provisions": 1,
+      "title": "Hướng dẫn cài đặt ứng dụng Chăm sóc khách hàng CTWCare — CANTHOWASSCO",
+      "origin": "PHUC:docs/legal_word_supplement_corpus_v8_20261005/supplement-s06-word.json"
+    },
+    {
+      "id": "supplement-s08-word",
+      "file": "supplement-s08-word.json",
+      "sha256": "d5c221fe6e29985f885bfc80d9663c8b84450b629c9cee2f05bcf4f2a9b75cd3",
+      "category": "ecommerce_platform",
+      "provisions": 1,
+      "title": "Làm thế nào để báo cáo tin đăng — Trợ Giúp Chợ Tốt",
+      "origin": "PHUC:docs/legal_word_supplement_corpus_v8_20261005/supplement-s08-word.json"
+    },
+    {
+      "id": "supplement-s09-word",
+      "file": "supplement-s09-word.json",
+      "sha256": "8a48debf28ec36fd4963eb3f9205ded7ac5a9650028434f9fe005d143cb27868",
+      "category": "ecommerce_platform",
+      "provisions": 1,
+      "title": "Nhà Tốt bảo vệ người dùng như thế nào — Trợ Giúp Chợ Tốt Nhà Tốt",
+      "origin": "PHUC:docs/legal_word_supplement_corpus_v8_20261005/supplement-s09-word.json"
+    },
+    {
+      "id": "supplement-s10-word",
+      "file": "supplement-s10-word.json",
+      "sha256": "afc2ed7e9587f8d7301aa965c9ecd29498ef44fd93499c672b10ca1b6010cb3f",
+      "category": "ecommerce_platform",
+      "provisions": 4,
+      "title": "Quy chế hoạt động website cung cấp dịch vụ thương mại điện tử Chợ Tốt — Trợ Giúp Chợ Tốt",
+      "origin": "PHUC:docs/legal_word_supplement_corpus_v8_20261005/supplement-s10-word.json"
+    },
+    {
+      "id": "supplement-s11-word",
+      "file": "supplement-s11-word.json",
+      "sha256": "dd822ec12eb7b729cda4b81e954ff70b0aeade8f0d731f689101ce7668c391fe",
+      "category": "criminal_law",
+      "provisions": 1,
+      "title": "Cảnh báo các thủ đoạn lừa đảo học sinh tân sinh viên mùa tựu trường — Cổng Thông tin điện tử Bộ Công an bài Công an TP Hải Phòng",
+      "origin": "PHUC:docs/legal_word_supplement_corpus_v8_20261005/supplement-s11-word.json"
+    },
+    {
+      "id": "supplement-s12-word",
+      "file": "supplement-s12-word.json",
+      "sha256": "11fd8599224cd4e48d7b17942dff876219c95684a8eb5bea72b41ab18b631384",
+      "category": "criminal_law",
+      "provisions": 1,
+      "title": "Cảnh giác mạo danh Fanpage khách sạn nhà hàng đặt cọc trực tuyến dịp Lễ hội Thành Tuyên 2026 — Cổng Thông tin điện tử Bộ Công an bài Công an tỉnh Tuyên Quang",
+      "origin": "PHUC:docs/legal_word_supplement_corpus_v8_20261005/supplement-s12-word.json"
+    },
+    {
+      "id": "supplement-s14-word",
+      "file": "supplement-s14-word.json",
+      "sha256": "8502d5a11efcf809c5fb0cc5a518b64d2b35e6e8195d773618b2b5ea8f479be1",
+      "category": "fire_safety",
+      "provisions": 2,
+      "title": "Tăng cường bảo đảm an toàn PCCC và kỹ năng thoát nạn tại các khu chung cư nhà trọ — Công an tỉnh Phú Thọ Phòng Cảnh sát PCCC và CNCH",
+      "origin": "PHUC:docs/legal_word_supplement_corpus_v8_20261005/supplement-s14-word.json"
+    },
+    {
+      "id": "supplement-s15-word",
+      "file": "supplement-s15-word.json",
+      "sha256": "437a790be2c32dd7df36f11ce8bf59fab896aa83ce364aac996e0d75576323d9",
+      "category": "ecommerce_platform",
+      "provisions": 41,
+      "title": "Luật Thương mại điện tử 122/2025/QH15 — Quốc hội Công báo Chính phủ",
+      "origin": "PHUC:docs/legal_word_supplement_corpus_v8_20261005/supplement-s15-word.json"
+    },
+    {
+      "id": "supplement-s16-word",
+      "file": "supplement-s16-word.json",
+      "sha256": "f616f2c757a993fc09fe053683e8446c191625a8dde2717f8c4d29b7b3271b6f",
+      "category": "ecommerce_platform",
+      "provisions": 26,
+      "title": "Nghị định 248/2026/NĐ-CP hướng dẫn Luật Thương mại điện tử — Chính phủ Công báo Chính phủ",
+      "origin": "PHUC:docs/legal_word_priority7_corpus_v13_20261006/supplement-s16-word.json"
+    },
+    {
+      "id": "google-lens-word",
+      "file": "google-lens-word.json",
+      "sha256": "ca3b134d84295d620d7eac8917f11c87b6ca58ea04cfb90cc94352dc1eef2fb5",
+      "category": "ecommerce_platform",
+      "provisions": 1,
+      "title": "Google Lens: kiểm tra nguồn hình ảnh — Google Search Help",
+      "origin": "PHUC:docs/legal_word_focus3_corpus_v10_20261006/google-lens-word.json"
+    },
+    {
+      "id": "nhatot-report-proof-word",
+      "file": "nhatot-report-proof-word.json",
+      "sha256": "93878c210cf16f13ad4f04eb3bb0f691d83538fafa63cf7f021812aa8c0377c4",
+      "category": "ecommerce_platform",
+      "provisions": 1,
+      "title": "Nhà Tốt: hình ảnh trao đổi hỗ trợ phản ánh tin vi phạm",
+      "origin": "PHUC:docs/legal_word_focus3_corpus_v11_20261006/nhatot-report-proof-word.json"
+    },
+    {
+      "id": "evn-cantho-transparency-word",
+      "file": "evn-cantho-transparency-word.json",
+      "sha256": "d68893b8ac95c33b93dec66f3e36c9f7e6c40c466f151ebcbce2a74446c302e6",
+      "category": "electricity",
+      "provisions": 1,
+      "title": "Công khai cách tính tiền điện nhà trọ — PC TP Cần Thơ / EVNSPC",
+      "origin": "PHUC:docs/legal_word_priority7_corpus_v13_20261006/evn-cantho-transparency-word.json"
+    },
+    {
+      "id": "fire-emergency114-word",
+      "file": "fire-emergency114-word.json",
+      "sha256": "d10269c62ab4bef5227c4a168a7c45bc63895dc0d2ffbddd29225741f7e27af6",
+      "category": "fire_safety",
+      "provisions": 1,
+      "title": "Báo cháy 114 — Công an tỉnh Phú Thọ",
+      "origin": "PHUC:docs/legal_word_priority7_corpus_v13_20261006/fire-emergency114-word.json"
+    },
+    {
+      "id": "online-secrets-0-word",
+      "file": "online-secrets-0-word.json",
+      "sha256": "e5326b83707f4c4638b96c5eee93b5f99cc57f19661445ccedb0a6f9c0b50d2e",
+      "category": "criminal_law",
+      "provisions": 1,
+      "title": "Cảnh báo bảo mật và liên kết lạ — Bộ Công an",
+      "origin": "PHUC:docs/legal_word_repair_corpus_v14_20261006/online-secrets-0-word.json"
+    },
+    {
+      "id": "online-secrets-1-word",
+      "file": "online-secrets-1-word.json",
+      "sha256": "a742783d0b85404ab9df31a387d9938392ba4141b80379bbb1f00d78b2df1c88",
+      "category": "criminal_law",
+      "provisions": 1,
+      "title": "Cảnh báo bảo mật và liên kết lạ — Bộ Công an",
+      "origin": "PHUC:docs/legal_word_repair_corpus_v14_20261006/online-secrets-1-word.json"
+    },
+    {
+      "id": "online-fake-link-0-word",
+      "file": "online-fake-link-0-word.json",
+      "sha256": "e519c47acd9d2ca7bcc5025e56ecc17a2a185a0ddde95de6b4bebfd0094105e5",
+      "category": "criminal_law",
+      "provisions": 1,
+      "title": "Nhận diện link giả và thúc ép — Bộ Công an",
+      "origin": "PHUC:docs/legal_word_repair_corpus_v14_20261006/online-fake-link-0-word.json"
+    },
+    {
+      "id": "online-fake-link-1-word",
+      "file": "online-fake-link-1-word.json",
+      "sha256": "86efdc0d2a6e83b9988c25e2f94cc37a8caf134405885511d8ece9d58f835ddb",
+      "category": "criminal_law",
+      "provisions": 1,
+      "title": "Nhận diện link giả và thúc ép — Bộ Công an",
+      "origin": "PHUC:docs/legal_word_repair_corpus_v14_20261006/online-fake-link-1-word.json"
+    },
+    {
+      "id": "residence154-official-word",
+      "file": "residence154-official-word.json",
+      "sha256": "02ba7f26390dc48782047d41cd3ef3a80e09fc4e5037907520f4d8376fbc41da",
+      "category": "residence",
+      "provisions": 1,
+      "title": "Nghị định 154/2024/NĐ-CP — Word Công báo",
+      "origin": "PHUC:docs/legal_word_repair_corpus_v16_20261006/residence154-official-word.json"
+    },
+    {
+      "id": "residence58-official-word",
+      "file": "residence58-official-word.json",
+      "sha256": "a39d429f1f40cc6ec2ebfda3ae6db4e0b76edd15b1c001a4275532293a8fe3f9",
+      "category": "residence",
+      "provisions": 5,
+      "title": "Nghị định 58/2026/NĐ-CP — Word Công báo",
+      "origin": "PHUC:docs/legal_word_repair_corpus_v16_20261006/residence58-official-word.json"
+    },
+    {
+      "id": "ctu-2026-registration",
+      "file": "ctu-2026-registration.json",
+      "sha256": "025d1db156308f7a2176bf858a3a876b305c8a1ae3e0b94568b574607dc3f92e",
+      "category": "student_housing",
+      "provisions": 2,
+      "title": "Đăng ký ở Ký túc xá học kỳ 1 năm học 2026-2027",
+      "origin": "PHUC:docs/ctu_ktx_corpus_20261007/ctu-2026-registration.json"
+    },
+    {
+      "id": "ctu-new-students",
+      "file": "ctu-new-students.json",
+      "sha256": "864d120102aa77b372988ba3f5d80b9d0dd71e16c1342f9c0c769aee9fe8738e",
+      "category": "student_housing",
+      "provisions": 1,
+      "title": "Hướng dẫn Tân sinh viên đăng ký ở Ký túc xá",
+      "origin": "PHUC:docs/ctu_ktx_corpus_20261007/ctu-new-students.json"
+    },
+    {
+      "id": "ctu-ktx-rules",
+      "file": "ctu-ktx-rules.json",
+      "sha256": "d6f823bd26f9e5684ea40f9c0ce55d5be4940d31f3afa03ed604f348e49431a9",
+      "category": "student_housing",
+      "provisions": 42,
+      "title": "Nội quy Ký túc xá Đại học Cần Thơ — bản trích công bố 09/2025",
+      "origin": "PHUC:docs/ctu_ktx_corpus_20261007/ctu-ktx-rules.json"
+    },
+    {
+      "id": "ctu-ktx-facilities",
+      "file": "ctu-ktx-facilities.json",
+      "sha256": "bc3b32c1465d74b78ef753d88d4dcaae31d6d59517f8bba8d5b274c45c575c94",
+      "category": "student_housing",
+      "provisions": 1,
+      "title": "Cơ sở vật chất, loại phòng và mức phí KTX Đại học Cần Thơ",
+      "origin": "PHUC:docs/ctu_ktx_corpus_20261007/ctu-ktx-facilities.json"
+    },
+    {
+      "id": "residence282-word",
+      "file": "residence282-word.json",
+      "sha256": "2c1b3e59b76e753a91fe779dac9c5896f75dff055e8d6354d9bbb4900cfa3919",
+      "category": "residence",
+      "provisions": 41,
+      "title": "Nghị định 282/2025/NĐ-CP — bản Word trích tuyển cung cấp",
+      "origin": "originals/nd282-2025-trich-tuyen.docx (Data/ của branch PHUC, nạp 08/10/2026)"
+    }
+  ],
+  "origin": {
+    "branch": "origin/PHUC @ 445f89d",
+    "legal": "docs/legal_word_repair_corpus_v16_20261006/manifest.json",
+    "ktx": "docs/ctu_ktx_corpus_20261007/manifest.json"
+  },
+  "policy": "Gộp nguyên văn 40 nguồn pháp lý/hướng dẫn (v16) + 4 nguồn KTX CTU (07/10/2026) của branch PHUC; không sửa nội dung, không thêm đáp án tự viết. Thêm/bớt nguồn ⇒ đổi manifest ⇒ index_corpus nạp lại phần đổi."
+}

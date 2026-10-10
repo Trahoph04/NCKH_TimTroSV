@@ -1,0 +1,265 @@
+{
+  "source": {
+    "id": "electricity60-word",
+    "title": "Thông tư 60/2025/TT-BCT — bản Word trích tuyển cung cấp",
+    "category": "electricity",
+    "path": "Data/electricity/Thông-tư-60-2025-TT-BCT.docx",
+    "sha256": "281c5617cc3a5e567fcbe446e405049fc2d8942cb02ab5a183a8b071af1be94f",
+    "original_sha256": "281c5617cc3a5e567fcbe446e405049fc2d8942cb02ab5a183a8b071af1be94f",
+    "source_url": "https://vanban.chinhphu.vn/?docid=216125&orggroupid=4&pageid=27160",
+    "page_kind": "logical_document",
+    "pages": 1,
+    "extraction": "Native Word XML/antiword text; no PDF or OCR execution",
+    "source_content_kind": "provided_word_excerpt",
+    "verification": "Word bytes and extracted content retained; supplied excerpts are not certified verbatim official originals.",
+    "source_policy": "Literal text from the supplied Word; context notes removed by article selection; no authored answers.",
+    "scope": "Basic accommodation questions only; no forms, agreement drafting, filing or specialised legal procedure.",
+    "source_scope_warning": "Nguồn là bản Word/trích tuyển được cung cấp, chưa xác minh toàn bộ câu chữ với bản chính thức; không coi ghi chú biên tập là quy định pháp luật.",
+    "not_exhaustive": true,
+    "ocr_used": false
+  },
+  "provisions": [
+    {
+      "provision_id": "281c5617cc3a5e567fcb:1967:1",
+      "article": "3",
+      "clause": "1",
+      "heading": "Điều 3. Áp dụng giá bán điện | Khoản 1",
+      "content": "1. Nguyên tắc áp dụng giá bán điện:\n\na) Giá bán điện phải áp dụng theo đúng đối tượng và mục đích sử dụng điện theo quy định tại Thông tư này;\n\nd) Trường hợp áp dụng giá sai mục đích sử dụng điện gây thiệt hại cho bên mua hoặc bên bán điện, trong thời hạn 15 ngày kể từ ngày hai bên thống nhất truy thu hoặc hoàn trả tiền điện chênh lệch, bên bán điện có trách nhiệm hoàn trả cho bên mua điện hoặc được truy thu của bên mua điện tiền điện chênh lệch trong thời gian áp dụng giá sai mục đích sử dụng điện. Trường hợp hai bên thống nhất là không xác định rõ thời điểm áp dụng giá sai mục đích thì thời gian tính toán số tiền điện được truy thu hoặc hoàn trả là 12 tháng kể từ thời điểm phát hiện áp dụng giá điện sai mục đích trở về trước. Bên mua hoặc bên bán điện có quyền yêu cầu bồi thường thiệt hại theo quy định pháp luật có liên quan hoặc theo điều khoản thỏa thuận tại hợp đồng mua bán điện.",
+      "source_start": 1997,
+      "source_end": 2896,
+      "points": [
+        "a",
+        "d"
+      ],
+      "exceptions": [],
+      "cross_references": [],
+      "kind": "legal_provision",
+      "article_context": "",
+      "content_sha256": "fd5ff34bef42559640baeb90295c494b1b1957a41679154497da9acd5924a309",
+      "page_from": 1,
+      "page_to": 1,
+      "extraction_text_sha256": "e8da154e853218beb76f10e4e968d76b15a90eaf0cd5d4994560c60b7f244098"
+    },
+    {
+      "provision_id": "281c5617cc3a5e567fcb:4141:1",
+      "article": "12",
+      "clause": "1",
+      "heading": "Điều 12. Giá bán lẻ điện sinh hoạt | Khoản 1",
+      "content": "1. Giá bán lẻ điện sinh hoạt áp dụng với hộ sử dụng điện cho nhu cầu sinh hoạt có hợp đồng mua bán điện trực tiếp với bên bán điện. Tại một địa điểm sử dụng điện, mỗi hộ sử dụng điện trong 01 tháng được áp dụng một định mức sử dụng điện sinh hoạt.",
+      "source_start": 4177,
+      "source_end": 4426,
+      "points": [],
+      "exceptions": [],
+      "cross_references": [],
+      "kind": "legal_provision",
+      "article_context": "",
+      "content_sha256": "294d301ba1a97ace3f3905f8af51e1dd7168c8532c1f85a90b98a352012b757a",
+      "page_from": 1,
+      "page_to": 1,
+      "extraction_text_sha256": "e8da154e853218beb76f10e4e968d76b15a90eaf0cd5d4994560c60b7f244098"
+    },
+    {
+      "provision_id": "281c5617cc3a5e567fcb:4141:2",
+      "article": "12",
+      "clause": "2",
+      "heading": "Điều 12. Giá bán lẻ điện sinh hoạt | Khoản 2",
+      "content": "2. Bên mua điện sinh hoạt có các hộ sử dụng điện dùng chung công tơ (số hộ thường trú hoặc tạm trú xác định theo thông tin về cư trú của hộ gia đình tại địa điểm sử dụng điện), áp dụng giá bán điện cho các hộ sử dụng theo nguyên tắc định mức chung của bên mua điện bằng định mức của từng bậc nhân với số hộ sử dụng điện dùng chung công tơ.",
+      "source_start": 4426,
+      "source_end": 4860,
+      "points": [],
+      "exceptions": [],
+      "cross_references": [],
+      "kind": "legal_provision",
+      "article_context": "",
+      "content_sha256": "20b04f52dd40f2998534ffa51f30a251b719346952b4688fa6be21c15de123f3",
+      "source_segments": [
+        "2. Bên mua điện sinh hoạt có các hộ sử dụng điện dùng chung công tơ (số hộ thường trú hoặc tạm trú xác định theo thông tin về cư trú của hộ gia đình tại địa điểm sử dụng điện), áp dụng giá bán điện cho các hộ sử dụng theo nguyên tắc định mức chung của bên mua điện bằng định mức của từng bậc nhân với số hộ sử dụng điện dùng chung công tơ."
+      ],
+      "omitted_editorial_notes": [
+        "Ghi chú tuyển chọn: Khoản 3 Điều 12 về ký túc xá có mốc hiệu lực riêng tại khoản 1 Điều 21."
+      ],
+      "page_from": 1,
+      "page_to": 1,
+      "extraction_text_sha256": "e8da154e853218beb76f10e4e968d76b15a90eaf0cd5d4994560c60b7f244098"
+    },
+    {
+      "provision_id": "281c5617cc3a5e567fcb:4141:3",
+      "article": "12",
+      "clause": "3",
+      "heading": "Điều 12. Giá bán lẻ điện sinh hoạt | Khoản 3",
+      "content": "3. Bên mua điện sử dụng vào mục đích sinh hoạt cho nhà ở tập thể của cán bộ, công chức, viên chức, nhân viên, người lao động của doanh nghiệp, trừ trường hợp quy định tại khoản 4 Điều này; nhà ở của người tu hành; nhà ở cho huấn luyện viên, vận động viên của trung tâm huấn luyện thể thao, nhà thi đấu thể thao; ký túc xá học sinh, sinh viên, học viên áp dụng như sau:\n\na) Trường hợp có thể kê khai được số người thì cứ 04 (bốn) người (xác định theo thông tin về cư trú tại địa điểm sử dụng điện) được tính là một hộ sử dụng điện để áp dụng giá bán lẻ điện sinh hoạt;\n\nb) Trường hợp không thể kê khai được số người thì áp dụng giá bán lẻ điện sinh hoạt của bậc 2: từ 101 - 200 kWh cho toàn bộ sản lượng điện đo đếm được tại công tơ.",
+      "source_start": 4860,
+      "source_end": 5594,
+      "points": [
+        "a",
+        "b"
+      ],
+      "exceptions": [
+        " Bên mua điện sử dụng vào mục đích sinh hoạt cho nhà ở tập thể của cán bộ, công chức, viên chức, nhân viên, người lao động của doanh nghiệp, trừ trường hợp quy định tại khoản 4 Điều này;"
+      ],
+      "cross_references": [],
+      "kind": "legal_provision",
+      "article_context": "",
+      "content_sha256": "6f6c213af7763855757832623d82a860ad9e0f4fc4f0e369877c9d230f11c51d",
+      "page_from": 1,
+      "page_to": 1,
+      "extraction_text_sha256": "e8da154e853218beb76f10e4e968d76b15a90eaf0cd5d4994560c60b7f244098"
+    },
+    {
+      "provision_id": "281c5617cc3a5e567fcb:4141:5",
+      "article": "12",
+      "clause": "5",
+      "heading": "Điều 12. Giá bán lẻ điện sinh hoạt | Khoản 5",
+      "content": "5. Bên mua điện sử dụng vào mục đích sinh hoạt của người thuê nhà để ở áp dụng như sau:\n\na) Tại mỗi địa chỉ nhà cho thuê, bên bán điện chỉ giao kết một hợp đồng mua bán điện duy nhất. Chủ nhà cho thuê có trách nhiệm cung cấp thông tin về cư trú tại địa điểm sử dụng điện của người thuê nhà;\n\nb) Đối với trường hợp cho hộ gia đình thuê: Chủ nhà trực tiếp giao kết hợp đồng mua bán điện hoặc ủy quyền cho hộ gia đình thuê nhà giao kết hợp đồng mua bán điện (có cam kết thanh toán tiền điện), mỗi hộ gia đình thuê nhà được tính một định mức;\n\nc) Trường hợp cho sinh viên và người lao động thuê nhà (bên thuê nhà không phải là một hộ gia đình):\n\n- Đối với trường hợp bên thuê nhà có hợp đồng thuê nhà từ 12 tháng trở lên và có đăng ký tạm trú, thường trú (xác định theo thông tin về cư trú tại địa điểm sử dụng điện) thì chủ nhà trực tiếp giao kết hợp đồng mua bán điện hoặc đại diện bên thuê nhà giao kết hợp đồng mua bán điện (có cam kết thanh toán tiền điện của chủ nhà);\n\n- Trường hợp thời hạn cho thuê nhà dưới 12 tháng và chủ nhà không thực hiện kê khai được đầy đủ số người sử dụng điện thì áp dụng giá bán lẻ điện sinh hoạt của bậc 2: Từ 101 - 200 kWh cho toàn bộ sản lượng điện đo đếm được tại công tơ;\n\n- Trường hợp chủ nhà kê khai được đầy đủ số người sử dụng điện thì bên bán điện có trách nhiệm cấp định mức cho chủ nhà căn cứ vào thông tin về cư trú tại địa điểm sử dụng điện; cứ 04 (bốn) người được tính là một hộ sử dụng điện để tính số định mức áp dụng giá bán lẻ điện sinh hoạt, cụ thể: 01 (một) người được tính là 1/4 định mức, 02 (hai) người được tính là 1/2 định mức, 03 (ba) người được tính là 3/4 định mức, 04 (bốn) người được tính là 01 định mức. Khi có thay đổi về số người thuê nhà, chủ nhà cho thuê có trách nhiệm thông báo cho bên bán điện để điều chỉnh định mức tính toán tiền điện;\n\n- Trường hợp người thuê nhà không giao kết hợp đồng trực tiếp với bên bán điện thì tổng tiền điện chủ nhà cho thuê thu của người thuê nhà không được vượt quá tiền điện trong hoá đơn tiền điện hằng tháng do đơn vị bán lẻ điện phát hành;\n\n- Bên bán điện được phép yêu cầu bên mua điện cung cấp thông tin về cư trú tại địa điểm sử dụng điện để làm căn cứ xác định số người tính số định mức khi tính toán hóa đơn tiền điện.",
+      "source_start": 5594,
+      "source_end": 7979,
+      "points": [
+        "a",
+        "b",
+        "c"
+      ],
+      "exceptions": [],
+      "cross_references": [],
+      "kind": "legal_provision",
+      "article_context": "",
+      "content_sha256": "ffc094499684913790bea8c1eaf4f8553449a78a46e771a1e4d11ff48e08ceda",
+      "source_segments": [
+        "5. Bên mua điện sử dụng vào mục đích sinh hoạt của người thuê nhà để ở áp dụng như sau:\n\na) Tại mỗi địa chỉ nhà cho thuê, bên bán điện chỉ giao kết một hợp đồng mua bán điện duy nhất. Chủ nhà cho thuê có trách nhiệm cung cấp thông tin về cư trú tại địa điểm sử dụng điện của người thuê nhà;\n\nb) Đối với trường hợp cho hộ gia đình thuê: Chủ nhà trực tiếp giao kết hợp đồng mua bán điện hoặc ủy quyền cho hộ gia đình thuê nhà giao kết hợp đồng mua bán điện (có cam kết thanh toán tiền điện), mỗi hộ gia đình thuê nhà được tính một định mức;",
+        "c) Trường hợp cho sinh viên và người lao động thuê nhà (bên thuê nhà không phải là một hộ gia đình):\n\n- Đối với trường hợp bên thuê nhà có hợp đồng thuê nhà từ 12 tháng trở lên và có đăng ký tạm trú, thường trú (xác định theo thông tin về cư trú tại địa điểm sử dụng điện) thì chủ nhà trực tiếp giao kết hợp đồng mua bán điện hoặc đại diện bên thuê nhà giao kết hợp đồng mua bán điện (có cam kết thanh toán tiền điện của chủ nhà);\n\n- Trường hợp thời hạn cho thuê nhà dưới 12 tháng và chủ nhà không thực hiện kê khai được đầy đủ số người sử dụng điện thì áp dụng giá bán lẻ điện sinh hoạt của bậc 2: Từ 101 - 200 kWh cho toàn bộ sản lượng điện đo đếm được tại công tơ;\n\n- Trường hợp chủ nhà kê khai được đầy đủ số người sử dụng điện thì bên bán điện có trách nhiệm cấp định mức cho chủ nhà căn cứ vào thông tin về cư trú tại địa điểm sử dụng điện; cứ 04 (bốn) người được tính là một hộ sử dụng điện để tính số định mức áp dụng giá bán lẻ điện sinh hoạt, cụ thể: 01 (một) người được tính là 1/4 định mức, 02 (hai) người được tính là 1/2 định mức, 03 (ba) người được tính là 3/4 định mức, 04 (bốn) người được tính là 01 định mức. Khi có thay đổi về số người thuê nhà, chủ nhà cho thuê có trách nhiệm thông báo cho bên bán điện để điều chỉnh định mức tính toán tiền điện;\n\n- Trường hợp người thuê nhà không giao kết hợp đồng trực tiếp với bên bán điện thì tổng tiền điện chủ nhà cho thuê thu của người thuê nhà không được vượt quá tiền điện trong hoá đơn tiền điện hằng tháng do đơn vị bán lẻ điện phát hành;\n\n- Bên bán điện được phép yêu cầu bên mua điện cung cấp thông tin về cư trú tại địa điểm sử dụng điện để làm căn cứ xác định số người tính số định mức khi tính toán hóa đơn tiền điện."
+      ],
+      "omitted_editorial_notes": [
+        "Ghi chú tuyển chọn: Điểm c khoản 5 về sinh viên/người lao động thuê nhà có mốc hiệu lực riêng tại khoản 1 Điều 21; không mặc nhiên áp dụng từ 02/12/2025."
+      ],
+      "page_from": 1,
+      "page_to": 1,
+      "extraction_text_sha256": "e8da154e853218beb76f10e4e968d76b15a90eaf0cd5d4994560c60b7f244098"
+    },
+    {
+      "provision_id": "281c5617cc3a5e567fcb:4141:9",
+      "article": "12",
+      "clause": "9",
+      "heading": "Điều 12. Giá bán lẻ điện sinh hoạt | Khoản 9",
+      "content": "9. Trường hợp bên mua điện thực hiện kê khai không đúng số hộ, số người sử dụng điện để cấp định mức sử dụng điện sinh hoạt nhiều hơn thực tế thì bên bán điện có quyền yêu cầu bồi thường và phạt vi phạm hợp đồng theo quy định pháp luật có liên quan hoặc theo điều khoản thỏa thuận tại hợp đồng mua bán điện.",
+      "source_start": 7979,
+      "source_end": 8288,
+      "points": [],
+      "exceptions": [],
+      "cross_references": [],
+      "kind": "legal_provision",
+      "article_context": "",
+      "content_sha256": "94f4e05d7de240ed9f7b37c0c523b8dcdda8291134d21ef56fbe0a3160311f24",
+      "page_from": 1,
+      "page_to": 1,
+      "extraction_text_sha256": "e8da154e853218beb76f10e4e968d76b15a90eaf0cd5d4994560c60b7f244098"
+    },
+    {
+      "provision_id": "281c5617cc3a5e567fcb:4141:10",
+      "article": "12",
+      "clause": "10",
+      "heading": "Điều 12. Giá bán lẻ điện sinh hoạt | Khoản 10",
+      "content": "10. Trường hợp bên bán điện thực hiện cấp định mức sử dụng điện sinh hoạt cho bên mua điện thấp hơn định mức theo quy định thì bên mua điện có quyền yêu cầu bồi thường và phạt vi phạm hợp đồng theo quy định pháp luật có liên quan hoặc theo điều khoản thỏa thuận tại hợp đồng mua bán điện.",
+      "source_start": 8288,
+      "source_end": 8578,
+      "points": [],
+      "exceptions": [],
+      "cross_references": [],
+      "kind": "legal_provision",
+      "article_context": "",
+      "content_sha256": "5332ec52de504e1331528c6054194320952492091ce159a84ff8d2c5afcc1c7e",
+      "page_from": 1,
+      "page_to": 1,
+      "extraction_text_sha256": "e8da154e853218beb76f10e4e968d76b15a90eaf0cd5d4994560c60b7f244098"
+    },
+    {
+      "provision_id": "281c5617cc3a5e567fcb:8578:1",
+      "article": "20",
+      "clause": "1",
+      "heading": "Điều 20. Điều khoản chuyển tiếp | Khoản 1",
+      "content": "1. Các quy định tại Thông tư số 16/2014/TT-BCT ngày 29 tháng 5 năm 2014 của Bộ trưởng Bộ Công Thương quy định về giá bán điện được tiếp tục áp dụng từ ngày Thông tư này có hiệu lực đến ngày thực hiện điều chỉnh mức giá bán lẻ điện bình quân gần nhất sau ngày Quyết định số 14/2025/QĐ-TTg có hiệu lực thi hành, bao gồm:\n\na) Khoản 1 Điều 5;\n\nb) Khoản 10 Điều 8;\n\nc) Khoản 3 Điều 10 (đã được sửa đổi theo quy định tại khoản 3 Điều 1 của Thông tư số 09/2023/TT-BCT sửa đổi, bổ sung một số điều của Thông tư số 16/2014/TT-BCT và Thông tư số 25/2018/TT-BCT ngày 12 tháng 9 năm 2018 của Bộ trưởng Bộ Công Thương sửa đổi, bổ sung một số điều của Thông tư số 16/2014/TT-BCT);\n\nd) Điểm c khoản 4 Điều 10 (đã được sửa đổi theo quy định tại khoản 5 Điều 1 của Thông tư số 25/2018/TT-BCT và khoản 2 Điều 2 của Thông tư số 09/2023/TT-BCT);\n\nđ) Khoản 6 Điều 12 (đã được sửa đổi theo quy định tại khoản 7 Điều 1 của Thông tư số 09/2023/TT-BCT);\n\ne) Khoản 6 Điều 13 (đã được sửa đổi theo quy định tại khoản 9 Điều 1 của Thông tư số 09/2023/TT-BCT).",
+      "source_start": 8611,
+      "source_end": 9644,
+      "points": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "đ",
+        "e"
+      ],
+      "exceptions": [],
+      "cross_references": [
+        "Khoản 1 Điều 5",
+        "Khoản 10 Điều 8",
+        "Khoản 3 Điều 10",
+        "khoản 3 Điều 1",
+        "khoản 4 Điều 10",
+        "khoản 5 Điều 1",
+        "khoản 2 Điều 2",
+        "Khoản 6 Điều 12",
+        "khoản 7 Điều 1",
+        "Khoản 6 Điều 13",
+        "khoản 9 Điều 1"
+      ],
+      "kind": "legal_provision",
+      "article_context": "",
+      "content_sha256": "14e528685d2959cf27afd87e9f2e46fc5934d975c87da6f17a72da027ca9c9b1",
+      "page_from": 1,
+      "page_to": 1,
+      "extraction_text_sha256": "e8da154e853218beb76f10e4e968d76b15a90eaf0cd5d4994560c60b7f244098"
+    },
+    {
+      "provision_id": "281c5617cc3a5e567fcb:9644:1",
+      "article": "21",
+      "clause": "1",
+      "heading": "Điều 21. Hiệu lực thi hành | Khoản 1",
+      "content": "1. Thông tư này có hiệu lực thi hành từ ngày 02 tháng 12 năm 2025, trừ quy định tại khoản 3 Điều 4, khoản 1 và khoản 2 Điều 5, Điều 9, Điều 10, khoản 10 Điều 11, khoản 3 Điều 12, khoản 4 Điều 12, điểm c khoản 5 Điều 12, khoản 6 Điều 14, khoản 6 Điều 15 Thông tư này và Phụ lục ban hành kèm theo Thông tư này có hiệu lực thi hành kể từ ngày thực hiện điều chỉnh mức giá bán lẻ điện bình quân gần nhất sau ngày Quyết định số 14/2025/QĐ-TTg có hiệu lực thi hành.",
+      "source_start": 9672,
+      "source_end": 10133,
+      "points": [],
+      "exceptions": [],
+      "cross_references": [
+        "khoản 3 Điều 4",
+        "khoản 2 Điều 5",
+        "Điều 9",
+        "Điều 10",
+        "khoản 10 Điều 11",
+        "khoản 3 Điều 12",
+        "khoản 4 Điều 12",
+        "khoản 5 Điều 12",
+        "khoản 6 Điều 14",
+        "khoản 6 Điều 15"
+      ],
+      "kind": "legal_provision",
+      "article_context": "",
+      "content_sha256": "2134e183f24d12bb7ba10f14c48b989ab6201e6b740e6d2b904c13011d11d2e4",
+      "page_from": 1,
+      "page_to": 1,
+      "extraction_text_sha256": "e8da154e853218beb76f10e4e968d76b15a90eaf0cd5d4994560c60b7f244098"
+    },
+    {
+      "provision_id": "281c5617cc3a5e567fcb:9644:2",
+      "article": "21",
+      "clause": "2",
+      "heading": "Điều 21. Hiệu lực thi hành | Khoản 2",
+      "content": "2. Các quy định sau hết hiệu lực thi hành kể từ ngày Thông tư này có hiệu lực, trừ các điều khoản chuyển tiếp quy định tại Điều 20 Thông tư này:\n\na) Thông tư số 16/2014/TT-BCT ngày 29 tháng 5 năm 2014 của Bộ trưởng Bộ Công Thương quy định về giá bán điện;\n\nb) Thông tư số 25/2018/TT-BCT ngày 12 tháng 9 năm 2018 của Bộ trưởng Bộ Công Thương sửa đổi, bổ sung một số điều của Thông tư số 16/2014/TT-BCT ngày 29 tháng 5 năm 2014 của Bộ trưởng Bộ Công Thương quy định về thực hiện giá bán điện;\n\nc) Thông tư số 06/2021/TT-BCT ngày 06 tháng 8 năm 2021 của Bộ trưởng Bộ Công Thương sửa đổi, bổ sung một số điều của Thông tư số 16/2014/TT-BCT ngày 29 tháng 5 năm 2014 của Bộ trưởng Bộ Công Thương quy định về thực hiện giá bán điện;\n\nd) Thông tư số 09/2023/TT-BCT ngày 21 tháng 4 năm 2023 của Bộ trưởng Bộ Công Thương sửa đổi, bổ sung một số điều của Thông tư số 16/2014/TT-BCT ngày 29 tháng 5 năm 2014 của Bộ trưởng Bộ Công Thương quy định về thực hiện giá bán điện và Thông tư số 25/2018/TT-BCT ngày 12 tháng 9 năm 2018 của Bộ trưởng Bộ Công Thương sửa đổi, bổ sung một số điều của Thông tư số 16/2014/TT-BCT.",
+      "source_start": 10133,
+      "source_end": 11237,
+      "points": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "exceptions": [],
+      "cross_references": [
+        "Điều 20"
+      ],
+      "kind": "legal_provision",
+      "article_context": "",
+      "content_sha256": "17cbe81dd997d5f0681ba81c2d6670ceb84ecb0f6f02dcbab7f69fb359574a61",
+      "page_from": 1,
+      "page_to": 1,
+      "extraction_text_sha256": "e8da154e853218beb76f10e4e968d76b15a90eaf0cd5d4994560c60b7f244098"
+    }
+  ]
+}

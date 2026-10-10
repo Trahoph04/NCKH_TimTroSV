@@ -1,0 +1,43 @@
+{
+  "source": {
+    "id": "online-fake-link-1-word",
+    "title": "Nhận diện link giả và thúc ép — Bộ Công an",
+    "category": "criminal_law",
+    "path": "docs/legal_word_repair_corpus_v14_20261006/online-fake-link-1-word.docx",
+    "sha256": "3b80041fcf77e1a5a533c66fcc6c307b00afaf8b35b934f1df16f912bc49943d",
+    "source_url": "https://www.bocongan.gov.vn/bai-viet/canh-bao-thu-doan-gia-danh-co-quan-cong-an-gui-tin-nhan-phat-nguoi-kem-duong-link-gia-mao-de-lua-dao-chiem-doat-tai-san-1788945012",
+    "publication_date": null,
+    "publisher": "Bộ Công an",
+    "page_kind": "logical_document",
+    "pages": 1,
+    "ocr_used": false,
+    "extraction": "Native DOCX XML; verified literal publisher excerpt, no OCR/PDF",
+    "source_content_kind": "publisher_guidance_word_conversion",
+    "source_scope_warning": "Khuyến cáo trong bối cảnh giả danh phạt nguội, không gọi là vụ thuê trọ; đoạn trích nhận diện rủi ro, không phải quy định hay kết luận tội phạm.",
+    "original_html_sha256": "cbb6d57ae0f9d7745805e42a229daee91350e4a7f77deaeee1a564befda84ff9",
+    "source_policy": "Exact source text only; no reference answer."
+  },
+  "provisions": [
+    {
+      "provision_id": "online-fake-link-1-word:excerpt",
+      "article": null,
+      "clause": null,
+      "heading": "Nhận diện link giả và thúc ép — Bộ Công an",
+      "content": "thúc giục người dân thực hiện theo hướng dẫn",
+      "source_segments": [
+        "thúc giục người dân thực hiện theo hướng dẫn"
+      ],
+      "source_start": 0,
+      "source_end": 44,
+      "content_sha256": "0c750af2f6d16820a31bbd01a51598fd03046ed70ed15320ec23925e0fd758ae",
+      "extraction_text_sha256": "0c750af2f6d16820a31bbd01a51598fd03046ed70ed15320ec23925e0fd758ae",
+      "points": [],
+      "exceptions": [],
+      "cross_references": [],
+      "kind": "publisher_guidance",
+      "article_context": "",
+      "page_from": 1,
+      "page_to": 1
+    }
+  ]
+}

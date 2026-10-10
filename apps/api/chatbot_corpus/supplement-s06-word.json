@@ -1,0 +1,67 @@
+{
+  "source": {
+    "id": "supplement-s06-word",
+    "title": "Hướng dẫn cài đặt ứng dụng Chăm sóc khách hàng CTWCare — CANTHOWASSCO",
+    "category": "water_cantho",
+    "path": "docs/legal_word_supplement_corpus_v8_20261005/S06-publisher-text.docx",
+    "sha256": "e155eac6ac6c953d709b299963c0e9a122c137438f06f46256eaea700d9aa83e",
+    "source_url": "https://ctn-cantho.com.vn/tin-khoa-hoc-cong-nghe/huong-dan-cai-dat-ung-dung-cham-soc-khach-hang-ctwcare-822.html",
+    "publisher": "CANTHOWASSCO",
+    "publication_date": "2025-03-03",
+    "page_kind": "logical_document",
+    "pages": 1,
+    "ocr_used": false,
+    "extraction": "Native DOCX XML; literal publisher text, no OCR or PDF",
+    "source_content_kind": "publisher_guidance_word_conversion",
+    "source_scope_warning": "Hướng dẫn/khuyến cáo của CANTHOWASSCO; không phải điều luật. Không đăng nhập, đăng ký hoặc dùng dữ liệu khách hàng trong đợt này. Không suy ra người thuê tự có quyền xem tài khoản của chủ trọ. Cần kiểm tra giao diện hiện tại khi sử dụng.",
+    "not_exhaustive": true,
+    "source_policy": "Literal publisher text; never assistant summary, reference answer, form or drafted agreement.",
+    "original_html_sha256": "45b3800ca0c48d7e5af6a5de43c593dc5c7b540615bd0d5b7f01496dc4d8d8b5",
+    "original_block_indices": [
+      45,
+      46,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      60
+    ],
+    "conversion": "Whitespace normalization only; selected exact DOM blocks converted to DOCX",
+    "retrieved_at_utc": "2026-10-05T15:27:13.173483+00:00"
+  },
+  "provisions": [
+    {
+      "provision_id": "S06:web-block:45",
+      "article": null,
+      "clause": null,
+      "heading": "Hướng dẫn cài đặt ứng dụng Chăm sóc khách hàng CTWCare | Đoạn nguyên văn 45",
+      "content": "Cài đặt Ứng dụng Chăm sóc khách hàng CTWCARE\n\nTải ứng dụng CSKH CTWCARE tại địa chỉ: https://onelink.to/bd22p2 hoặc truy cập vào App Store (iOS) hoặc Google Play Store (Android) và tìm kiếm với từ khóa \"CTWCARE\" để cài đặt ứng dụng.\n\nMở ứng dụng và tiến hành đăng nhập\n\n- Nếu có tài khoản, tiến hành đăng nhập bằng thông tin tên đăng nhập và mật khẩu\n\n- Hoặc có thể đăng nhập bằng số điện thoại\n\nBước 1: Chọn Đăng nhập bằng Số điện thoại\n\nBước 2: Nhập Số Điện Thoại của bạn sau đó nhấn tiếp tục (Định dạng số điện thoại: 0xxxxxxxxx, ví dụ 0939123456). Chọn phương thức nhận mã xác thực: NHẬN MÃ XÁC THỰC QUA SMS.\n\nBước 3: Một mã xác thực sẽ được gửi đến số điện thoại mà bạn đã nhập. Kiểm tra tin nhắn và nhập mã xác thực vào ứng dụng.\n\nBước 4: Sau khi nhập đúng mã xác thực, nhấn Tiếp tục để hoàn tất đăng nhập vào ứng dụng CTWCare.\n\nTiếp theo, bạn có thể làm theo HƯỚNG DẪN để nhận thông báo thông tin hóa đơn tiền nước.",
+      "source_start": 0,
+      "source_end": 922,
+      "points": [],
+      "exceptions": [],
+      "cross_references": [],
+      "kind": "publisher_guidance",
+      "article_context": "",
+      "content_sha256": "701a993f959171406eda46842057fa08d515d111d2e54a7f8de76e8803463cc3",
+      "page_from": 1,
+      "page_to": 1,
+      "original_block_indices": [
+        45,
+        46,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        60
+      ],
+      "extraction_text_sha256": "701a993f959171406eda46842057fa08d515d111d2e54a7f8de76e8803463cc3"
+    }
+  ]
+}

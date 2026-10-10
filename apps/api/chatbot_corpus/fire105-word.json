@@ -1,0 +1,63 @@
+{
+  "source": {
+    "id": "fire105-word",
+    "title": "Nghị định 105/2025/NĐ-CP — bản Word cung cấp",
+    "category": "fire_safety",
+    "path": "Data/fire_safety/Nghị-định-105-2025-NĐ-CP.docx",
+    "sha256": "96d3c8812018b49f0968bf43f4d9785c8e7d87536cec262e2a904f7cb4021b23",
+    "original_sha256": "96d3c8812018b49f0968bf43f4d9785c8e7d87536cec262e2a904f7cb4021b23",
+    "source_url": "https://vanban.chinhphu.vn/?classid=0&docid=213702&pageid=27160",
+    "page_kind": "logical_document",
+    "pages": 1,
+    "extraction": "Native Word XML/antiword text; no PDF or OCR execution",
+    "source_content_kind": "provided_word_excerpt",
+    "verification": "Word bytes and extracted content retained; supplied excerpts are not certified verbatim official originals.",
+    "source_policy": "Literal text from the supplied Word; context notes removed by article selection; no authored answers.",
+    "scope": "Basic accommodation questions only; no forms, agreement drafting, filing or specialised legal procedure.",
+    "source_scope_warning": "Nguồn là bản Word/trích tuyển được cung cấp, chưa xác minh toàn bộ câu chữ với bản chính thức; không coi ghi chú biên tập là quy định pháp luật.",
+    "not_exhaustive": true,
+    "ocr_used": false
+  },
+  "provisions": [
+    {
+      "provision_id": "96d3c8812018b49f0968:802:1",
+      "article": "3",
+      "clause": "1",
+      "heading": "Điều 3. Nội quy phòng cháy, chữa cháy, cứu nạn, cứu hộ | Khoản 1",
+      "content": "1. Nội quy phòng cháy, chữa cháy, cứu nạn, cứu hộ đối với cơ sở gồm các nội dung cơ bản sau:\n\na) Quy định việc quản lý, sử dụng điện, nguồn lửa, nguồn nhiệt, thiết bị, dụng cụ sinh lửa, sinh nhiệt, chất dễ cháy, nổ;\n\nb) Quy định việc quản lý, sử dụng phương tiện, thiết bị phòng cháy, chữa cháy, cứu nạn, cứu hộ;\n\nc) Quy định nội dung cần thực hiện khi có cháy, nổ, tai nạn, sự cố xảy ra.",
+      "source_start": 858,
+      "source_end": 1248,
+      "points": [
+        "a",
+        "b",
+        "c"
+      ],
+      "exceptions": [],
+      "cross_references": [],
+      "kind": "legal_provision",
+      "article_context": "",
+      "content_sha256": "fb3fe741a0ec371efac58a9f5a3b97ff849c1605996f48fce27cb3fa05a9b6af",
+      "page_from": 1,
+      "page_to": 1,
+      "extraction_text_sha256": "944c77e4d05add5f5de03a40970f51ef72b363578f418e0a876f6db6b79d9118"
+    },
+    {
+      "provision_id": "96d3c8812018b49f0968:802:3",
+      "article": "3",
+      "clause": "3",
+      "heading": "Điều 3. Nội quy phòng cháy, chữa cháy, cứu nạn, cứu hộ | Khoản 3",
+      "content": "3. Người đứng đầu cơ sở, chủ phương tiện giao thông ban hành hoặc tham mưu người có thẩm quyền ban hành nội quy phòng cháy, chữa cháy, cứu nạn, cứu hộ; nội quy phòng cháy, chữa cháy, cứu nạn, cứu hộ phải phù hợp với tính chất, đặc điểm hoạt động của cơ sở, phương tiện giao thông và được phổ biến, niêm yết ở vị trí dễ thấy.",
+      "source_start": 1248,
+      "source_end": 1574,
+      "points": [],
+      "exceptions": [],
+      "cross_references": [],
+      "kind": "legal_provision",
+      "article_context": "",
+      "content_sha256": "f4b1e733eba45c390ddf6018b68ca45cc048df2d8c207d018fc6cc296d04b0b7",
+      "page_from": 1,
+      "page_to": 1,
+      "extraction_text_sha256": "944c77e4d05add5f5de03a40970f51ef72b363578f418e0a876f6db6b79d9118"
+    }
+  ]
+}

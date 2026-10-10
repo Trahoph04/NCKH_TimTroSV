@@ -1,0 +1,44 @@
+{
+  "source": {
+    "id": "nhatot-report-proof-word",
+    "title": "Nhà Tốt: hình ảnh trao đổi hỗ trợ phản ánh tin vi phạm",
+    "category": "ecommerce_platform",
+    "path": "docs/legal_word_focus3_corpus_v11_20261006/nhatot-report-proof.docx",
+    "sha256": "ad7175c1303d4d6ec23da68521c4abe426a1df29671f8cb53e98c95c7e4f53d8",
+    "source_url": "https://trogiup.chotot.com/nguoi-mua/bi-quyet-mua-bat-dong-san-an-toan-voi-nha-tot/",
+    "publisher": "Trợ Giúp Chợ Tốt / Nhà Tốt",
+    "publication_date": null,
+    "page_kind": "logical_document",
+    "pages": 1,
+    "ocr_used": false,
+    "extraction": "Native DOCX XML; exact short publisher excerpt, no OCR/PDF",
+    "source_content_kind": "publisher_guidance_word_conversion",
+    "original_html_sha256": "0ae7e3beac53e811fe780ca7ace0d7aba3f4deec2c46c031202df061b1925adc",
+    "retrieved_at_utc": "2026-10-05T18:28:09.608746+00:00",
+    "source_scope_warning": "Hướng dẫn của Nhà Tốt về hình ảnh trao đổi giúp làm rõ phản ánh tin/người bán vi phạm; không phải điều luật hoặc thời hạn xử lý. Trang nguồn có bối cảnh mua bất động sản; chỉ dùng phần phản ánh tin, không suy sang thủ tục mua bán hoặc quyền trong hợp đồng thuê.",
+    "source_policy": "Only literal public publisher excerpt; no reference answers or authored legal rules embedded."
+  },
+  "provisions": [
+    {
+      "provision_id": "nhatot:report-proof",
+      "article": null,
+      "clause": null,
+      "heading": "Hình ảnh trao đổi khi phản ánh tin đăng/người bán vi phạm",
+      "content": "Thông tin (hình ảnh) trao đổi mua bán của bạn với người bán thể hiện hành vi vi phạm (nếu có).",
+      "source_segments": [
+        "Thông tin (hình ảnh) trao đổi mua bán của bạn với người bán thể hiện hành vi vi phạm (nếu có)."
+      ],
+      "source_start": 0,
+      "source_end": 94,
+      "content_sha256": "197ac9b0c86e1afdc269aa1a6f26053178d7811e58921eee18f6997f78c0eb02",
+      "extraction_text_sha256": "197ac9b0c86e1afdc269aa1a6f26053178d7811e58921eee18f6997f78c0eb02",
+      "points": [],
+      "exceptions": [],
+      "cross_references": [],
+      "kind": "publisher_guidance",
+      "article_context": "",
+      "page_from": 1,
+      "page_to": 1
+    }
+  ]
+}

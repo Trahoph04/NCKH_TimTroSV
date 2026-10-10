@@ -1,0 +1,39 @@
+{
+  "source": {
+    "id": "ctu-new-students",
+    "source_url": "https://tansinhvien.ctu.edu.vn/sinh-hoat/huong-dan-tan-sinh-vien-dang-ky-o-ky-tuc-xa",
+    "resolved_url": "https://tansinhvien.ctu.edu.vn/sinh-hoat/huong-dan-tan-sinh-vien-dang-ky-o-ky-tuc-xa",
+    "path": "docs/source_grounded_originals_20261004/ctu-new-students.html",
+    "sha256": "87142f4c05447e5406ca0ef1c2ce29f7962c40ecaf17b20f357f24e172bb0f81",
+    "retrieved_at_utc": "2026-10-04T16:13:48.596063+00:00",
+    "http_status": 200,
+    "bytes": 16779,
+    "category": "student_housing",
+    "verification": "Primary publisher original; text extraction, no authored answers",
+    "title": "Hướng dẫn Tân sinh viên đăng ký ở Ký túc xá",
+    "pages": 1,
+    "page_kind": "web_excerpt",
+    "extraction": "Native article HTML text grouped without paraphrase",
+    "original_sha256": "87142f4c05447e5406ca0ef1c2ce29f7962c40ecaf17b20f357f24e172bb0f81",
+    "not_exhaustive": false
+  },
+  "provisions": [
+    {
+      "provision_id": "ctu-new-students:064ec91f3dd209097444",
+      "article": null,
+      "clause": null,
+      "heading": "Thông tin KTX công bố bởi CTU",
+      "content": "Hướng dẫn đăng ký ở Ký túc xá\nClick vào đây Xem phòng ở tại Ký túc xá (Tân sinh viên - Khóa 52)\n(Tân sinh viên có thể ghi nhận lại nhu cầu đăng ký theo liên kết trên)\n- Phòng ở tại Ký túc xá (KTX) ĐH Cần Thơ có sức chứa từ 03 đến 08 Sinh viên/ phòng. Tân sinh viên (TSV) đăng ký ở KTX, nộp phí ở theo học kỳ.\nPhí ở học kỳ 1 năm học 2026-2027 tính từ ngày 7 tháng 9 đến 18/12/2026\n(Tính theo học kỳ 3.5 tháng, chưa bao gồm phí điện nước)\n. Trường hợp, TSV nhận chỗ ở từ 14/8/2026 đến trước 7/9/2026 thì nộp thêm chệnh lệch phí nửa tháng.\n- Phòng ở có wifi riêng từng phòng.\n- SV ở KTX được miễn phí gửi xe đạp.\n- Phí gửi xe máy/ xe điện là 25.000đ/Sinh viên/ tháng nộp theo học kỳ.\n- Trong khuôn viên có căn tin, siêu thị mini phục vụ cho SV.\n- Có hợp đồng với công ty bảo vệ chuyên nghiệp, có hệ thống camera an ninh.\n* KTX là nơi an toàn, thuận lợi cho sinh viên ăn ở, sinh hoạt và học tập tại ĐH Cần Thơ.\n* Lưu ý:\n- Sinh viên có thể xin chuyển đổi chỗ nếu có chỗ ở khác thích hợp hơn có vị trí trống. Trường không hoàn phí ở KTX nếu trả chỗ trước hạn. Chỉ hoàn trả phí cho trường hợp SV trả chỗ ở trong vòng 07 ngày kể từ ngày duyệt chỗ ở qua Hệ thống Quản lý KTX (phải có lý do chính đáng).\n- Loại phòng\nkhông được nấu ăn\n, sinh viên chỉ được sử dụng ấm đun siêu tốc,\nkhông được sử dụng\ncác dụng cụ đa năng.\n- Đối với Cơ sở Hậu Giang chỉ bố trí cho sinh viên học năm thứ nhất và năm cuối; Cơ sở Sóc Trăng chỉ bố trí sinh viên học năm cuối.\n- Trong thời gian nghỉ Tết Nguyên Đán, sinh viên có nhu cầu ở lại phải đóng phí 02 tuần.\nHƯỚNG DẪN ĐĂNG KÝ Ở KÝ TÚC XÁ\n+ Tân sinh viên chưa có tài khoản đăng nhập Hệ thống Quản lý KTX, thực hiện đăng ký nhu cầu ở KTX Trường\nthực hiện điền thông tin vào mẫu\n+\nTải mẫu đơn\n(đối với trường hợp SV đăng ký trực tiếp tại Ký túc xá)\n+\nSịnh viên đã có tài khoản đăng nhập Hệ thống quản lý của Trường\n(\nXem hướng dẫn đăng ký ở Ký túc xá\n)",
+      "content_sha256": "064ec91f3dd2090974441b0d42a5703568d4cd39a1e55ec20e0521c9b0054b7e",
+      "page_from": 1,
+      "page_to": 1,
+      "kind": "official_information",
+      "points": [],
+      "exceptions": [],
+      "cross_references": [],
+      "article_context": "",
+      "source_start": null,
+      "source_end": null
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "source": {
+    "id": "ctu-ktx-facilities",
+    "title": "Cơ sở vật chất, loại phòng và mức phí KTX Đại học Cần Thơ",
+    "category": "student_housing",
+    "source_url": "https://ssc.ctu.edu.vn/hoat/160-cs1.html",
+    "resolved_url": "https://ssc.ctu.edu.vn/hoat/160-cs1.html",
+    "path": "docs/ctu_ktx_corpus_20261007/ctu-ktx-facilities.html",
+    "sha256": "bb721bd2395420143c722031a8dcc3a5dc5e977db73549580cdb12a655108991",
+    "original_sha256": "bb721bd2395420143c722031a8dcc3a5dc5e977db73549580cdb12a655108991",
+    "retrieved_at_utc": "2026-10-07T13:38:26.762913+00:00",
+    "pages": 1,
+    "page_kind": "web_excerpt",
+    "extraction": "Native article HTML text; no paraphrase",
+    "not_exhaustive": false,
+    "verification": "CTU primary publisher; fee range has no publication date in article"
+  },
+  "provisions": [
+    {
+      "provision_id": "ctu-ktx-facilities:f881ae79b55c416a5f36",
+      "heading": "Thông tin KTX CTU — phần 1",
+      "content": "Cở sở vật chất tại phòng ở KTX\nThí sinh/ Tân sinh viên khi trúng tuyển và xác nhận học tại ĐH Cần Thơ có nhu cầu đăng ký ở Ký túc xá vui lòng điền thông tin lại mẫu. Trung tâm sẽ liên hệ tư vấn chỗ ở khi có kết quả sắp chỗ.\nĐiền thông tin tại mẫu: https://forms.gle/K8F4Smtd44ez51PB9\nKý túc xá (KTX) Đại học Cần Thơ có 03 khu với sức chứa khoảng 8.780 sinh viên (SV). KTX có hàng rào bao quanh, có hệ thống camera an ninh, có lực lượng bảo vệ chuyên nghiệp đảm bảo ANTT, an toàn cho SV; Có hệ thống nhà giữ xe (miễn phí gửi xe đạp), căng tin, siêu thị mini, nhà ăn đảm bảo an toàn vệ sinh, thực phẩm đủ dinh dưỡng mức giá khác nhau cho SV lựa chọn.\nPhòng ở tại KTX được trang bị giường tầng, bàn học, tử cá nhân có ngăn riêng cho từng SV, có khu vực vệ sinh cá riêng cho từng phòng; hoặc loại giường bộ (mỗi SV có một bộ giường tủ riêng). Các phòng đều có trang bị mạng wifi tốc độ cao cho SV tìm kiếm tài liệu học tập và giải trí thư giãn.\nKý túc xá Khu A và Khu B tọa lạc tại Khu II (TP. Cần Thơ). Có mức giá từ 220.000đ đến 475.000đ/ SV/ tháng tùy theo nhu cầu về chỗ ở của SV. Sinh viên nộp phí theo học kỳ.\nCó loại phòng không được nấu ăn (SV được sử dụng ấm đun siêu tốc) loại 4 hoặc 8 SV/ phòng (có ở khu A lẫn khu B).\nPhòng ở khu B\nPhòng ở khu A (dãy A2)\nCó loại phòng được nấu ăn loại 3, 4, 5, 6 hoặc 8 sinh viên/ phòng, SV trang bị dụng cụ tự nấu ăn trong phòng (tập trung ở KTX khu A)\nLoại 3 người ở được nấu ăn (giường bộ)\nLoại 5, 6 người ở được nấu ăn (giường bộ)\nLoại 8 người ở được nấu ăn giường tầng\nKý túc xá Khu C (Cơ sở Hậu Giang) tọa lạc tại xã Hòa An, TP Cần Thơ với sức chưa khoảng 250 sinh viên.\nKý túc xá là nơi an toàn, thuận tiện cho sinh vên đến ăn ở, sinh hoạt và học tập tại trường ĐH Cần Thơ.",
+      "content_sha256": "f881ae79b55c416a5f361c243830655b4faffdd9f8c056a3e04c47cea75f3d9e",
+      "page_from": 1,
+      "page_to": 1,
+      "kind": "official_information",
+      "article": null,
+      "clause": null,
+      "points": [],
+      "exceptions": [],
+      "cross_references": [],
+      "article_context": ""
+    }
+  ]
+}

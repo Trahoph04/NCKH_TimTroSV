@@ -1,0 +1,63 @@
+{
+  "source": {
+    "id": "supplement-s04-word",
+    "title": "Cơ chế giải quyết tranh chấp của Chợ Tốt — Trợ Giúp Chợ Tốt",
+    "category": "ecommerce_platform",
+    "path": "docs/legal_word_supplement_corpus_v8_20261005/S04-publisher-text.docx",
+    "sha256": "de47ae4b06ea0c94c221302907fc5b62188839c5acb9b78d48c190d22ddd03b4",
+    "source_url": "https://trogiup.chotot.com/nguoi-mua/co-che-giai-quyet-tranh-chap-cua-cho-tot/",
+    "publisher": "Trợ Giúp Chợ Tốt",
+    "publication_date": null,
+    "page_kind": "logical_document",
+    "pages": 1,
+    "ocr_used": false,
+    "extraction": "Native DOCX XML; literal publisher text, no OCR or PDF",
+    "source_content_kind": "publisher_guidance_word_conversion",
+    "source_scope_warning": "Hướng dẫn/khuyến cáo của Trợ Giúp Chợ Tốt; không phải điều luật. Quy trình riêng của Chợ Tốt. Không phải cam kết nền tảng tự hoàn tiền cọc hoặc giải quyết mọi tranh chấp thuê nhà; một phần quy trình trên trang nói về hàng hóa khuyến mại, cần giữ đúng phạm vi.",
+    "not_exhaustive": true,
+    "source_policy": "Literal publisher text; never assistant summary, reference answer, form or drafted agreement.",
+    "original_html_sha256": "c86e3ef7ade20f9ec104719f331f349c2e767e36fa62711719e59e46cad85bbf",
+    "original_block_indices": [
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      86
+    ],
+    "conversion": "Whitespace normalization only; selected exact DOM blocks converted to DOCX",
+    "retrieved_at_utc": "2026-10-05T15:27:13.163486+00:00"
+  },
+  "provisions": [
+    {
+      "provision_id": "S04:web-block:75",
+      "article": null,
+      "clause": null,
+      "heading": "Cơ chế giải quyết tranh chấp của Chợ Tốt | Đoạn nguyên văn 75",
+      "content": "1. Nguyên tắc giải quyết tranh chấp:\n\nKhi phát sinh tranh chấp hoặc khiếu nại liên quan các hoạt động trên sàn giao dịch thương mại điện tử giữa Người mua và Người bán, Chợ Tốt khuyến khích hai bên có thể tự thương lượng, hoà giải để có thể thống nhất được phương án giải quyết.\n\nBên cạnh đó, Chợ Tốt xây dựng cơ chế thông báo tin đăng/quảng cáo sai sự thật. Nếu xác định được Người bán có hành vi vi phạm, Chợ Tốt có quyền xử lý theo Cơ chế giải quyết tranh chấp này.\n\nMọi tranh chấp phát sinh giữa Chợ Tốt và Người dùng sẽ được giải quyết trên cơ sở hoà giải, thương lượng. Trường hợp không đạt được thỏa thuận như mong muốn, một trong hai bên có quyền đưa vụ việc ra Tòa án nhân dân có thẩm quyền để giải quyết.\n\n2. Tranh chấp hoặc khiếu nại sẽ được giải quyết theo quy trình như sau:\n\nKhi phát sinh tranh chấp hoặc khiếu nại, Bên khiếu nại sẽ liên lạc bên kia để khiếu nại, trao đổi và tìm ra phương pháp tự giải quyết trên cơ sở thương lượng, hòa giải.\n\nChợ Tốt và/hoặc người bán sẽ có trách nhiệm tiếp nhận khiếu nại và hỗ trợ người mua liên quan đến giao dịch trên Chợ Tốt.\n\nNgười dùng có thể gửi khiếu nại tại địa chỉ: Công ty TNHH Chợ Tốt Địa chỉ: Tầng 18, Toà nhà UOA, Số 6 đường Tân Trào, Phường Tân Mỹ, Thành phố Hồ Chí Minh, Việt Nam Hotline: 19003003 E-Mail: [email protected]",
+      "source_start": 0,
+      "source_end": 1315,
+      "points": [],
+      "exceptions": [],
+      "cross_references": [],
+      "kind": "publisher_guidance",
+      "article_context": "",
+      "content_sha256": "69ae870b7dcf1c580977357c20d05da20c2a39de3c89aa0fe4496cbefec31943",
+      "page_from": 1,
+      "page_to": 1,
+      "original_block_indices": [
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        86
+      ],
+      "extraction_text_sha256": "69ae870b7dcf1c580977357c20d05da20c2a39de3c89aa0fe4496cbefec31943"
+    }
+  ]
+}

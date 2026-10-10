@@ -1,0 +1,55 @@
+{
+  "source": {
+    "id": "supplement-s11-word",
+    "title": "Cảnh báo các thủ đoạn lừa đảo học sinh tân sinh viên mùa tựu trường — Cổng Thông tin điện tử Bộ Công an bài Công an TP Hải Phòng",
+    "category": "criminal_law",
+    "path": "docs/legal_word_supplement_corpus_v8_20261005/S11-publisher-text.docx",
+    "sha256": "beda39c0a93ad3f6124c9f24ab51fe96c381d871d65d0bf27581e4bb867d44d7",
+    "source_url": "https://bocongan.gov.vn/bai-viet/catp-hai-phong-canh-bao-cac-thu-doan-lua-dao-bua-vay-hoc-sinh-tan-sinh-vien-mua-tuu-truong-1787629964",
+    "publisher": "Cổng Thông tin điện tử Bộ Công an bài Công an TP Hải Phòng",
+    "publication_date": "2026-08-25",
+    "page_kind": "logical_document",
+    "pages": 1,
+    "ocr_used": false,
+    "extraction": "Native DOCX XML; literal publisher text, no OCR or PDF",
+    "source_content_kind": "publisher_guidance_word_conversion",
+    "source_scope_warning": "Hướng dẫn/khuyến cáo của Cổng Thông tin điện tử Bộ Công an bài Công an TP Hải Phòng; không phải điều luật. Chỉ lấy phần thuê trọ và an toàn giao dịch; các thủ đoạn học phí, học bổng ngoài mục tiêu dự án. Không suy ra mọi tranh chấp cọc đều là tội phạm hay chắc chắn thu hồi được tiền.",
+    "not_exhaustive": true,
+    "source_policy": "Literal publisher text; never assistant summary, reference answer, form or drafted agreement.",
+    "original_html_sha256": "6ac847f2393bb5acf36a6404f5e651d326487633fdc5339b6b06b00892325f1d",
+    "original_block_indices": [
+      12,
+      19,
+      20,
+      22
+    ],
+    "conversion": "Whitespace normalization only; selected exact DOM blocks converted to DOCX",
+    "retrieved_at_utc": "2026-10-05T15:27:13.246098+00:00"
+  },
+  "provisions": [
+    {
+      "provision_id": "S11:web-block:12",
+      "article": null,
+      "clause": null,
+      "heading": "Cảnh báo các thủ đoạn lừa đảo học sinh tân sinh viên mùa tựu trường | Đoạn nguyên văn 12",
+      "content": "- Bẫy \"Phòng trọ giá rẻ, view đẹp\"; Kẻ gian đăng tải thông tin cho thuê phòng trọ giá siêu rẻ, vị trí đẹp trên các hội nhóm. Khi liên hệ, chúng sẽ dùng nhiều lý do (nhiều người hỏi thuê, chủ đi vắng...) để yêu cầu chuyển tiền đặt cọc giữ chỗ trước khi đến xem phòng. Nhận được tiền, chúng lập tức chặn liên lạc.\n\nBảo mật thông tin cá nhân: Không cung cấp Căn cước công dân, Hộ chiếu, thông tin tài khoản ngân hàng, mã OTP hay bất kỳ dữ liệu cá nhân nào qua tin nhắn, số điện thoại hoặc email không thuộc hệ thống chính thức của trường.\n\nKhông tự ý chuyển tiền: Không thực hiện bất kỳ giao dịch chuyển tiền hay đóng lệ phí nào theo hướng dẫn từ các cá nhân, tổ chức chưa được xác minh rõ ràng.\n\nKhi có nghi vấn, cần báo ngay cho cơ quan Công an gần nhất để được hướng dẫn và xử lý kịp thời./.",
+      "source_start": 0,
+      "source_end": 791,
+      "points": [],
+      "exceptions": [],
+      "cross_references": [],
+      "kind": "publisher_guidance",
+      "article_context": "",
+      "content_sha256": "f9992e142f1d27677499bece80c8c1c44b1880e3181614d73fb61a51867eb172",
+      "page_from": 1,
+      "page_to": 1,
+      "original_block_indices": [
+        12,
+        19,
+        20,
+        22
+      ],
+      "extraction_text_sha256": "f9992e142f1d27677499bece80c8c1c44b1880e3181614d73fb61a51867eb172"
+    }
+  ]
+}

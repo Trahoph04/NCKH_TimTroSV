@@ -28,6 +28,18 @@ COPY migrations/92_matching_chat.sql /docker-entrypoint-initdb.d/92-matching-cha
 COPY migrations/93_matching_deck.sql /docker-entrypoint-initdb.d/93-matching-deck.sql
 # đánh giá ghép bạn: deck_log.explore, ghép lại không mất vết unmatched, chấm điểm 1–5
 COPY migrations/94_matching_eval.sql /docker-entrypoint-initdb.d/94-matching-eval.sql
+# bản đồ v2: loại nha_mini, nhãn sang nhượng, bảng tiện ích OSM + cache đường đi ORS
+COPY migrations/95_map_v2.sql /docker-entrypoint-initdb.d/95-map-v2.sql
+# snapshot tiện ích OSM (Overpass) quanh 3 khu CTU — sinh bằng `python -m app.pois.fetch_overpass --sql`
+COPY migrations/96_pois_seed.sql /docker-entrypoint-initdb.d/96-pois-seed.sql
+# đánh giá mù hệ gợi ý nhà trọ (pooling 3 hệ, SV chấm 0–2)
+COPY migrations/97_rec_eval.sql /docker-entrypoint-initdb.d/97-rec-eval.sql
+# rà soát chất lượng: lý do loại tin (audit_reason) — app.cleaner.audit
+COPY migrations/98_listing_audit.sql /docker-entrypoint-initdb.d/98-listing-audit.sql
+# cờ vị trí chính xác — bản đồ mặc định chỉ cắm tin TRUE
+COPY migrations/99_location_precise.sql /docker-entrypoint-initdb.d/98b-location-precise.sql
+# chatbot: kho pháp lý/KTX, lịch sử hội thoại, cache câu trả lời (ADR-023). Tên 98c để chạy TRƯỚC 99-test-db.sh
+COPY migrations/100_chatbot.sql /docker-entrypoint-initdb.d/98c-chatbot.sql
 # DB riêng cho pytest (nckh_test) — chạy SAU mọi migration, áp lại đúng các file trên
 COPY create_test_db.sh /docker-entrypoint-initdb.d/99-test-db.sh
 COPY create_test_db.sh /usr/local/bin/create_test_db.sh

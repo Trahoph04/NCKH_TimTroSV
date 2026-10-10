@@ -1,0 +1,55 @@
+{
+  "source": {
+    "id": "supplement-s03-word",
+    "title": "Thông tin giá điện — Trung tâm Chăm sóc khách hàng Điện lực miền Nam EVNSPC",
+    "category": "electricity",
+    "path": "docs/legal_word_supplement_corpus_v8_20261005/S03-publisher-text.docx",
+    "sha256": "eb15a5d4fa9aa5ddc0458d5ed944d8c91dc3b5205bd68aa9e69c4e8a39e4d420",
+    "source_url": "https://cskh.evnspc.vn/TraCuu/ThongTinGiaDien",
+    "publisher": "Trung tâm Chăm sóc khách hàng Điện lực miền Nam EVNSPC",
+    "publication_date": null,
+    "page_kind": "logical_document",
+    "pages": 1,
+    "ocr_used": false,
+    "extraction": "Native DOCX XML; literal publisher text, no OCR or PDF",
+    "source_content_kind": "publisher_guidance_word_conversion",
+    "source_scope_warning": "Hướng dẫn/khuyến cáo của Trung tâm Chăm sóc khách hàng Điện lực miền Nam EVNSPC; không phải điều luật. Trang ghép nhiều văn bản theo thời kỳ. Không dùng riêng ghi chú để kết luận cách tính cho ba sinh viên; phải đối chiếu điều kiện của Thông tư 60 và kỳ hóa đơn. Không đưa bảng giá điện cố định vào bản đọc này.",
+    "not_exhaustive": true,
+    "source_policy": "Literal publisher text; never assistant summary, reference answer, form or drafted agreement.",
+    "original_html_sha256": "e47517501dd45d28d46b099eecfc5d6e509ce306333bdb392c1ceab2a2707b55",
+    "original_block_indices": [
+      61,
+      63,
+      158,
+      160
+    ],
+    "conversion": "Whitespace normalization only; selected exact DOM blocks converted to DOCX",
+    "retrieved_at_utc": "2026-10-05T15:27:13.170226+00:00"
+  },
+  "provisions": [
+    {
+      "provision_id": "S03:web-block:61",
+      "article": null,
+      "clause": null,
+      "heading": "Thông tin giá điện | Đoạn nguyên văn 61",
+      "content": "Thông tư 60/2025/TT-BCT ngày 02/12/2025 của Bộ Công Thương quy định về thực hiện giá bán điện.\n\nQuyết định 1279/QĐ-BCT ngày 09/5/2025 của Bộ Công Thương quy định về giá bán điện.\n\nHotline: 1558 - 19001006 - 19009000\n\nEmail: cskh@evnspc.vn",
+      "source_start": 0,
+      "source_end": 238,
+      "points": [],
+      "exceptions": [],
+      "cross_references": [],
+      "kind": "publisher_guidance",
+      "article_context": "",
+      "content_sha256": "c290380abece9a547abed2ce00c0b74e7c8be0443efdb834dd154131d80fcefe",
+      "page_from": 1,
+      "page_to": 1,
+      "original_block_indices": [
+        61,
+        63,
+        158,
+        160
+      ],
+      "extraction_text_sha256": "c290380abece9a547abed2ce00c0b74e7c8be0443efdb834dd154131d80fcefe"
+    }
+  ]
+}
