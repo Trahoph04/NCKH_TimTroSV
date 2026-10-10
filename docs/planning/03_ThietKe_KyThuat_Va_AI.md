@@ -25,6 +25,8 @@
   - **Rule-based:** Chấm điểm rủi ro nếu (1) Không có ảnh, (2) Nhắc đến "đặt cọc trước khi xem phòng".
 
 ### 🟠 MODULE 2: Gợi Ý Nhà Trọ (Housing Recommendation)
+> **07/10/2026: thiết kế cosine dưới đây đã được thay** bằng knowledge-based (lọc + MAUT + MMR) — số đo bác cosine
+> và thiết kế mới ở `docs/specs/Recommendation.md`, ADR-021. Giữ nguyên đoạn dưới làm lịch sử.
 - **Vấn đề:** Trả về danh sách nhà trọ phù hợp nhất với túi tiền, sở thích và nhu cầu an sinh của sinh viên.
 - **Kỹ thuật sử dụng:** `Content-Based Filtering` kết hợp `Cosine Similarity` và `Spatial Analysis` (Phân tích không gian).
 - **Cách hoạt động:**

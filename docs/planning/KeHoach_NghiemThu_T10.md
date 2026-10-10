@@ -6,6 +6,14 @@ _Lập: 13/09/2026 · Mốc nghiệm thu: **tuần 12–16/10/2026** · Chủ nh
 > (WebSocket + Redis, ảnh xoá EXIF, T3 lộ liên hệ khi cả hai đồng ý; xem `docs/tech_specs/Chat_Realtime.md`).
 > Kịch bản demo mục 5 đã đổi theo.
 
+> **Cập nhật 07/10:** code freeze lùi **10/10** để làm bản đồ v2 (MapLibre + tiện ích OSM + gói Chợ Tốt 789, xem
+> `docs/tech_specs/Map_MapLibre_POI.md`). Bước 2 kịch bản demo đổi theo; marker đỏ/review chỉ có khi nhánh risk của
+> nhóm được ghép. Chạy `route_cache_backfill --apply` trước buổi tập (quota ORS Directions).
+
+> **Cập nhật 07/10 (2):** module B (gợi ý) đã code — knowledge-based, ADR-021. **Buổi thử nghiệm 09/10** gồm 3 phần
+> cho mỗi SV (đăng nhập MSSV): `/roommate/rate` (chấm ghép bạn) → `/goi-y/danh-gia` (chấm mù gợi ý, ~6 phút) → phiếu SUS.
+> Kịch bản + lệnh xuất CSV: `docs/tech_specs/Recommendation.md` mục 3.
+
 > Nguyên tắc xuyên suốt: **hội đồng chấm 3 thứ — demo chạy trót lọt, báo cáo có số liệu, mỗi nội dung đã đăng ký trong thuyết minh có sản phẩm tương ứng.** Mọi việc không phục vụ 1 trong 3 thứ đó thì cắt.
 
 ---
@@ -100,7 +108,7 @@ Kết luận: nền tảng dữ liệu + web đã ổn; **4 module AI và toàn 
 
 | Việc | Người | Hạn |
 |---|---|---|
-| **Code freeze 08/10** — sau đó chỉ sửa lỗi demo | cả nhóm | 08/10 |
+| **Code freeze 10/10** (lùi từ 08/10 ngày 07/10) — sau đó chỉ sửa lỗi demo | cả nhóm | 10/10 |
 | Chương 5 (kết luận, hạn chế, hướng phát triển) + hoàn thiện toàn bộ báo cáo tổng kết theo mẫu ĐHCT; tài liệu tham khảo (ghép [1]–[9] gốc + [R1]–[R11] bổ sung) | Phú | 07/10 |
 | Báo cáo tóm tắt (8–10 trang) + Bản tin (1 trang) theo mẫu ĐHCT | Phúc | 08/10 |
 | Slides 15–20 trang + kịch bản demo 8 phút (mục 5) | Bảo + Lợi | 09/10 |
@@ -140,8 +148,10 @@ Phụ lục: bộ câu hỏi khảo sát, hướng dẫn cài đặt, danh sách
 ## 5. Kịch bản demo 8 phút (tập đúng thứ tự này)
 
 1. (1') Trang chủ — số liệu thật, lọc "Dưới 2 triệu · Khu II · ≤10 phút".
-2. (2') Bản đồ — bán kính quanh Khu II, marker đỏ → bấm → review 1 sao "cọc không trả" + lý do rủi ro; marker xanh → review tốt. Bấm "Khiếu nại".
-3. (1') Gợi ý cho bạn — nhập ngân sách/khu/tiện ích → 10 tin + lý do.
+2. (2') Bản đồ — bán kính quanh Khu II, tab Nhà mini/Phòng trọ; bấm cluster lớn → "N tin chung một vị trí" (giải
+   thích toạ độ cấp phường); chọn tin → đường đi từ khu II + phút + "Tiện ích trong 1 km" (bấm chấm nhà thuốc/xe
+   buýt); đổi Khu III. *(Nếu nhánh risk đã ghép: marker đỏ → review 1 sao + lý do rủi ro; bấm "Khiếu nại".)*
+3. (1') Gợi ý cho bạn — `/goi-y`: ngân sách lấy sẵn từ hồ sơ, chọn khu/thời gian/tiện ích/3 điều quan tâm → 10 tin + % + lý do + "nên hỏi chủ trọ"; mở "Hệ thống xếp hạng như thế nào?" (trọng số từ khảo sát).
 4. (2') Ghép bạn ở — đăng nhập tab **MSSV** → hồ sơ đã điền → bộ thẻ kèm % + lý do → "Quan tâm" (hoặc "✉ Nhắn" kèm lời
    nhắn) → tài khoản thứ 2 mở tab Lời mời, thích lại → **"Thành đôi!"** bật ra ở **cả hai** máy → mở chat, nhắn 1 câu
    (realtime) → cả hai bấm đồng ý chia sẻ liên hệ (**T3**) → hiện email/SĐT + nút Zalo.

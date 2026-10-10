@@ -56,14 +56,16 @@ KHÔNG tự tạo tài khoản khi MSSV lạ (khác Google): pool chỉ gồm ng
 |---|---|---|---|
 | GET | `/listings` | Tìm kiếm + lọc + sắp xếp + phân trang | 🌐 |
 | GET | `/listings/{id}` | Chi tiết 1 tin | 🌐 |
-| GET | `/listings/nearby` | Tìm theo bán kính (lat,lng,radius) | 🌐 |
+| GET | `/listings/nearby` | Tìm theo bán kính (lat,lng,radius,housing) — tối đa 1000 tin | 🌐 |
+| GET | `/listings/{id}/route?campus=0\|1\|2` | Polyline `[[lat,lng],…]` khu CTU → tin; đọc `route_cache` trước, thiếu mới gọi ORS | 🌐 |
 | POST | `/listings` | Đăng tin UGC (qua AI Risk Check) | ✓ |
 | PUT | `/listings/{id}` | Sửa tin của mình | ✓ |
 | DELETE | `/listings/{id}` | Ẩn tin của mình (soft) | ✓ |
 | POST | `/listings/{id}/report` | Báo cáo tin sai | ✓ |
 
 **GET /listings** — query params:
-`q`, `min_price`, `max_price`, `min_area`, `district`, `amenities` (csv), `max_distance_ctu`, `sort` (`price_asc`|`price_desc`|`newest`|`nearest`|`freshness`), `page`, `size`.
+`q`, `min_price`, `max_price`, `min_area`, `district`, `amenities` (csv), `max_distance_ctu`, `housing` (`phong_tro`|`nha_mini`; bỏ trống = cả hai, giá trị khác → 422), `sort` (`price_asc`|`price_desc`|`newest`|`nearest`|`freshness`|`quality`), `page`, `size`.
+Mỗi item có thêm `listing_type` (`phong_tro`|`nha_mini`|…) và `offer_kind` (`"lease_transfer"` = pass phòng/sang nhượng, `null` = thuê thường) — FE hiện nhãn "Nhà mini" / "Sang nhượng".
 ```jsonc
 // 200 — chỉ trả status=active, kèm freshness
 { "total": 142, "page": 1, "size": 20, "items": [
@@ -76,19 +78,55 @@ KHÔNG tự tạo tài khoản khi MSSV lạ (khác Google): pool chỉ gồm ng
 
 ---
 
-## 3. Recommendation (`/recommend`)
+> **08/10 (ADR-024):** sinh viên không đăng tin. `POST /listings`, `PUT|DELETE /listings/{id}` và `GET /listings/managed`
+> (thay `GET /listings/mine`) cần quyền **admin**; `PUT` tin không phải `source='user'` ⇒ **409** (tin crawl/khảo sát do
+> pipeline cập nhật); `DELETE` = ẩn (`status='hidden'`) mọi tin.
+
+## 2b. Tiện ích OSM (`/pois`) — ✅ đã code (07/10)
+
+Dữ liệu © OpenStreetMap (Overpass, snapshot `infra/db/migrations/96_pois_seed.sql`). Khoảng cách = **đường chim bay**.
+Nhóm: `cho` · `sieu_thi` · `atm` · `nha_thuoc` · `y_te` · `xe_buyt` (định nghĩa ở `apps/api/app/pois/categories.py`).
 
 | Method | Path | Mô tả | Auth |
 |---|---|---|---|
-| POST | `/recommend/quiz` | Nộp onboarding quiz → tạo preference_vector | ✓ |
-| GET | `/recommend/for-you` | Top-10 gợi ý (cold-start fallback popularity) | ✓ |
-| GET | `/recommend/popular` | Top-10 phổ biến (guest dùng được) | 🌐 |
-| POST | `/recommend/feedback` | Ghi implicit feedback (view/bookmark/click) | ✓ |
+| GET | `/pois?lat&lng&radius=1000&category=` | Tiện ích trong bán kính (≤ 5000 m), gần trước, tối đa 300; category lạ → 422 | 🌐 |
+| GET | `/pois/summary?lat&lng&radius=1000` | Mỗi nhóm: `count` + `nearest` (luôn đủ 6 nhóm, nhóm trống count=0) | 🌐 |
 
 ```jsonc
-// POST /recommend/feedback
-{ "listing_id": 1, "type": "bookmark", "duration_ms": 4200 }
+// GET /pois/summary?lat=10.0146&lng=105.7615&radius=1000
+{ "radius": 1000, "categories": [
+  { "category": "nha_thuoc", "label": "Nhà thuốc", "count": 15,
+    "nearest": { "id": 812, "category": "nha_thuoc", "name": "PharmaCity",
+                 "lat": 10.0151, "lng": 105.7626, "distance_m": 131.4 } }, ... ] }
 ```
+FE gọi qua Route Handler `/api/pois`, `/api/pois/summary`, `/api/listings/{id}/route` (FastAPI không bật CORS).
+
+## 3. Recommendation (`/recommend`) — ✅ đã code (07/10)
+
+Knowledge-based: lọc cứng + nới → MAUT (trọng số khảo sát) → MMR (ADR-021, `docs/specs/Recommendation.md`).
+Thay thiết kế cũ (quiz → preference_vector cosine, popularity fallback, feedback) — xem ADR-021.
+
+| Method | Path | Mô tả | Auth |
+|---|---|---|---|
+| POST | `/recommend` | 10 tin + `match` 0–100 + `reasons` + `ask` (nên hỏi chủ trọ) + `relaxed` | 🌐 |
+| GET | `/recommend/prefill` | `{budget, gender}` từ hồ sơ ghép bạn (C1 → trần ngân sách) | ✓ |
+| POST | `/recommend/eval/session` | Lượt đánh giá mù: gộp top-10 của 3 hệ, xáo trộn → thẻ (không điểm/hệ) | ✓ (10/10 phút) |
+| GET | `/recommend/eval/session` | Lượt gần nhất (làm tiếp) | ✓ |
+| POST | `/recommend/eval/judge` | `{card_code, relevance: 0\|1\|2}` → 204; thẻ người khác → 404 | ✓ (90/phút) |
+
+```jsonc
+// POST /recommend
+{ "budget": 2000000, "campus": 1, "max_minutes": 10, "housing": "phong_tro",       // housing tuỳ chọn
+  "required": ["wifi", "private_wc"], "top_factors": ["gia", "gan_truong"], "gender": "nam" }
+// required ⊂ wifi|air_conditioner|private_wc|parking|kitchen|fridge|washing_machine|free_hours
+// top_factors ≤ 3 ⊂ gia|gan_truong|gio_tu_do|tien_nghi|cho_de_xe|gan_cho   — sai → 422
+// 200
+{ "items": [{ "listing": { /* ListingOut */ }, "match": 92,
+              "reasons": ["Giá 1,3 triệu, thấp hơn ngân sách 700k", "5 phút xe máy tới khu II"],
+              "ask": ["WC riêng"] }],
+  "relaxed": [], "candidates": 325, "weights": { "gia": 0.302, ... }, "algo_ver": "maut-mmr-v1" }
+```
+Xuất phán đoán: `python -m app.recommend.export_judgments` (người chấm = mã băm, không PII).
 
 ---
 
@@ -168,25 +206,35 @@ Rate limit (429): tin nhắn 30/phút · upload 10/phút · báo cáo 5/10 phút
 
 ---
 
-## 5. Chatbot RAG (`/assistant`) — ⬜ chưa code
+## 5. Chatbot RAG (`/chatbot`) — ✅ đã code (08/10, ghép từ branch `PHUC`, ADR-023)
 
-> Tiền tố `/chat` đã thuộc về chat realtime (mục 4b). Khi code chatbot RAG, dùng tiền tố khác (đề xuất `/assistant`).
+> Tiền tố `/chat` thuộc chat realtime (mục 4b) ⇒ chatbot dùng `/chatbot` (FE: `/api/chatbot/*`). Mọi route cần đăng nhập;
+> chủ lịch sử lấy từ token, không nhận `user_id` từ client. Rate limit 12 câu/phút/user (feedback 30/phút).
 
 | Method | Path | Mô tả | Auth |
 |---|---|---|---|
-| POST | `/assistant/ask` | Hỏi đáp ngôn ngữ tự nhiên (confidence threshold) | ✓ |
-| GET | `/assistant/history` | Lịch sử hội thoại (5 lượt gần nhất) | ✓ |
+| POST | `/chatbot/ask` | Hỏi tìm trọ / KTX / pháp lý; trả câu trả lời + tin + nguồn, lưu vào hội thoại | ✓ |
+| GET | `/chatbot/conversations?limit=30&offset=0` | Danh sách hội thoại của mình | ✓ |
+| GET | `/chatbot/conversations/{uuid}?limit=50&before_id=` | Mở hội thoại, phân trang lượt cũ | ✓ |
+| DELETE | `/chatbot/conversations/{uuid}` | Xoá hội thoại (kèm cache riêng của nó) — 204 | ✓ |
+| POST | `/chatbot/feedback` | `{event_id, rating: 1\|-1, reason?, comment?}` — event phải của chính mình | ✓ |
+| GET/PATCH | `/admin/documents[/{id}]` | Admin tìm/đọc/bật-tắt tài liệu của corpus đang phục vụ (có audit) | admin |
+| GET | `/health/ai` | Provider, Ollama có model chưa, Gemini có key chưa, corpus đã nạp | 🌐 |
 
 ```jsonc
-// POST /assistant/ask
-{ "question": "Phòng 1.5 triệu gần CTU có wifi?", "session_id": "abc" }
-// 200 — confidence cao
-{ "answer": "Có 3 phòng phù hợp...", "confidence": "high",
-  "sources": [ { "listing_id": 1, "title": "..." } ] }
-// 200 — confidence thấp (T8: không bịa)
-{ "answer": "Không tìm thấy thông tin phù hợp. Thử từ khóa khác nhé!",
-  "confidence": "low", "sources": [] }
+// POST /chatbot/ask
+{ "message": "Phòng dưới 2 triệu ở Ninh Kiều có máy lạnh", "conversation_id": null }
+// 200
+{ "answer": "Mình tìm thấy 5 lựa chọn phù hợp nhất: … [1] …", "intent": "find_listing",
+  "listings": [ { "id": 1530, "title": "…", "price": 1500000, "match_reasons": ["Trong ngân sách"], "rank": 1 } ],
+  "sources": [ { "kind": "listing" | "legal_document", "rank": 1, "title": "…", "heading": "Điều 328…" } ],
+  "no_answer": false, "partial_answer": false, "degraded": true, "degraded_reasons": ["…"],
+  "retrieval_mode": "hybrid" | "lexical_structured" | "legal_hybrid", "generation_provider": "gemini" | "qwen-local" | "template" | "legal-extractive" | …,
+  "conversation_id": "uuid", "turn_id": 12, "reused_answer": false, "event_id": 34, "latency_ms": 2700 }
 ```
+
+`degraded: true` = không dùng được LLM hoặc bộ kiểm chứng bác bản nháp ⇒ câu trả lời template/trích nguyên văn theo nguồn
+(không bịa). Câu hỏi độc lập có nguồn được cache (pháp lý/KTX 24 h, tin trọ 5 phút) — `reused_answer: true`.
 
 ---
 
@@ -237,11 +285,12 @@ Rate limit (429): tin nhắn 30/phút · upload 10/phút · báo cáo 5/10 phút
 |---|---|---|---|
 | GET | `/health` | Liveness | 🌐 |
 | GET | `/health/deps` | PostGIS + pgvector + Redis | 🌐 |
+| GET | `/health/ai` | Chatbot: provider/model, Ollama, corpus (mục 5) | 🌐 |
 
 ---
 
 ## Phụ lục: trạng thái hiện thực
-- ✅ Đã code: `/health`, `/health/deps`, `/crawler/*`, `/listings` (search/filter/sort/nearby/detail), `/auth`
-  (register/login/login-google/login-ctu/refresh/me), `/matching` (mục 4), `/chat` realtime (mục 4b).
-- ⬜ Chưa code: verify-otp / forgot / reset password, recommend, chatbot RAG, risk, admin.
+- ✅ Đã code: `/health`, `/health/deps`, `/crawler/*`, `/listings` (search/filter/sort/nearby/detail/route), `/pois`, `/recommend`, `/auth`
+  (register/login/login-google/login-ctu/refresh/me), `/matching` (mục 4), `/chat` realtime (mục 4b), `/chatbot` (mục 5, 08/10).
+- ⬜ Chưa code: verify-otp / forgot / reset password, risk, admin (risk/admin ở branch nhóm, chờ ghép; riêng `/admin/documents` của chatbot đã có API).
 - Khi code, dùng FastAPI auto-docs tại `/docs` (OpenAPI) làm nguồn chính thức; file này là hợp đồng thiết kế.

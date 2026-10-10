@@ -90,11 +90,11 @@ Kiến trúc tách Frontend (Next.js) — Backend (FastAPI) — Database (Postgr
 ### FR-4: Gợi ý cá nhân hóa (AI)
 | ID | Yêu cầu | Quyền |
 |---|---|---|
-| FR-4.1 | Onboarding quiz → preference_vector 384-dim (T5) | User |
-| FR-4.2 | Gợi ý "Dành cho bạn" Top-10 Content-Based Cosine | User |
-| FR-4.3 | Cold-start: chưa có vector → Popularity-Based fallback | User |
-| FR-4.4 | Ghi implicit feedback (view/bookmark/click) | User |
-| FR-4.5 | Khám phá ε-greedy 80/20 chống filter bubble (T6) | User |
+| FR-4.1 | Nhập tiêu chí theo đúng câu khảo sát (C1 ngân sách, khu học, C4 thời gian, C5 tiện ích, 3 yếu tố quan tâm nhất); lấy sẵn ngân sách từ hồ sơ ghép bạn | Guest/User |
+| FR-4.2 | Top-10 **knowledge-based**: lọc cứng + tự nới (báo rõ) → MAUT, trọng số từ khảo sát co rút về lựa chọn cá nhân → kèm lý do + "nên hỏi chủ trọ" (ADR-021). *Thay "Content-Based Cosine": đo trên DB, cosine thô cho ≥ 0,9999 ở 100% tin; cosine chuẩn hoá chỉ 35% top-10 thoả tiêu chí* | Guest |
+| FR-4.3 | Cold-start: knowledge-based không cần lịch sử ⇒ không cần popularity fallback | System |
+| FR-4.4 | Ghi phán đoán mù 0–2 trong buổi thử nghiệm (pooling 3 hệ) để đo P@10/NDCG@10 | User |
+| FR-4.5 | Chống "bọt lọc"/trùng lặp bằng **MMR** (λ = 0,7), đo ILS@10. *Thay ε-greedy: không có vòng học từ phản hồi nên thăm dò không có tác dụng* | System |
 
 ### FR-5: Tìm bạn ở ghép (AI)
 | ID | Yêu cầu | Quyền |

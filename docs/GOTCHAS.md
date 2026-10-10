@@ -149,3 +149,130 @@ bằng package rỗng trong `sys.modules` (`eval/roommate_lib.py`).
 `-r--r--r--` giống `scheduler.py` trước đây. Không tự đổi quyền; biến mới
 (`ROOMMATE_DECK_MODE`, `CHAT_WS_URL`) có giá trị mặc định trong `docker-compose.yml`.
 Nếu read-only không cố ý: `chmod u+w .env.example` rồi thêm hai biến đó.
+
+## `maplibre-gl@6` + Next 14: "Worker failed to load" — bản đồ trắng (07/10/2026)
+
+Bản 6 chỉ phát hành ESM, file worker (`maplibre-gl-worker.mjs`) được tìm theo `import.meta.url` lúc chạy;
+webpack của Next 14 không copy file đó. Ghim `maplibre-gl@^5` (worker nhúng sẵn trong bundle). Muốn lên 6 phải tự
+copy worker vào `public/` + `setWorkerUrl()`.
+
+## Bản đồ MapLibre trống khi tab chạy nền / ảnh chụp tự động (07/10/2026)
+
+Trình duyệt dừng `requestAnimationFrame` ở tab không hiển thị ⇒ tile và lớp GeoJSON về rồi nhưng chưa vẽ; ảnh chụp
+bằng extension trông như bản đồ hỏng. Tương tác 1 lần (cuộn/zoom) là vẽ đủ. Không phải lỗi app.
+
+## GeoJSON cluster: `maxzoom` của source phải > `clusterMaxZoom` (07/10/2026)
+
+Mặc định `maxzoom` = 18; đặt `clusterMaxZoom` = 18 (để các tin chung 1 toạ độ luôn là bong bóng có số) mà không
+nâng `maxzoom` thì MapLibre cảnh báo và lớp tin có thể không vẽ. `MapCanvas.tsx` đặt `maxzoom = MAX_ZOOM + 2`.
+
+## Browser gọi thẳng FastAPI :8000 bị chặn CORS (07/10/2026)
+
+FastAPI không bật CORS; `apiFetch` luôn gửi `Content-Type: application/json` ⇒ request từ client component bị
+preflight chặn (trước đây nút vẽ đường trên bản đồ hỏng âm thầm vì lỗi bị nuốt). Mọi lời gọi từ browser đi qua
+Route Handler (`/api/listings/[id]/route`, `/api/pois`, `/api/pois/summary`).
+
+## Chạy lại `run_cleaner` trên tin đã `cleaned` làm hỏng cờ diện tích (07/10/2026)
+
+Tầng `resolve_area` GHI ĐÈ `area` bằng số impute (`is_imputed_area=true`). Set `cleaning_status='raw'` rồi chạy lại ⇒
+số impute bị coi là diện tích thật. Đổi classifier thì dùng `python -m app.cleaner.reclassify` (chỉ tính lại loại/
+điểm từ cột đã lưu; tin `rejected` thì an toàn để về `raw` vì nhánh reject không ghi area).
+
+## Overpass trả 406 khi thiếu User-Agent, 504 khi quá tải (07/10/2026)
+
+`curl` mặc định bị 406; gọi phải kèm UA định danh. Máy chủ chính và các mirror có lúc cùng 504 hàng chục phút —
+`fetch_overpass.py` thử lần lượt các mirror; vẫn hỏng thì dùng snapshot `96_pois_seed.sql` có sẵn (hoặc lọc PBF
+Geofabrik ra JSON rồi `--from-file`).
+
+## ORS Directions hết quota trong ngày ⇒ 403 "Quota exceeded" (07/10/2026)
+
+Key ORS hiện tại hết quota Directions sau ~180 lượt ngày 07/10 (Matrix là quota riêng, vẫn chạy). Lỗi là **403**,
+không phải 429. Quota hồi lúc 0h UTC. `route_cache_backfill` dừng ngay khi gặp 403; tránh gọi Directions thừa
+(mọi đường đi đã tính nằm trong `route_cache`).
+
+## Build lại container `api` giết job đang `exec` trong nó (07/10/2026)
+
+`docker compose up -d --build api` tạo container mới ⇒ job dài chạy bằng `docker compose exec api …` (vd.
+`route_cache_backfill --apply`, ~15 phút) chết giữa chừng. Job dài chạy bằng `docker compose run --rm --no-deps -T api …`
+(container riêng); script tự bỏ qua phần đã làm.
+
+## Bấm nút trước khi trang Next hydrate thì mất cú bấm (07/10/2026)
+
+Trang client (`/goi-y`, `/goi-y/danh-gia`) render sẵn HTML phía server; nút đã hiện nhưng chưa có handler tới khi JS
+hydrate xong ⇒ bấm ngay sau khi tải không có tác dụng, không báo lỗi (dính khi test bằng trình duyệt tự động). Buổi thử
+nghiệm trên mạng trường chậm: dặn SV chờ trang tải hẳn. Kiểm bằng log API: không có request = cú bấm rơi trước hydrate.
+
+## nhatot.com chặn bot (403) — kiểm tin còn sống qua gateway JSON (07/10/2026)
+
+GET trang `www.nhatot.com/<id>.htm` / `chotot.com` từ script luôn 403 (chống bot) ⇒ KHÔNG kết luận được tin đã gỡ. Dùng
+`https://gateway.chotot.com/v1/public/ad-listing/<list_id>`: 200 = còn, 404 = đã gỡ. Đo 07/10: 14/24 ứng viên Chợ Tốt
+crawl 15–18/09 đã 404 sau ~3 tuần — dữ liệu sàn "chết" rất nhanh, phải kiểm trước mỗi buổi demo.
+
+## Tên phường trong tin ≠ tên phường OSM sau sáp nhập 2025 (07/10/2026)
+
+Tin ghi phường cũ (Thới Bình, Xuân Khánh, Hưng Lợi…), OSM đã đổi sang phường mới sau sáp nhập (Phường Ninh Kiều, Tân An,
+Cái Khế…). So khớp vị trí bằng tên PHƯỜNG sẽ báo sai hàng loạt — `cleaner/audit.py` chỉ so tên ĐƯỜNG.
+
+## Quota ORS Directions không hồi lúc 0h UTC như tưởng (07/10/2026)
+
+Hết quota ~01h 07/10, tới 12h20 vẫn 403 ⇒ nhiều khả năng cửa sổ 24 giờ trượt tính từ lúc dùng. Matrix là quota riêng nên
+phút tới trường không bị ảnh hưởng; chỉ không vẽ được đường cho tin chưa có trong `route_cache`.
+
+## `docker cp apps/api/tests …:/app/tests` lần 2 tạo `tests/tests/` ⇒ pytest báo hàng loạt ERROR (07/10/2026)
+
+Lần đầu (container mới build) thư mục đích chưa có nên chép đúng chỗ; lần sau `/app/tests` đã tồn tại ⇒ docker chép VÀO
+trong, sinh `tests/tests/*` trùng tên module ⇒ "19 errors" lúc thu thập test, không phải lỗi code. Chép nội dung thay vì
+thư mục: `docker cp apps/api/tests/. "$(docker compose ps -q api)":/app/tests/`.
+
+## Bỏ dấu làm "diện tích" trùng "điện" ⇒ tiền điện sai (07/10/2026)
+
+`_fold` bỏ dấu và đổi đ→d nên "Diện tích: 5x5m" thành "dien tich: 5x5m" — regex tiền điện `dien…<số>` đọc "5" thành 5.000đ
+(tin demo 1598 ghi "điện 3.500đ/kw" nhưng lưu 5.000). Đã chặn `dien tich|thoai|may` bằng lookahead và tính lại 68 tin
+(đa số là số rác từ "diện tích 3.000m²", "trạm điện 560 KVA" → nay NULL). Regex nào chạy trên text đã bỏ dấu phải
+nghĩ tới các từ trùng mặt chữ sau khi bỏ dấu.
+
+## ORS hết quota Directions ⇒ bấm tin trên bản đồ không còn đường đi (07/10/2026)
+
+Triệu chứng: bấm tin chưa có trong `route_cache` thì card hiện số phút nhưng không có đường (API 502 vì ORS trả 403). Số
+phút không mất vì Matrix là quota riêng nên dễ tưởng chức năng vẫn chạy. Đã thêm OSRM công khai làm dự phòng (profile
+cache `osrm-driving`). Lưu ý: server demo OSRM chỉ cho dùng nhẹ (khoảng 1 req/s, không SLA), chỉ có profile ô tô; đừng
+dùng cho tải thật — backfill trước buổi demo để lúc trình bày đọc cache.
+
+## Chatbot: hỏi trước khi có model E5 ⇒ embedder "nhiễm" lỗi tới lúc restart API (08/10/2026)
+
+`E5EmbeddingProvider._load_once` ghi `_load_error` ở lần nạp hỏng đầu tiên và không thử lại. API chỉ đọc model từ cache
+local (`local_files_only`), model chỉ được tải bởi `index_corpus`/`index_listings` (vào volume `models`). Nếu có người hỏi
+chatbot TRƯỚC khi chạy index lần đầu ⇒ API chạy BM25 (`degraded`) mãi. Chạy index xong mà `/chatbot/ask` vẫn báo
+"embedding model unavailable" ⇒ `docker compose restart api`. Xoá volume `models` cũng gây lại đúng lỗi này.
+
+## Chatbot ghép từ branch PHUC: key tiện ích và giới tính khác crawler repo này (08/10/2026)
+
+Catalog của PHUC dùng `private_bathroom`/`refrigerator`/`flexible_hours`/`mezzanine`/`pets_allowed` và
+`parsed_amenities->>'gender'`; crawler repo này ghi `private_wc`/`fridge`/`free_hours` (không có gác, thú cưng) và giới tính
+ở cột `gender_only` ('nam'/'nu'). Lọc theo key không tồn tại KHÔNG lỗi mà trả 0 tin ("có gác" ⇒ không có phòng nào).
+Đã đổi trong `chatbot/parser.py:AMENITIES` + `repo.py`; khi đồng bộ lại code từ branch PHUC phải giữ các chỗ này.
+
+## Tin khảo sát chỉ có tên trọ ("TT HOME", "2T House") bị xếp `khac` ⇒ biến khỏi UI (08/10/2026)
+
+`classify` chỉ đọc tiêu đề; tin khảo sát không đo diện tích nên luật giá/diện tích cũng không bắt. Đã cho
+`source='survey'` rơi về `phong_tro` ở cuối `classify` (luật mặt bằng/nhà mini/nguyên căn vẫn ưu tiên). Nạp khảo sát xong
+nên xem `listing_type` của các tin mới — tin `khac`/`nha_nguyen_can` không hiện trên tìm kiếm/bản đồ.
+
+## Khoá Gemini sai vẫn "chạy": chatbot lặng lẽ rơi sang Qwen/template (08/10/2026)
+
+`FallbackResponseGenerator` nuốt lỗi của từng nhà cung cấp, nên khoá sai/hết hạn không làm API lỗi — chỉ thấy chatbot chậm
+(70–85 s) và hay ra câu trả lời mẫu. Khoá gửi bằng header `x-goog-api-key` tới `generativelanguage.googleapis.com`. **Khoá
+Gemini API hiện có cả dạng cũ `AIza…` lẫn dạng mới `AQ.…` (Google đổi từ 2026)** — đừng kết luận khoá sai chỉ vì hình dạng;
+(08/10 mình từng nhầm `AQ.` là khoá Vertex, sai). Khoá bị từ chối lần đầu vì chuỗi dán dính ký tự thừa ở hai đầu: lỗi 400
+"API key not valid" (khoá nguyên bản) và 401 "cần OAuth" (đã cắt một phần). Sau khi đặt khoá luôn chạy `python -m app.room_service.chatbot.check_llm --call` — nó báo khoá có dùng được không và tên
+`GEMINI_MODEL` có tồn tại với khoá đó không (tên mặc định do Phúc chọn, chưa kiểm với khoá của nhóm). Đã gặp: chuỗi dán từ
+trình duyệt kèm ký tự thừa ở đầu/cuối ⇒ bị từ chối. Không dán khoá vào chat/docs/commit; chỉ đặt ở `.env` (đã gitignore).
+
+## Có khoá Gemini thật trong container ⇒ pytest chậm 16 phút và có test hỏng giả (08/10/2026)
+
+Các test tích hợp gọi `/chatbot/ask` thật; khi `GEMINI_API_KEY` có giá trị thì chúng gọi Gemini (giãn cách 5 s/lần) và Qwen, bộ test từ ~1 phút thành ~16 phút; `test_numbered_credentials…` còn đọc nhầm khoá thật vào danh sách khoá. Chạy test với khoá tắt:
+`docker compose exec -T -e GEMINI_API_KEY= api python -m pytest -q` (596 passed, 68 s). Test mới về khoá phải truyền `gemini_api_key=""` để cô lập khỏi môi trường.
+
+## Đánh giá chatbot bằng một lần chạy là nhiễu (08/10/2026)
+
+Gemini không tất định: cùng mã, cùng câu hỏi, cờ `partial_answer` đổi giữa lần chạy (câu 13: 1/4 lần đủ). So sánh trước/sau trên 36 câu phải chạy nhiều lượt (≥ 3) rồi so TỶ LỆ, không so từng câu; và đừng gộp nhiều câu hỏi vào một hội thoại khi đo (lịch sử bị lẫn, từng làm câu "rẻ hơn" trả lời bằng nội dung câu khẩn cấp trước đó).

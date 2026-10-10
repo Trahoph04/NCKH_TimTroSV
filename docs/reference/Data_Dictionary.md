@@ -32,7 +32,7 @@ aggregated_listings 1──N crawl_runs (theo source, không FK cứng)
 | geom | GEOMETRY(Point,4326) | GIST index | Tọa độ (geocode) |
 | images | TEXT[] | | Mảng URL ảnh |
 | description | TEXT | | Mô tả |
-| source | VARCHAR(30) | NOT NULL | Nguồn: phongtro123/chotot/ugc |
+| source | VARCHAR(30) | NOT NULL | Nguồn: phongtro123/nhatot/mogi/…/`survey` (nhóm khảo sát thực địa, `source_id` = `KS-<STT>`, toạ độ đo tại chỗ)/`user` (UGC) |
 | source_url | TEXT | | Link gốc |
 | source_id | VARCHAR(100) | UNIQUE(source,source_id) | ID gốc trên nguồn (incremental dedup) |
 | content_hash | CHAR(64) | index | SHA-256 nội dung → đổi → trigger update |
@@ -50,7 +50,12 @@ aggregated_listings 1──N crawl_runs (theo source, không FK cứng)
 | freshness_score | REAL | DEFAULT 1.0 | exp(-age/7), độ tươi |
 | updated_at | TIMESTAMPTZ | DEFAULT now() | Lần cập nhật nội dung gần nhất |
 
+| listing_type | listing_type_enum | DEFAULT 'khac' | `phong_tro` · `nha_mini` (mig 95) · `nha_nguyen_can` · `mat_bang` · `khac` — search chỉ trả 2 loại đầu |
+| offer_kind | VARCHAR(16) | | (mig 95) `lease_transfer` = pass phòng/sang nhượng; NULL = thuê thường/không rõ |
+| audit_reason, audit_at | TEXT, TIMESTAMPTZ | | (mig 98) lý do tin bị loại bởi `app.cleaner.audit` (vi_tri_cap_phuong, da_go_khoi_nguon, ngoai_pham_vi, tin_mau, sai_duong, …); NULL = chưa bị loại |
+
 **Enum `listing_status`:** `active` | `expired` | `flagged`
+**`geocode_confidence` của nguồn `nhatot`:** toạ độ ≥ 2 tin dùng chung = điểm mặc định của phường do Chợ Tốt gán → `medium`; điểm riêng 1 tin = người đăng ghim → `high` (`crawler/repo.py:mark_shared_coords`).
 **Index:** GIST(geom), (status,last_seen), (content_hash).
 
 ---
@@ -144,6 +149,49 @@ aggregated_listings 1──N crawl_runs (theo source, không FK cứng)
 
 ---
 
+## Bảng `pois` — tiện ích OSM (migration 95, dữ liệu 96)
+
+| Cột | Kiểu | Ràng buộc | Ý nghĩa |
+|---|---|---|---|
+| id | SERIAL | PK | |
+| osm_type, osm_id | VARCHAR(8), BIGINT | UNIQUE cặp | node/way/relation + id OSM (id trùng được giữa các loại) |
+| category | VARCHAR(20) | index | `cho` `sieu_thi` `atm` `nha_thuoc` `y_te` `xe_buyt` |
+| name | TEXT | | tên OSM (hoặc brand) |
+| geom | GEOMETRY(Point,4326) | GIST | tâm (way/relation lấy `out center`) |
+| tags | JSONB | | chỉ giữ tag hiển thị (`KEEP_TAGS`) |
+| fetched_at | TIMESTAMPTZ | | |
+
+## Bảng `route_cache` — đường đi ORS đã tính (migration 95)
+
+PK `(origin_lat, origin_lng, campus, profile)` — toạ độ gốc `NUMERIC(8,5)` (~1 m); `path` JSONB `[[lat,lng],…]`
+(khu CTU → tin). ~140 toạ độ phân biệt × 3 khu ⇒ lưu hết được; demo không phụ thuộc quota ORS.
+
+---
+
+## Bảng `rec_eval_sessions` / `rec_eval_cards` — đánh giá mù gợi ý (migration 97)
+
+`rec_eval_sessions`: 1 lượt chấm (`user_id`, `criteria` JSONB = tiêu chí đã nhập, `relaxed`, `algo_ver`, `completed_at`).
+`rec_eval_cards`: PK `(session_id, listing_id)`; `card_code` UNIQUE (in trên thẻ); `display_pos`; `rank_proposed` /
+`rank_price` / `rank_cosine` (1..10, NULL = hệ đó không xếp tin này); `utility` (điểm MAUT); `relevance` 0–2; `judged_at`.
+`listing_id` cố ý KHÔNG khoá ngoại — tin bị gỡ sau buổi thử nghiệm thì phán đoán vẫn còn.
+
+---
+
+## Chatbot — migration 100 (`100_chatbot.sql`, ADR-023)
+
+- `aggregated_listings` thêm `embedding_model`, `embedded_content_hash` (sha256 văn bản đã nhúng — `index_listings` chỉ nhúng
+  lại tin đổi nội dung), `embedded_at`, `risk_evaluated_at` (luôn NULL ở repo này ⇒ risk "chưa đánh giá"). Vector ở
+  `embedding_vector VECTOR(384)` có sẵn từ mig 20.
+- `legal_documents` / `legal_chunks` (schema `public` = khung rỗng; corpus phục vụ ở schema **`legal_ctu_v1`**, cùng cột +
+  `source_metadata` JSONB, `provision_id`, `parent_content` = nguyên văn điều khoản để trích dẫn đủ ngoại lệ). `content_tsv`
+  là cột sinh (BM25/tsvector), `embedding_vector VECTOR(384)` E5. `admin_enabled` = admin tắt nguồn mà không xoá vector.
+- `legal_corpus_releases` (schema → hash manifest, trạng thái), `legal_document_admin_audit` (trước/sau mỗi lần admin sửa).
+- `chatbot_conversations` (UUID, `user_id` → users ON DELETE CASCADE) / `chatbot_turns` (`question`, `response` JSONB,
+  `cache_key`/`cache_scope`/`cache_expires_at`); `chatbot_shared_answers` (cache dùng chung, không chứa dữ liệu cá nhân).
+- `chatbot_events` (telemetry: intent, confidence, provider, latency — KHÔNG lưu nội dung câu hỏi), `chatbot_feedback`.
+
+---
+
 ## Ghi chú hiện thực
 - ✅ Đã có migration: `aggregated_listings`, `crawl_runs` (`20_listings.sql`); `users`, `roommate_profiles`, `user_interactions`, `reports`, `match_requests`, `saved_searches` (`30_users.sql`).
 - `30_users.sql` cũng thêm cột `aggregated_listings.posted_by` (FK→users, cho tin UGC).
@@ -152,3 +200,8 @@ aggregated_listings 1──N crawl_runs (theo source, không FK cứng)
 ## Công cụ vận hành
 - `python -m app.crawler.backfill` — re-geocode + re-extract area cho listing đã có, KHÔNG fetch lại nguồn (nhanh, dùng khi cải tiến logic geocode/area). Cập nhật `geom`/`distance_to_ctu`/`geocode_confidence`/`area`.
 - `python -m app.crawler.smoke phongtro123` — smoke test net thật, in 3 listing đầu, không ghi DB.
+- `python -m app.crawler.import_catalog [--apply] < CATALOG.jsonl` — nạp gói Chợ Tốt (chỉ tin chưa có, idempotent).
+- `python -m app.cleaner.reclassify [--apply]` — áp classifier mới lên tin đã làm sạch (không đụng area/title).
+- `python -m app.pois.fetch_overpass [--apply] [--sql]` — lấy lại tiện ích OSM / sinh seed 96.
+- `python -m app.listings.route_cache_backfill [--apply]` — lưu sẵn đường đi mọi toạ độ × 3 khu.
+- `python -m app.recommend.export_snapshot` / `export_judgments` — CSV cho notebook 01 (không PII).
