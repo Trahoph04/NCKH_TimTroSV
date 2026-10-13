@@ -184,7 +184,8 @@ class ChatRepository:
             clauses.append("area >= :min_area")
             params["min_area"] = filters.min_area
         if filters.district:
-            clauses.append("district ILIKE :district")
+            # district_norm như listings/repo.py: cột thô lẫn "Bình Thuỷ"/"Quận … , Thành phố Cần Thơ"
+            clauses.append("COALESCE(NULLIF(district_norm, ''), district) ILIKE :district")
             params["district"] = f"%{filters.district}%"
         if filters.max_distance_ctu is not None:
             clauses.append("distance_to_ctu <= :max_distance")
@@ -224,7 +225,8 @@ class ChatRepository:
             params["candidate_limit"] = limit
 
         sql = text(
-            "SELECT id, title, price, area, address, district, description, parsed_amenities, "
+            "SELECT id, title, price, area, address, COALESCE(NULLIF(district_norm, ''), district) AS district, "
+            "description, parsed_amenities, "
             "distance_to_ctu, route_time_campus, source, source_url, quality_score, "
             "freshness_score, risk_score, risk_evaluated_at, listing_type, first_seen, last_seen, updated_at, "
             f"{vector_sql} AS vector_score FROM {self.listing_schema}.aggregated_listings "

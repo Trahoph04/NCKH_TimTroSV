@@ -91,3 +91,20 @@ def test_tariff_vs_rental_electricity():
     for q in ("Chủ trọ được thu tiền điện của người thuê như thế nào theo quy định?",
               "Chủ trọ thu điện 4.000 đồng/kWh có đúng không?"):
         assert rental_electricity_question(q) and not tariff_question(q)
+
+
+
+def test_deposit_disputes_are_legal_questions_not_listing_search():
+    from app.room_service.chatbot.parser import parse_query
+    for q in ("Chủ trọ giữ cọc không trả thì sao?", "Chủ trọ không trả lại tiền cọc phải làm sao?",
+              "Trả phòng sớm có được hoàn cọc không?", "Bị mất cọc khi chuyển đi trước hạn"):
+        assert parse_query(q).intent == "legal_question", q
+    # tìm phòng có nhắc mức cọc vẫn là tìm phòng
+    assert parse_query("Phòng dưới 2 triệu cọc 1 tháng gần CTU").intent == "find_listing"
+
+
+
+def test_deposit_question_expands_to_civil_code_terms():
+    from app.room_service.chatbot.legal_retrieval import expand_legal_query
+    expanded = expand_legal_query("Chủ trọ giữ cọc không trả thì sao?")
+    assert "tài sản đặt cọc" in expanded and "bên nhận đặt cọc" in expanded

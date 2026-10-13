@@ -2,15 +2,21 @@ from contextlib import asynccontextmanager
 import asyncio
 import logging
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy import create_engine, text
 import httpx
 import redis
 
 from .config import settings
-from .crawler import ListingRepo, build_scheduler, run_nhatot, run_source
+from .crawler import ListingRepo, build_scheduler
+from .crawler.run_once import MODES, run_crawl_once
+from .crawler.scheduler import ENABLED_SOURCES
 from .listings import init_listings, listings_router
+from .admin_users import admin_users_router, init_admin_users
+from .reviews import init_reviews, reviews_router
 from .auth import AuthRepo, auth_router, init_auth, init_auth_deps
+from .auth.deps import require_admin
+from .auth.schemas import UserOut
 from .chat import ChatHub, chat_router, init_chat
 from .chat.body_limit import ChatUploadLimit
 from .matching import init_matching, matching_router
@@ -29,10 +35,12 @@ init_listings(engine)
 init_pois(engine)
 init_recommend(engine)
 init_auth(engine)
+init_reviews(engine)
 init_auth_deps(AuthRepo(engine))
 # hub realtime chat: WebSocket tại chỗ + Redis pub/sub cho nhiều worker (Redis chết ⇒ local-only)
 chat_hub = ChatHub(settings.redis_url)
 init_chat(engine, chat_hub)
+init_admin_users(engine, chat_hub)
 init_matching(engine, chat_hub)
 init_chatbot(engine)
 
@@ -67,6 +75,8 @@ app.include_router(listings_router)
 app.include_router(pois_router)
 app.include_router(recommend_router)
 app.include_router(auth_router)
+app.include_router(admin_users_router)
+app.include_router(reviews_router)
 app.include_router(matching_router)
 app.include_router(chat_router)
 app.include_router(chatbot_router)
@@ -142,18 +152,24 @@ def crawler_status(limit: int = 10):
     return {"enabled": settings.crawler_enabled, "runs": ListingRepo(engine).latest_runs(limit)}
 
 
-@app.post("/crawler/run")
-async def crawler_run(source: str = "phongtro123", mode: str = "incremental"):
-    """Trigger thủ công 1 nguồn (Admin/test). mode: 'incremental' | 'full'."""
-    if mode not in ("incremental", "full"):
-        raise HTTPException(400, "mode phải là 'incremental' hoặc 'full'")
-    repo = ListingRepo(engine)
-    counts = await run_nhatot(repo, mode) if source == "nhatot" else await run_source(source, mode, repo)
-    # làm sạch ngay để manual run cũng cho ra data 'cleaned' (không kẹt ở 'raw').
-    # Qua threadpool vì cùng lý do ở crawler/scheduler.py: SQLAlchemy đồng bộ gọi
-    # thẳng trong `async def` sẽ chặn event loop đang giữ mọi WebSocket chat.
-    from starlette.concurrency import run_in_threadpool
+# Một lượt mỗi nguồn: mỗi request tạo Fetcher riêng nên khoảng nghỉ chống chặn IP chỉ có tác dụng trong một lượt.
+_crawl_locks: dict[str, asyncio.Lock] = {}
 
-    from .cleaner.pipeline import run_cleaner
-    await run_in_threadpool(run_cleaner, engine)
-    return {"source": source, "mode": mode, **counts}
+
+@app.post("/crawler/run")
+async def crawler_run(
+    source: str = "phongtro123",
+    mode: str = "incremental",
+    _admin: UserOut = Depends(require_admin),
+):
+    """Trigger thủ công 1 nguồn — CHỈ admin (crawl full ghi DB, gọi site ngoài + Nominatim + quota ORS).
+    Script trên máy host dùng `python -m app.crawler.run_once` trong container thay vì gọi endpoint này."""
+    if mode not in MODES:
+        raise HTTPException(400, "mode phải là 'incremental' hoặc 'full'")
+    if source not in ENABLED_SOURCES:
+        raise HTTPException(400, f"source phải là một trong {ENABLED_SOURCES}")
+    lock = _crawl_locks.setdefault(source, asyncio.Lock())
+    if lock.locked():
+        raise HTTPException(409, f"Nguồn {source} đang được crawl")
+    async with lock:
+        return await run_crawl_once(engine, source, mode)

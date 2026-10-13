@@ -25,7 +25,8 @@ _UPSERT = text(
         last_seen = :now,
         miss_count = 0,
         freshness_score = 1.0,
-        status = CASE WHEN aggregated_listings.status = 'expired'
+        -- gặp lại tin hết hạn → sống lại, TRỪ tin bị rà soát loại (audit_reason, ADR-022): chạy lại audit mới gỡ
+        status = CASE WHEN aggregated_listings.status = 'expired' AND aggregated_listings.audit_reason IS NULL
                       THEN 'active' ELSE aggregated_listings.status END,
         title = CASE WHEN aggregated_listings.content_hash <> :content_hash
                      THEN :title ELSE aggregated_listings.title END,
@@ -43,6 +44,14 @@ _UPSERT = text(
         geom = CASE WHEN CAST(:lat AS DOUBLE PRECISION) IS NULL THEN aggregated_listings.geom
                     ELSE ST_SetSRID(ST_MakePoint(CAST(:lng AS DOUBLE PRECISION), CAST(:lat AS DOUBLE PRECISION)), 4326) END,
         distance_to_ctu = COALESCE(CAST(:distance_to_ctu AS REAL), aggregated_listings.distance_to_ctu),
+        -- toạ độ đổi (> ~5 m) ⇒ bỏ phút tới trường cũ để auto_route tính lại; trước 12/10 số phút cũ giữ mãi
+        -- (vd. tin ở khu III mang {4, 0, 3.4} của toạ độ khu II)
+        route_time_campus = CASE
+            WHEN CAST(:lat AS DOUBLE PRECISION) IS NOT NULL AND (aggregated_listings.geom IS NULL OR NOT ST_DWithin(
+                aggregated_listings.geom,
+                ST_SetSRID(ST_MakePoint(CAST(:lng AS DOUBLE PRECISION), CAST(:lat AS DOUBLE PRECISION)), 4326),
+                0.00005))
+            THEN NULL ELSE aggregated_listings.route_time_campus END,
         geocode_confidence = :geocode_confidence,
         content_hash = :content_hash,
         cleaning_status = CASE WHEN aggregated_listings.content_hash <> :content_hash
@@ -214,13 +223,22 @@ class ListingRepo:
                             ELSE status END
                     WHERE source = :source
                       AND (source_id IS NULL OR source_id <> ALL(:ids))
-                      AND status <> 'expired'
+                      -- tin admin/audit đã ẩn giữ nguyên 'hidden' (expired thì upsert sau sẽ bật lại)
+                      AND status NOT IN ('expired', 'hidden')
                     RETURNING status
                     """
                 ),
                 {"source": source, "ids": seen_ids or [""]},
             ).fetchall()
         return sum(1 for r in rows if r.status == "expired")
+
+    def active_count(self, source: str) -> int:
+        """Số tin đang active của nguồn — mốc để biết lượt full có parse đủ tin không (pipeline.MIN_SWEEP_RATIO)."""
+        with self.engine.connect() as conn:
+            return conn.execute(
+                text("SELECT count(*) FROM aggregated_listings WHERE source = :s AND status = 'active'"),
+                {"s": source},
+            ).scalar_one()
 
     def pending_route(self) -> list[dict]:
         """Tin có geom nhưng chưa route_time_campus (mới crawl, hoặc backfill sót)."""

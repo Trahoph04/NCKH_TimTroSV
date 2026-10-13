@@ -65,7 +65,7 @@ class ChatListing(BaseModel):
     district: str | None = None
     amenities: dict[str, Any] = Field(default_factory=dict)
     distance_to_ctu: float | None = None
-    route_time_campus: list[float] | None = None
+    route_time_campus: list[float | None] | None = None  # từng khu có thể None (xem listings/schemas.py)
     source: str
     source_url: str | None = None
     similarity_score: float = 0.0

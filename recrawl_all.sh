@@ -34,7 +34,8 @@ done
 say "3. Crawl lại mọi nguồn (mode=$MODE)"
 for s in phongtro123 tromoi mogi bds123 nhadatcantho nhadatcantho247 nhatot; do
   echo "  → $s" | tee -a "$LOG"
-  curl -fsS --max-time 1800 -X POST "http://localhost:8000/crawler/run?source=$s&mode=$MODE" \
+  # chạy trong container (không qua HTTP): POST /crawler/run chỉ dành cho admin từ 12/10
+  docker compose exec -T api python -m app.crawler.run_once --source "$s" --mode "$MODE" 2>&1 \
     | tee -a "$LOG" || echo "  ✗ $s lỗi (bỏ qua, chạy tiếp)" | tee -a "$LOG"
   echo | tee -a "$LOG"
 done

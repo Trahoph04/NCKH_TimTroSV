@@ -105,6 +105,38 @@ def _cleanup(source: str) -> None:
         conn.execute(text("DELETE FROM aggregated_listings WHERE source = :s"), {"s": source})
 
 
+def test_district_filter_and_output_use_district_norm():
+    """Lọc quận ở trang chủ gửi "Bình Thủy"; cột district thô ghi "Quận Bình Thuỷ , …" (dấu trên u) ⇒ phải khớp
+    qua district_norm, và API trả tên quận đã chuẩn hoá."""
+    src, tag = "test-district", uuid4().hex[:8]
+    try:
+        lid = _insert_listing(src, 10.05, 105.75, title=f"Phòng trọ quận {tag}",
+                              district="Quận Bình Thuỷ , Thành phố Cần Thơ", district_norm="Bình Thủy")
+        res = client.get("/listings", params={"district": "Bình Thủy", "q": tag}).json()
+        assert [i["id"] for i in res["items"]] == [lid]
+        assert res["items"][0]["district"] == "Bình Thủy"
+        assert client.get(f"/listings/{lid}").json()["district"] == "Bình Thủy"
+    finally:
+        _cleanup(src)
+
+
+def test_partial_route_times_do_not_break_listing_endpoints():
+    """ORS Matrix không tới được riêng một khu ⇒ [4.0, None, 3.2] trong DB; trước 13/10 schema list[float] làm 500."""
+    src, tag = "test-partial-route", uuid4().hex[:8]
+    try:
+        lid = _insert_listing(src, 10.031, 105.769, title=f"Phòng trọ phút thiếu {tag}")
+        with engine.begin() as conn:
+            conn.execute(text("UPDATE aggregated_listings SET route_time_campus = ARRAY[4.0, NULL, 3.2]::real[] "
+                              "WHERE id = :id"), {"id": lid})
+        detail = client.get(f"/listings/{lid}")
+        assert detail.status_code == 200 and detail.json()["route_time_campus"] == [4.0, None, 3.2]
+        assert client.get("/listings", params={"q": tag}).status_code == 200
+        near = client.get("/listings/nearby", params={"lat": 10.031, "lng": 105.769, "radius": 200})
+        assert near.status_code == 200 and any(i["id"] == lid for i in near.json())
+    finally:
+        _cleanup(src)
+
+
 def _row(listing_id: int) -> dict:
     with engine.connect() as conn:
         return dict(conn.execute(

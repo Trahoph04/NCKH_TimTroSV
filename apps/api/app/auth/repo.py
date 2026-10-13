@@ -14,7 +14,7 @@ class AuthRepo:
             row = conn.execute(
                 text(
                     "SELECT i.id AS identity_id, i.secret_hash, "
-                    "u.id AS user_id, u.email, u.name, u.role "
+                    "u.id AS user_id, u.email, u.name, u.role, u.locked_at "
                     "FROM user_identities i JOIN users u ON u.id = i.user_id "
                     "WHERE i.provider = :p AND i.provider_user_id = :pid"
                 ),
@@ -25,7 +25,7 @@ class AuthRepo:
     def get_user(self, user_id: int) -> dict | None:
         with self.engine.connect() as conn:
             row = conn.execute(
-                text("SELECT id, email, name, role, avatar_url FROM users WHERE id = :id"),
+                text("SELECT id, email, name, role, avatar_url, locked_at FROM users WHERE id = :id"),
                 {"id": user_id},
             ).mappings().first()
         return dict(row) if row else None

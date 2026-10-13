@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import IntegrityError
 
-from .deps import get_current_user
+from .deps import LOCKED_DETAIL, get_current_user
 from .providers import AuthError, verify_ctu, verify_google, verify_local
 from .repo import AuthRepo
 from .schemas import (
@@ -43,6 +43,12 @@ def _tokens(user_id: int, role: str) -> TokenPair:
     )
 
 
+def _reject_locked(row: dict) -> None:
+    """Tài khoản bị admin khoá (mig 101): kiểm SAU khi xác thực mật khẩu ⇒ không lộ email nào bị khoá cho người đoán."""
+    if row.get("locked_at") is not None:
+        raise HTTPException(403, LOCKED_DETAIL)
+
+
 @router.post("/register", response_model=TokenPair, status_code=201)
 def register(body: RegisterIn, repo: AuthRepo = Depends(get_repo)):
     if repo.email_exists(body.email):
@@ -69,6 +75,7 @@ def login(body: LoginIn, repo: AuthRepo = Depends(get_repo)):
         verify_local(identity["secret_hash"], body.password)
     except AuthError as e:
         raise HTTPException(401, str(e))
+    _reject_locked(identity)
     return _tokens(identity["user_id"], identity["role"])
 
 
@@ -81,6 +88,7 @@ async def login_google(body: GoogleLoginIn, repo: AuthRepo = Depends(get_repo)):
 
     identity = repo.find_identity("google", vi.provider_user_id)
     if identity is not None:
+        _reject_locked(identity)
         return _tokens(identity["user_id"], identity["role"])
 
     # lần đầu: tạo user + google identity (secret_hash NULL)
@@ -118,6 +126,7 @@ def login_ctu(body: CtuLoginIn, repo: AuthRepo = Depends(get_repo)):
         verify_ctu(identity["secret_hash"], body.password)
     except AuthError:
         raise HTTPException(401, "MSSV hoặc mã đăng nhập sai")
+    _reject_locked(identity)
     return _tokens(identity["user_id"], identity["role"])
 
 
@@ -133,6 +142,7 @@ def refresh(body: RefreshIn, repo: AuthRepo = Depends(get_repo)):
     user = repo.get_user(int(payload["sub"]))
     if user is None:
         raise HTTPException(401, "User không tồn tại")
+    _reject_locked(user)
     return _tokens(user["id"], user["role"])
 
 

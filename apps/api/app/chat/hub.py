@@ -51,6 +51,11 @@ def dumps(obj: Any) -> str:
     return json.dumps(obj, default=_json_default, ensure_ascii=False)
 
 
+# Admin khoá tài khoản (mig 101) ⇒ publish sự kiện này tới user đó; mọi socket (kể cả ở worker khác qua Redis) tự đóng 4403.
+# So sánh nguyên chuỗi đã serialize để không phải parse JSON mỗi frame gửi đi.
+LOCKED_EVENT_TEXT = dumps({"type": "account.locked"})
+
+
 @dataclass(eq=False)
 class Connection:
     user_id: int
@@ -61,6 +66,10 @@ class Connection:
 
     async def send_text(self, text: str) -> None:
         try:
+            if text == LOCKED_EVENT_TEXT:
+                await self.websocket.send_text(text)
+                await self.websocket.close(code=4403)
+                return
             await self.websocket.send_text(text)
         except Exception:  # noqa: BLE001 — socket đóng giữa chừng: bỏ qua, disconnect sẽ dọn
             pass

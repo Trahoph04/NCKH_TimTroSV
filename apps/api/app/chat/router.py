@@ -33,6 +33,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.engine import Engine
 
 from ..auth import get_current_user
+from ..auth.repo import AuthRepo
 from ..auth.schemas import UserOut
 from ..auth.security import decode_token, make_ws_ticket
 from ..config import settings
@@ -399,6 +400,11 @@ async def chat_ws(websocket: WebSocket, ticket: str = ""):
         return
     if _engine is None or _hub is None:
         await websocket.close(code=1013)
+        return
+    # vé 60 s cấp TRƯỚC lúc admin khoá vẫn hợp lệ về chữ ký ⇒ kiểm khoá ở DB trước khi cấp socket (mig 101)
+    account = await run_in_threadpool(AuthRepo(_engine).get_user, user_id)
+    if account is None or account.get("locked_at") is not None:
+        await websocket.close(code=4403)
         return
     if _hub.socket_count(user_id) >= MAX_SOCKETS_PER_USER:
         await websocket.close(code=4429)

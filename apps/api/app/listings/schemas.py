@@ -85,10 +85,15 @@ class ListingOut(BaseModel):
     freshness_label: str = ""
     quality_score: float | None = None
     last_seen: datetime | None = None
-    route_time_campus: list[float] | None = None  # [khuI, khuII, khuIII] phút, None = chưa route
+    # [khuI, khuII, khuIII] phút, None = chưa route. Từng phần tử cũng có thể None: ORS Matrix không tìm được đường tới
+    # riêng một khu ⇒ auto_route ghi [4.0, None, 3.2]; khai list[float] thì mọi trang có tin đó lỗi 500 (bắt từ nhánh
+    # open-mobility của Huy, 13/10)
+    route_time_campus: list[float | None] | None = None
     listing_type: str | None = None  # phong_tro | nha_mini | ... (tin user tự đăng có thể chưa phân loại)
     offer_kind: str | None = None    # 'lease_transfer' = pass phòng/sang nhượng → FE hiện nhãn riêng
     location_precise: bool | None = None  # app.cleaner.audit: False = toạ độ cấp phường (bản đồ ẩn mặc định)
+    rating_avg: float | None = None       # điểm TB đánh giá SV đang hiện (app/reviews); None = chưa có
+    rating_count: int = 0
 
 
 class ContactOut(BaseModel):

@@ -47,6 +47,10 @@ async def backfill() -> dict:
                         "  ELSE ST_SetSRID(ST_MakePoint(CAST(:lng AS DOUBLE PRECISION), "
                         "  CAST(:lat AS DOUBLE PRECISION)), 4326) END, "
                         "distance_to_ctu = COALESCE(CAST(:dist AS REAL), distance_to_ctu), "
+                        # toạ độ đổi ⇒ phút tới trường cũ không còn đúng; route_backfill/auto_route tính lại
+                        "route_time_campus = CASE WHEN CAST(:lat AS DOUBLE PRECISION) IS NOT NULL AND (geom IS NULL "
+                        "  OR NOT ST_DWithin(geom, ST_SetSRID(ST_MakePoint(CAST(:lng AS DOUBLE PRECISION), "
+                        "  CAST(:lat AS DOUBLE PRECISION)), 4326), 0.00005)) THEN NULL ELSE route_time_campus END, "
                         "geocode_confidence = :conf, "
                         "area = CAST(:area AS REAL) "
                         "WHERE id = :id"

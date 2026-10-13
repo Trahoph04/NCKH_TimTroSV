@@ -29,6 +29,7 @@ LIMITS: dict[str, tuple[int, float]] = {
     "rec_judge": (90, 60.0),     # ~25 thẻ/lượt, bấm nhanh
     "chatbot": (12, 60.0),       # mỗi câu hỏi gọi LLM + truy xuất vector — ngưỡng giữ nguyên của branch PHUC
     "chatbot_feedback": (30, 60.0),
+    "review": (10, 600.0),       # viết/sửa đánh giá nhà trọ — người thật vài lần mỗi buổi
 }
 
 _lock = threading.Lock()

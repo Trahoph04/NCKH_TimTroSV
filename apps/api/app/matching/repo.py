@@ -424,7 +424,8 @@ class MatchRepo:
                     text(
                         f"SELECT {_ALGO_COLS} FROM roommate_profiles rp "
                         "JOIN users u ON u.id = rp.user_id "
-                        "WHERE rp.user_id <> :me AND rp.gender = :g"
+                        # tài khoản bị admin khoá (mig 101) không còn trong pool ghép
+                        "WHERE rp.user_id <> :me AND rp.gender = :g AND u.locked_at IS NULL"
                     ),
                     {"me": user_id, "g": me.gender},
                 ).mappings().all()
@@ -549,7 +550,7 @@ class MatchRepo:
             text(
                 f"SELECT {_ALGO_COLS} FROM roommate_profiles rp "
                 "JOIN users u ON u.id = rp.user_id "
-                "WHERE rp.user_id <> :me AND rp.gender = :g "
+                "WHERE rp.user_id <> :me AND rp.gender = :g AND u.locked_at IS NULL "
                 "  AND NOT EXISTS (SELECT 1 FROM swipes s WHERE s.user_id = :me "
                 "                  AND s.target_id = rp.user_id "
                 "                  AND (s.decision = 'like' "

@@ -170,3 +170,15 @@ def test_managed_listings_admin_only():
 
     student = _register()
     assert client.get("/listings/managed", headers=student["headers"]).status_code == 403
+
+
+def test_admin_update_district_overrides_normalized_district():
+    """API đọc quận qua district_norm trước — sửa quận phải bỏ bản chuẩn hoá cũ, nếu không giá trị mới không hiện."""
+    admin = _register(admin=True)
+    listing_id = _create(admin)
+    with engine.begin() as conn:
+        conn.execute(text("UPDATE aggregated_listings SET district_norm = 'Ninh Kiều' WHERE id = :id"), {"id": listing_id})
+    r = client.put(f"/listings/{listing_id}", json={"district": "Cái Răng"}, headers=admin["headers"])
+    assert r.status_code == 200, r.text
+    assert r.json()["district"] == "Cái Răng"
+    assert client.get(f"/listings/{listing_id}").json()["district"] == "Cái Răng"

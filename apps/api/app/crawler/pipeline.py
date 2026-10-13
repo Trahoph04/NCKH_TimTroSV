@@ -63,6 +63,10 @@ def merge_detail(n: NormalizedListing, detail: dict, base_url: str = "") -> Norm
     return n
 
 
+# Lượt full phải thấy ít nhất tỉ lệ này số tin đang hiện của nguồn thì mới được đánh dấu tin vắng mặt.
+MIN_SWEEP_RATIO = 0.5
+
+
 async def auto_route(repo: ListingRepo, source: str) -> int:
     """Phút tới 3 khu cho tin có geom nhưng chưa route_time_campus (tin mới, hoặc tin cũ lỡ sót), 1 call ORS
     Matrix. KHÔNG route lại toàn bộ. Thiếu key/lỗi mạng → skip êm, không làm hỏng cả crawl job. Dùng chung cho
@@ -167,10 +171,17 @@ async def run_source(
                     n.address, n.district, n.title, n.description,
                 ))
 
-        # full sweep: tin không thấy → miss_count++/expired
+        # full sweep: tin không thấy → miss_count++/expired. CHỈ khi lượt full sạch: trang danh sách lỗi/bị chặn giữa
+        # chừng hoặc selector hỏng (parse ra quá ít tin) mà vẫn quét thì 2 lượt liên tiếp làm expired TOÀN BỘ tin của
+        # nguồn (run_nhatot không dính vì lỗi HTTP ở đó raise trước khi quét).
         if mode == "full":
             seen_ids = [n.source_id for n in listings if n.source_id]
-            counts["expired_count"] = repo.mark_misses(source, seen_ids)
+            active = repo.active_count(source)
+            if counts["error"] is None and len(seen_ids) >= MIN_SWEEP_RATIO * active:
+                counts["expired_count"] = repo.mark_misses(source, seen_ids)
+            else:
+                log.warning("bỏ quét expired source=%s: error=%s, thấy %d/%d tin đang hiện",
+                            source, counts["error"], len(seen_ids), active)
 
         repo.refresh_scores()
 

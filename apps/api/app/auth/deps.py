@@ -10,6 +10,8 @@ from .security import decode_token
 
 _bearer = HTTPBearer(auto_error=True)
 
+LOCKED_DETAIL = "Tài khoản đã bị khoá. Liên hệ quản trị viên nếu cần mở lại."
+
 # engine set bởi main.py qua init_auth()
 _repo = None
 
@@ -32,6 +34,9 @@ def get_current_user(
     user = _repo.get_user(int(payload["sub"]))
     if user is None:
         raise HTTPException(401, "User không tồn tại")
+    # đọc DB mỗi request ⇒ admin khoá là có hiệu lực ngay, không chờ access token hết hạn (mig 101)
+    if user.get("locked_at") is not None:
+        raise HTTPException(403, LOCKED_DETAIL)
     return UserOut(**user)
 
 

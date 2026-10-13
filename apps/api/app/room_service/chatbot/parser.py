@@ -99,6 +99,9 @@ def parse_query(message: str) -> ParsedQuery:
     legal_terms = (
         "luat", "nghi dinh", "thong tu", "quyet dinh",
         "hop dong", "dat coc", "tam tru", "cu tru", "tranh chap", "khieu nai",
+        # tranh chấp tiền cọc nói bằng nhiều cách ("giữ cọc không trả" là câu demo số 1 — trước 13/10 rơi xuống nhánh tìm
+        # phòng, trả "chưa tìm thấy tin"). KHÔNG thêm "coc" trơn: "phòng cọc 1 tháng" vẫn là tìm phòng
+        "giu coc", "tien coc", "tra coc", "hoan coc", "mat coc", "lay lai coc", "coc khong tra", "chiem coc",
         "phong chay", "pccc", "gia dien", "tien dien", "thu dien", "kwh", "dinh muc dien", "gia nuoc", "tien nuoc",
         "quyen cua nguoi thue", "nghia vu", "xu phat", "boi thuong", "don phuong cham dut",
     )

@@ -40,6 +40,10 @@ COPY migrations/98_listing_audit.sql /docker-entrypoint-initdb.d/98-listing-audi
 COPY migrations/99_location_precise.sql /docker-entrypoint-initdb.d/98b-location-precise.sql
 # chatbot: kho pháp lý/KTX, lịch sử hội thoại, cache câu trả lời (ADR-023). Tên 98c để chạy TRƯỚC 99-test-db.sh
 COPY migrations/100_chatbot.sql /docker-entrypoint-initdb.d/98c-chatbot.sql
+# quản lý người dùng: khoá tài khoản (users.locked_at). Tên 98d để chạy TRƯỚC 99-test-db.sh
+COPY migrations/101_user_admin.sql /docker-entrypoint-initdb.d/98d-user-admin.sql
+# đánh giá nhà trọ của SV: 1 đánh giá/tài khoản/tin (bảng reviews mig 90). Tên 98e để chạy TRƯỚC 99-test-db.sh
+COPY migrations/102_reviews_ugc.sql /docker-entrypoint-initdb.d/98e-reviews-ugc.sql
 # DB riêng cho pytest (nckh_test) — chạy SAU mọi migration, áp lại đúng các file trên
 COPY create_test_db.sh /docker-entrypoint-initdb.d/99-test-db.sh
 COPY create_test_db.sh /usr/local/bin/create_test_db.sh

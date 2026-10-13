@@ -10,12 +10,22 @@ from .schemas import (
     risk_level,
 )
 
+# Quận: ưu tiên district_norm (crawler/address.py chuẩn hoá) — cột district thô lẫn "Quận Ninh Kiều , Thành phố
+# Cần Thơ", "Bình Thuỷ" (dấu trên u) ⇒ lọc "Bình Thủy" từ trang chủ chỉ khớp 8/39 tin (đo 12/10). Tin nhập tay
+# chưa chuẩn hoá thì rơi về district.
+_DISTRICT = "COALESCE(NULLIF(district_norm, ''), district)"
+
 # cột select chung; geom → tách lat/lng qua ST_X/ST_Y
 _COLS = (
-    "id, title, price, area, address, district, description, "
+    f"id, title, price, area, address, {_DISTRICT} AS district, description, "
     "ST_Y(geom) AS lat, ST_X(geom) AS lng, distance_to_ctu, images, "
     "source, source_url, risk_score, geocode_confidence, freshness_score, "
-    "quality_score, last_seen, route_time_campus, listing_type, offer_kind, location_precise"
+    "quality_score, last_seen, route_time_campus, listing_type, offer_kind, location_precise, "
+    # đánh giá của SV (app/reviews, chỉ status visible) — thẻ tin/bản đồ hiện "★ 4,2 (5)"
+    "(SELECT round(avg(r.rating), 1)::float FROM reviews r WHERE r.listing_id = aggregated_listings.id "
+    "AND r.status = 'visible') AS rating_avg, "
+    "(SELECT count(*) FROM reviews r WHERE r.listing_id = aggregated_listings.id AND r.status = 'visible') "
+    "AS rating_count"
 )
 
 _SORT_SQL = {
@@ -67,7 +77,7 @@ def build_filters(p: SearchParams) -> tuple[str, dict]:
         clauses.append("area >= :min_area")
         params["min_area"] = p.min_area
     if p.district:
-        clauses.append("district ILIKE :district")
+        clauses.append(f"{_DISTRICT} ILIKE :district")
         params["district"] = f"%{p.district}%"
     if p.max_distance_ctu is not None:
         clauses.append("distance_to_ctu <= :max_dist")
@@ -259,6 +269,10 @@ class ListingWriteRepo:
     def update(self, listing_id: int, fields: dict, lat, lng, conf, dist) -> None:
         """Update partial — chỉ set cột có trong fields (khoá đã whitelist qua ListingUpdate)."""
         set_clauses = [f"{col} = :{col}" for col in fields if col in _UPDATABLE_COLS]
+        # API đọc quận qua district_norm trước (_DISTRICT) ⇒ admin sửa quận thì bỏ bản chuẩn hoá cũ, nếu không giá trị
+        # mới không bao giờ hiện
+        if "district" in fields:
+            set_clauses.append("district_norm = NULL")
         params: dict = {**fields, "id": listing_id}
 
         if "address" in fields and lat is not None and lng is not None:

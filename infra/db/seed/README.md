@@ -44,7 +44,8 @@ awk 'BEGIN{FS=OFS="\t"} /^COPY public\.aggregated_listings /{i=1;print;next} i&&
 ## 3. Tự crawl — dữ liệu tươi nhất
 
 ```bash
-curl -X POST "http://localhost:8000/crawler/run?source=phongtro123&mode=incremental"
+docker compose exec -T api python -m app.crawler.run_once --source phongtro123 --mode incremental
+# (HTTP POST /crawler/run cần token admin từ 12/10/2026)
 ```
 
 Đổi `source` sang `mogi`, `tromoi`, `bds123`, `nhadatcantho`, `nhadatcantho247`.

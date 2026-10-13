@@ -41,7 +41,7 @@ def test_build_filters_price_district():
     where, params = build_filters(p)
     assert "price >= :min_price" in where
     assert "price <= :max_price" in where
-    assert "district ILIKE :district" in where
+    assert "COALESCE(NULLIF(district_norm, ''), district) ILIKE :district" in where
     assert params["min_price"] == 1_000_000
     assert params["district"] == "%Ninh Kiều%"
 

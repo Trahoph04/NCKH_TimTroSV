@@ -95,6 +95,12 @@ def expand_legal_query(query: str) -> str:
             additions.append('đăng ký tạm trú hồ sơ tờ khai thay đổi thông tin cư trú chỗ ở hợp pháp')
     if any(term in value for term in ("dau hieu rui ro", "dau hieu lua dao", "khong cho xem phong")):
         additions.append("thủ đoạn gian dối chiếm đoạt tài sản lừa đảo điều kiện giao dịch dân sự đặt cọc")
+    # "giữ cọc / trả cọc / hoàn cọc" không trùng chữ nào với BLDS Điều 328 ("tài sản đặt cọc", "bên nhận đặt cọc") ⇒
+    # BM25 xếp mẹo thuê phòng lên trên, câu demo "Chủ trọ giữ cọc không trả thì sao?" không trích được Điều 328 (13/10)
+    if any(term in value for term in ("giu coc", "tra coc", "hoan coc", "mat coc", "tien coc", "lay lai coc",
+                                      "coc khong tra", "chiem coc", "dat coc")):
+        additions.append("đặt cọc tài sản đặt cọc bên đặt cọc bên nhận đặt cọc được trả lại từ chối giao kết thực hiện "
+                         "hợp đồng phạt cọc")
     if any(term in value for term in ("chu tro", "chu nha")):
         additions.append("người cho thuê nhà")
     if any(term in value for term in ("o ghep", "o chung", "sinh vien")):
