@@ -91,7 +91,7 @@ export default function EvalApp() {
       <div>
         <h1 className="text-[22px] font-bold text-ink">Đánh giá gợi ý phòng</h1>
         <p className="mt-1 text-[14px] text-ink-muted">
-          Buổi thử nghiệm của đề tài NCKH. Hãy chọn tiêu chí như khi bạn tìm phòng thật; sau đó với mỗi tin, cho biết
+          Phiếu đánh giá hệ gợi ý của đề tài NCKH. Hãy chọn tiêu chí như khi bạn tìm phòng thật; sau đó với mỗi tin, cho biết
           bạn có liên hệ chủ trọ không. Thứ tự các tin là ngẫu nhiên.
         </p>
       </div>

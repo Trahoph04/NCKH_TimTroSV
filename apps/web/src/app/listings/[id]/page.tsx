@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/current-user";
 import { formatArea, formatDistance, formatPrice, isLocationPrecise, riskBadge } from "@/lib/format";
 import ContactBox from "./ContactBox";
 import MiniMap from "./MiniMap";
+import ReviewSection from "./ReviewSection";
 import DeleteListingButton from "./DeleteListingButton";
 
 export const dynamic = "force-dynamic";
@@ -107,6 +108,8 @@ export default async function ListingDetailPage({
               Đọc cẩm nang →
             </Link>
           </div>
+
+          <ReviewSection listingId={listing.id} loggedIn={user != null} />
 
           {listing.lat != null && listing.lng != null && (
             <MiniMap

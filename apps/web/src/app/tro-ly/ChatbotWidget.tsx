@@ -34,7 +34,7 @@ type Listing = {
   district: string | null;
   amenities: Record<string, unknown>;
   distance_to_ctu: number | null;
-  route_time_campus: number[] | null;
+  route_time_campus: (number | null)[] | null;
   source_url: string | null;
   similarity_score: number;
   vector_score: number;
@@ -109,6 +109,7 @@ const QUICK_PROMPTS = [
   "Phòng dưới 2 triệu gần CTU",
   "Ở Ninh Kiều, có máy lạnh và wifi",
   "Tân sinh viên đăng ký KTX CTU như thế nào?",
+  "Phí ở KTX CTU bao nhiêu, phòng nào được nấu ăn?",
   "Chủ trọ được thu tiền điện như thế nào theo quy định?",
 ];
 
@@ -198,7 +199,13 @@ export default function ChatbotWidget() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (pathname === "/tro-ly") setMode("compact");
+    if (pathname === "/tro-ly") {
+      setMode("compact");
+      // /tro-ly?hoi=…: nút "Hỏi Trợ lý" ở Cẩm nang điền sẵn câu hỏi — chỉ điền, người dùng tự bấm gửi (mỗi câu tốn lượt
+      // gọi LLM). Đọc window.location thay useSearchParams: widget nằm ở layout, useSearchParams buộc bọc Suspense.
+      const asked = new URLSearchParams(window.location.search).get("hoi");
+      if (asked) setMessage(asked.slice(0, 500));
+    }
     if (pathname === "/login" || pathname === "/register") {
       epochRef.current++;
       setTurns([WELCOME]);
@@ -380,7 +387,8 @@ export default function ChatbotWidget() {
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
-    if (event.key === "Enter" && !event.shiftKey) {
+    // bộ gõ Telex/VNI đang ghép chữ thì Enter là để chốt chữ, không phải gửi (cùng cách ChatThread)
+    if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
       event.preventDefault();
       void send(message);
     }
@@ -444,7 +452,7 @@ export default function ChatbotWidget() {
                 Tìm phòng · Ký túc xá · Hỏi đáp thuê trọ
               </p>
             </div>
-            <button type="button" onClick={() => setMode("closed")} title="Đóng" className="rounded-xl p-2 text-blue-100 transition hover:bg-white/15 hover:text-white">
+            <button type="button" onClick={() => setMode("closed")} title="Đóng" aria-label="Đóng trợ lý" className="rounded-xl p-2 text-blue-100 transition hover:bg-white/15 hover:text-white">
               <Icon name="close" />
             </button>
             <div className="flex w-full items-center gap-2 border-t border-white/10 pt-2">
@@ -452,7 +460,7 @@ export default function ChatbotWidget() {
               <Icon name="history" />
               Lịch sử
             </button>
-            <button type="button" disabled={loading || historyBusy} onClick={resetConversation} title="Cuộc trò chuyện mới" className="flex items-center gap-1.5 rounded-xl px-2 py-1 text-xs text-blue-100 transition hover:bg-white/15 hover:text-white disabled:opacity-40">
+            <button type="button" disabled={loading || historyBusy} onClick={resetConversation} title="Cuộc trò chuyện mới" aria-label="Cuộc trò chuyện mới" className="flex items-center gap-1.5 rounded-xl px-2 py-1 text-xs text-blue-100 transition hover:bg-white/15 hover:text-white disabled:opacity-40">
               <Icon name="reset" />
               Chat mới
             </button>

@@ -10,14 +10,24 @@ import {
   Source,
   type MapLayerMouseEvent,
   type MapRef,
+  type MapStyleDataEvent,
 } from "react-map-gl/maplibre";
-import type { GeoJSONSource } from "maplibre-gl";
+import type { ExpressionSpecification, GeoJSONSource, SymbolLayerSpecification } from "maplibre-gl";
 import type { Feature, FeatureCollection, LineString, Point } from "geojson";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { PoiOut } from "@/lib/api";
 import { CAMPUSES, CAMPUS_MARKER_LABELS } from "@/lib/campus";
 import { isLocationPrecise } from "@/lib/format";
-import { formatMeters, POI_CATEGORIES, POI_COLOR } from "@/lib/pois";
+import {
+  CLUSTER_STYLES,
+  CLUSTER_TEXT_OFFSET,
+  MAP_ICON,
+  MapBadge,
+  POI_GLYPH,
+  RISK_FILL,
+  registerMapIcons,
+} from "@/lib/map-icons";
+import { formatMeters, POI_CATEGORIES } from "@/lib/pois";
 import type { ListingWithCoords } from "./MapScreen";
 
 // Vector tile miễn phí, không key (ADR-019). Style tự mang attribution OpenFreeMap/OpenMapTiles/OSM
@@ -25,20 +35,31 @@ import type { ListingWithCoords } from "./MapScreen";
 const MAP_STYLE = "https://tiles.openfreemap.org/styles/liberty";
 const MAX_ZOOM = 18;
 
-
-// Màu chấm theo risk_level — hôm nay mọi tin 'unknown' (xanh như mockup 03); khi module rủi ro của
-// nhóm ghi risk_score, bản đồ tự đổi màu mà không phải sửa lại file này.
-const RISK_COLOR = [
+// Icon tin vị trí chính xác theo risk_level — hôm nay mọi tin 'unknown' (xanh); khi module rủi ro của nhóm ghi
+// risk_score, icon tự đổi màu (ảnh từng mức nạp sẵn trong registerMapIcons) mà không phải sửa file này.
+const PRECISE_ICON = [
   "match",
   ["get", "risk"],
-  "suspicious",
-  "#dc2626",
-  "caution",
-  "#d97706",
-  "safe",
-  "#16a34a",
-  "#1069bd",
-] as const;
+  ...Object.keys(RISK_FILL).flatMap((risk) => [risk, MAP_ICON.riskPrecise(risk)]),
+  MAP_ICON.precise,
+] as unknown as ExpressionSpecification;
+// Thu nhỏ icon khi nhìn xa để vài chục tin chính xác không chồng kín bản đồ ở mức zoom mặc định (13,3)
+const ICON_SIZE: ExpressionSpecification = ["interpolate", ["linear"], ["zoom"], 12, 0.72, 15, 1];
+
+// Cụm tin = nhãn "🏠 + số" (ảnh co giãn theo độ dài số, xem map-icons.tsx). Luôn hiện, không bị ẩn vì va chạm.
+function clusterLayout(icon: string): SymbolLayerSpecification["layout"] {
+  return {
+    "icon-image": icon,
+    "icon-text-fit": "width",
+    "icon-text-fit-padding": [0, 3, 0, 3],
+    "icon-allow-overlap": true,
+    "text-allow-overlap": true,
+    "text-field": ["get", "point_count_abbreviated"],
+    "text-font": ["Noto Sans Bold"],
+    "text-size": 12,
+    "text-offset": CLUSTER_TEXT_OFFSET,
+  };
+}
 
 // Vòng bán kính tìm kiếm: đa giác 64 đỉnh xấp xỉ trên mặt phẳng địa phương (sai số < 0,5% ở 5 km).
 function circleLine(lat: number, lng: number, radiusM: number): Feature<LineString> {
@@ -101,7 +122,8 @@ export default function MapCanvas({
         .map((p) => ({
           type: "Feature",
           geometry: { type: "Point", coordinates: [p.lng, p.lat] },
-          properties: { id: p.id, category: p.category },
+          // dist: tiện ích gần tin hơn được đặt trước khi icon va nhau (symbol-sort-key)
+          properties: { id: p.id, category: p.category, dist: p.distance_m },
         })),
     }),
     [pois, hiddenPoiCats],
@@ -110,16 +132,22 @@ export default function MapCanvas({
 
   const radiusGeo = useMemo(() => circleLine(center[0], center[1], radius), [center, radius]);
 
-  const routeGeo = useMemo<Feature<LineString> | null>(
-    () =>
-      route
-        ? {
-            type: "Feature",
-            properties: {},
-            // API trả [lat, lng]; GeoJSON cần [lng, lat]
-            geometry: { type: "LineString", coordinates: route.map(([lat, lng]) => [lng, lat]) },
-          }
-        : null,
+  // Source đường đi luôn có mặt (rỗng khi chưa chọn tin) để lớp đường giữ đúng thứ tự: nằm DƯỚI icon tiện ích/tin.
+  // Mount có điều kiện thì lớp được thêm sau cùng ⇒ đè lên icon.
+  const routeGeo = useMemo<FeatureCollection<LineString>>(
+    () => ({
+      type: "FeatureCollection",
+      features: route
+        ? [
+            {
+              type: "Feature",
+              properties: {},
+              // API trả [lat, lng]; GeoJSON cần [lng, lat]
+              geometry: { type: "LineString", coordinates: route.map(([lat, lng]) => [lng, lat]) },
+            },
+          ]
+        : [],
+    }),
     [route],
   );
 
@@ -132,6 +160,20 @@ export default function MapCanvas({
 
   // POI của tin cũ không còn liên quan khi đổi tin
   useEffect(() => setPoiPopup(null), [selected?.id]);
+
+  // Icon phải có trong style TRƯỚC khi lớp symbol được dựng: styledata đầu tiên bắn ngay khi style nạp xong, trước
+  // lượt render mà react-map-gl gọi addLayer. styleimagemissing là lưới an toàn nếu thứ tự đó đổi ở bản sau.
+  const iconsHooked = useRef(false);
+  function handleStyleData(e: MapStyleDataEvent) {
+    const map = e.target;
+    registerMapIcons(map);
+    if (!iconsHooked.current) {
+      iconsHooked.current = true;
+      map.on("styleimagemissing", (ev: { id: string }) => {
+        if (ev.id.startsWith("tro-")) registerMapIcons(map);
+      });
+    }
+  }
 
   async function handleClick(e: MapLayerMouseEvent) {
     const feature = e.features?.[0];
@@ -179,6 +221,7 @@ export default function MapCanvas({
       onMouseEnter={() => setCursor("pointer")}
       onMouseLeave={() => setCursor("")}
       onClick={handleClick}
+      onStyleData={handleStyleData}
     >
       <NavigationControl position="bottom-right" showCompass={false} />
 
@@ -191,37 +234,32 @@ export default function MapCanvas({
         />
       </Source>
 
-      {routeGeo && (
-        <Source id="route" type="geojson" data={routeGeo}>
-          <Layer
-            id="route-casing"
-            type="line"
-            layout={{ "line-cap": "round", "line-join": "round" }}
-            paint={{ "line-color": "#ffffff", "line-width": 8 }}
-          />
-          <Layer
-            id="route-line"
-            type="line"
-            layout={{ "line-cap": "round", "line-join": "round" }}
-            paint={{ "line-color": "#1069bd", "line-width": 4.5 }}
-          />
-        </Source>
-      )}
+      <Source id="route" type="geojson" data={routeGeo}>
+        <Layer
+          id="route-casing"
+          type="line"
+          layout={{ "line-cap": "round", "line-join": "round" }}
+          paint={{ "line-color": "#ffffff", "line-width": 8 }}
+        />
+        <Layer
+          id="route-line"
+          type="line"
+          layout={{ "line-cap": "round", "line-join": "round" }}
+          paint={{ "line-color": "#1069bd", "line-width": 4.5 }}
+        />
+      </Source>
 
+      {/* Tiện ích: icon theo nhóm. Không cho chồng nhau — hàng trăm tiện ích trong 1 km sẽ phủ kín bản đồ; cái gần
+          tin nhất được đặt trước, phóng to thì hiện thêm (số đếm đầy đủ nằm ở card bên trái). */}
       <Source id="pois" type="geojson" data={poisGeo}>
         <Layer
           id="poi-points"
-          type="circle"
-          paint={{
-            "circle-radius": 6,
-            "circle-color": [
-              "match",
-              ["get", "category"],
-              ...POI_CATEGORIES.flatMap((c) => [c.key, c.color]),
-              "#64748b",
-            ] as never,
-            "circle-stroke-width": 2,
-            "circle-stroke-color": "#ffffff",
+          type="symbol"
+          layout={{
+            "icon-image": ["concat", "tro-poi-", ["get", "category"]],
+            "icon-size": ICON_SIZE,
+            "icon-padding": 1,
+            "symbol-sort-key": ["get", "dist"],
           }}
         />
       </Source>
@@ -240,36 +278,20 @@ export default function MapCanvas({
       >
         <Layer
           id="clusters-approx"
-          type="circle"
-          filter={["has", "point_count"]}
-          paint={{
-            "circle-color": "rgba(100,116,139,0.85)",
-            "circle-radius": ["step", ["get", "point_count"], 15, 10, 18, 100, 22],
-            "circle-stroke-width": 3,
-            "circle-stroke-color": "rgba(255,255,255,0.85)",
-          }}
-        />
-        <Layer
-          id="cluster-count-approx"
           type="symbol"
           filter={["has", "point_count"]}
-          layout={{
-            "text-field": ["get", "point_count_abbreviated"],
-            "text-font": ["Noto Sans Bold"],
-            "text-size": 12,
-            "text-allow-overlap": true,
-          }}
-          paint={{ "text-color": "#ffffff" }}
+          layout={clusterLayout(MAP_ICON.clusterApprox)}
+          paint={{ "text-color": CLUSTER_STYLES.approx.text }}
         />
         <Layer
           id="points-approx"
-          type="circle"
+          type="symbol"
           filter={["!", ["has", "point_count"]]}
-          paint={{
-            "circle-radius": 6,
-            "circle-color": "#ffffff",
-            "circle-stroke-width": 2.5,
-            "circle-stroke-color": "#64748b",
+          layout={{
+            "icon-image": MAP_ICON.approx,
+            "icon-size": ICON_SIZE,
+            // tin luôn hiện (không bị ẩn vì va chạm) và vẫn chiếm chỗ ⇒ tiện ích/nhãn đường tự né
+            "icon-allow-overlap": true,
           }}
         />
       </Source>
@@ -285,55 +307,40 @@ export default function MapCanvas({
       >
         <Layer
           id="clusters-precise"
-          type="circle"
-          filter={["has", "point_count"]}
-          paint={{
-            "circle-color": "rgba(16,105,189,0.95)",
-            "circle-radius": ["step", ["get", "point_count"], 14, 10, 18],
-            "circle-stroke-width": 3,
-            "circle-stroke-color": "#ffffff",
-          }}
-        />
-        <Layer
-          id="cluster-count-precise"
           type="symbol"
           filter={["has", "point_count"]}
-          layout={{
-            "text-field": ["get", "point_count_abbreviated"],
-            "text-font": ["Noto Sans Bold"],
-            "text-size": 12,
-            "text-allow-overlap": true,
-          }}
-          paint={{ "text-color": "#ffffff" }}
+          layout={clusterLayout(MAP_ICON.clusterPrecise)}
+          paint={{ "text-color": CLUSTER_STYLES.precise.text }}
         />
         <Layer
           id="points-precise"
-          type="circle"
+          type="symbol"
           filter={["!", ["has", "point_count"]]}
-          paint={{
-            "circle-radius": 7.5,
-            "circle-color": RISK_COLOR as never,
-            "circle-stroke-width": 3,
-            "circle-stroke-color": "#ffffff",
+          layout={{
+            "icon-image": PRECISE_ICON,
+            "icon-size": ICON_SIZE,
+            "icon-allow-overlap": true,
           }}
         />
       </Source>
 
-      {/* Campus: ô vuông navy + nhãn bên dưới (mockup 03); anchor top + offset để TÂM ô vuông
+      {/* Campus: ô vuông navy có mũ tốt nghiệp + nhãn bên dưới (mockup 03); anchor top + offset để TÂM ô vuông
           trùng toạ độ dù nhãn rộng hơn ô. */}
-      <Marker latitude={campusPos[0]} longitude={campusPos[1]} anchor="top" offset={[0, -11]}>
-        <div className="flex flex-col items-center gap-[5px]">
-          <span className="block h-[22px] w-[22px] border-[3px] border-white bg-navy shadow-[0_3px_8px_rgba(0,0,0,.3)]" />
+      <Marker latitude={campusPos[0]} longitude={campusPos[1]} anchor="top" offset={[0, -14]}>
+        <div className="flex flex-col items-center gap-1">
+          <MapBadge badge="campus" glyph="campus" className="drop-shadow-[0_2px_4px_rgba(0,0,0,.3)]" />
           <span className="whitespace-nowrap rounded-[7px] bg-white/90 px-2 py-[3px] text-[12.5px] font-bold text-navy">
             {CAMPUS_MARKER_LABELS[campus]}
           </span>
         </div>
       </Marker>
 
-      {/* Tin đang chọn: marker HTML riêng để vẫn thấy khi tin nằm trong cluster */}
+      {/* Tin đang chọn: marker HTML riêng (to hơn, có quầng) để vẫn thấy khi tin nằm trong cluster */}
       {selected && (
         <Marker latitude={selected.lat} longitude={selected.lng} anchor="center">
-          <span className="block h-[22px] w-[22px] rounded-full border-[3px] border-white bg-navy shadow-[0_2px_8px_rgba(0,0,0,.35)]" />
+          <span className="block rounded-full shadow-[0_0_0_5px_rgba(6,48,92,.22),0_3px_8px_rgba(0,0,0,.35)]">
+            <MapBadge badge="selected" glyph="house" className="block" />
+          </span>
         </Marker>
       )}
 
@@ -348,10 +355,14 @@ export default function MapCanvas({
         >
           <div className="text-[13px] leading-snug">
             <p className="font-semibold text-ink">{poiPopup.name ?? "Chưa có tên trên OSM"}</p>
-            <p className="text-ink-muted">
-              <span style={{ color: POI_COLOR[poiPopup.category] }}>●</span>{" "}
-              {POI_CATEGORIES.find((c) => c.key === poiPopup.category)?.label} ·{" "}
-              {formatMeters(poiPopup.distance_m)} chim bay
+            <p className="mt-0.5 flex items-center gap-1.5 text-ink-muted">
+              {POI_GLYPH[poiPopup.category] && (
+                <MapBadge badge="poi" glyph={POI_GLYPH[poiPopup.category]} size={18} className="shrink-0" />
+              )}
+              <span>
+                {POI_CATEGORIES.find((c) => c.key === poiPopup.category)?.label} ·{" "}
+                {formatMeters(poiPopup.distance_m)} chim bay
+              </span>
             </p>
           </div>
         </Popup>

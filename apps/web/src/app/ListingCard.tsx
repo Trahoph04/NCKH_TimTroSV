@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { ListingOut } from "@/lib/api";
 import { formatArea, formatDistance, formatPriceShort, listingTags, riskBadge } from "@/lib/format";
+import { minutesToCampusText } from "@/lib/campus";
+import { formatRating } from "@/lib/reviews";
 
 // Card tin theo mockup 01 UI_NCKH.html: ảnh + badge, giá xanh to, meta, footer phút tới khu II.
 export default function ListingCard({ listing }: { listing: ListingOut }) {
@@ -49,6 +51,12 @@ export default function ListingCard({ listing }: { listing: ListingOut }) {
             {formatPriceShort(listing.price)}
           </span>
           {listing.price != null && <span className="text-[13px] text-ink-muted">/ tháng</span>}
+          {listing.rating_avg != null && (listing.rating_count ?? 0) > 0 && (
+            <span className="ml-auto text-[13px] font-semibold text-ink-soft" title="Điểm đánh giá của sinh viên">
+              <span className="text-amber-500">★</span> {formatRating(listing.rating_avg)}{" "}
+              <span className="font-normal text-ink-muted">({listing.rating_count})</span>
+            </span>
+          )}
         </p>
 
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-[14px] text-ink-soft">
@@ -62,7 +70,7 @@ export default function ListingCard({ listing }: { listing: ListingOut }) {
         <div className="mt-auto flex items-center justify-between gap-2 border-t border-line-soft pt-3">
           <span className="text-[13px] text-ink-muted">
             {minutes != null
-              ? `${Math.round(minutes)} phút xe máy tới khu II`
+              ? minutesToCampusText(minutes, "khu II", "xe máy tới")
               : listing.freshness_label || " "}
           </span>
           <span className="shrink-0 text-sm font-semibold text-primary-bright group-hover:underline">

@@ -1,4 +1,6 @@
 // Helper hiển thị cho chat.
+import * as L from "@/app/roommate/labels";
+import { formatPriceShort } from "@/lib/format";
 import type { Conversation, ListingSnapshot, RoommateProfile } from "./types";
 
 export function initials(name: string | null | undefined): string {
@@ -68,15 +70,14 @@ export function previewText(c: Conversation, meId: number): string {
   }
 }
 
+// cùng cách hiển thị với thẻ tin ("750 nghìn", không phải "0.8 triệu")
 export function priceShort(price: number | null | undefined): string {
-  if (price == null) return "Thỏa thuận";
-  const tr = price / 1_000_000;
-  return `${Number.isInteger(tr) ? tr.toFixed(0) : tr.toFixed(1)} triệu`;
+  return formatPriceShort(price);
 }
 
-// Nhãn hồ sơ ở ghép (thang theo migration 30 + form v2).
-const SLEEP = ["Ngủ sớm (trước 23h)", "Ngủ khoảng 23h–0h", "Cú đêm (sau 0h)"];
-const BUDGET = ["Dưới 1 triệu", "1–1,5 triệu", "1,5–2 triệu", "2–3 triệu", "Trên 3 triệu"];
+// Nhãn hồ sơ ở ghép lấy CHUNG từ form (roommate/labels.ts): bộ nhãn riêng trước 12/10 lệch mốc (ngân sách "Dưới 1
+// triệu" trong khi người dùng chọn "Dưới 1,5 triệu", giờ ngủ mốc 23h trong khi form hỏi 22h).
+const { SLEEP, BUDGET } = L;
 
 export function profileRows(p: RoommateProfile | null): { k: string; v: string }[] {
   if (!p) return [];
@@ -92,7 +93,7 @@ export function profileRows(p: RoommateProfile | null): { k: string; v: string }
 
 export function profileChips(p: RoommateProfile): string[] {
   const chips: string[] = [];
-  if (p.sleep_time != null) chips.push(["Ngủ sớm", "Ngủ 23h–0h", "Cú đêm"][p.sleep_time] ?? "");
+  if (p.sleep_time != null && SLEEP[p.sleep_time]) chips.push(`Ngủ ${SLEEP[p.sleep_time].toLowerCase()}`);
   if (p.cleanliness != null) chips.push(`Sạch sẽ ${p.cleanliness}/5`);
   if (p.noise_tolerance != null) chips.push(`Chịu ồn ${p.noise_tolerance}/5`);
   if (p.smoke === false) chips.push("Không hút thuốc");

@@ -93,7 +93,12 @@ export default function RoommateApp({
       // Bỏ thẻ vừa quyết khỏi deck tại chỗ, không chờ tải lại — tránh nhấp nháy
       setDeck((p) => (p ? { ...p, items: p.items.filter((i) => i.user_id !== targetId) } : p));
       setLikes((p) => p.filter((i) => i.user_id !== targetId));
+      // "Đổi ý — Quan tâm" ở tab Đã bỏ qua: thẻ phải rời tab đó ngay
+      if (decision === "like") setPassed((p) => p.filter((i) => i.user_id !== targetId));
       setErr(null);
+      // Quẹt hết lượt thẻ đang có ⇒ xin lượt mới; server mới biết thật sự hết người (reason) — để rỗng tại chỗ thì
+      // hiện câu "chưa có ai qua bộ lọc" sai sự thật
+      if (deck && deck.items.length > 0 && deck.items.every((i) => i.user_id === targetId)) void loadDeck();
     } catch {
       setErr("Không kết nối được máy chủ");
     } finally {
@@ -191,7 +196,7 @@ export default function RoommateApp({
         {mode === "random" && (
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-tint px-4 py-3 text-sm text-ink-soft">
             <span>
-              <strong>Buổi thử nghiệm:</strong> thẻ được xáo ngẫu nhiên và không hiện % tương thích.
+              <strong>Chế độ đánh giá:</strong> thẻ được xáo ngẫu nhiên và không hiện % tương thích.
             </span>
             <Link href="/roommate/rate" className="font-semibold text-primary underline">
               Chấm điểm 5 thẻ →
@@ -199,7 +204,20 @@ export default function RoommateApp({
           </div>
         )}
 
-        {err && <ErrBox msg={err} onRetry={tab === "deck" ? loadDeck : loadProfile} />}
+        {err && (
+          <ErrBox
+            msg={err}
+            // thử lại đúng thứ vừa lỗi: tab Lời mời/Đã bỏ qua mà gọi loadProfile thì khung lỗi biến mất còn danh sách vẫn
+            // trống ⇒ hiện "Chưa có ai gửi lời mời" sai
+            onRetry={
+              tab === "deck"
+                ? loadDeck
+                : tab === "likes" || tab === "passed"
+                ? () => void loadList(tab)
+                : loadProfile
+            }
+          />
+        )}
 
         {tab === "deck" && (
           <>

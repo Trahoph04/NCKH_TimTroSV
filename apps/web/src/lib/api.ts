@@ -30,8 +30,10 @@ export async function apiFetch<T>(
   if (!res.ok) {
     let detail = `Lỗi ${res.status}`;
     try {
-      const body = (await res.json()) as { detail?: string };
-      if (body?.detail) detail = body.detail;
+      // FastAPI trả detail là chuỗi, riêng lỗi validate (422) là MẢNG {loc, msg} — render thẳng mảng thì React sập
+      const body = (await res.json()) as { detail?: unknown };
+      if (typeof body?.detail === "string") detail = body.detail;
+      else if (Array.isArray(body?.detail)) detail = "Dữ liệu gửi lên không hợp lệ";
     } catch {
       // body không phải JSON — giữ message mặc định
     }
@@ -105,10 +107,12 @@ export type ListingOut = {
   freshness_label: string;
   quality_score: number | null;
   last_seen: string | null;
-  route_time_campus: number[] | null; // [khuI, khuII, khuIII] phút, null = chưa route
+  route_time_campus: (number | null)[] | null; // [khuI, khuII, khuIII] phút; null = chưa route, từng khu cũng có thể null
   listing_type: string | null; // phong_tro | nha_mini | ...
   offer_kind: string | null; // "lease_transfer" = pass phòng / sang nhượng
   location_precise: boolean | null; // false = toạ độ cấp phường (điểm mặc định của sàn) → bản đồ ẩn mặc định
+  rating_avg?: number | null; // điểm TB đánh giá SV đang hiện (app/reviews); null = chưa có
+  rating_count?: number;
 };
 
 export type SearchResult = {

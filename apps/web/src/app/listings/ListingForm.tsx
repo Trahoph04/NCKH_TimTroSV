@@ -17,7 +17,7 @@ const DISTRICTS = [
 
 const listingSchema = z.object({
   title: z.string().min(1, "Nhập tiêu đề"),
-  price: z.union([z.coerce.number().positive("Giá phải > 0"), z.literal("")]).optional(),
+  price: z.union([z.coerce.number().int("Giá phải là số nguyên (đồng)").positive("Giá phải > 0"), z.literal("")]).optional(),
   area: z.union([z.coerce.number().positive("Diện tích phải > 0"), z.literal("")]).optional(),
   address: z.string().optional(),
   district: z.string().optional(),
@@ -100,8 +100,9 @@ export default function ListingForm({
         return;
       }
 
-      const body = (await res.json().catch(() => ({}))) as { detail?: string };
-      setFormError(body.detail ?? "Lưu tin thất bại");
+      // 422 của FastAPI có detail là mảng — render thẳng làm form sập, mất dữ liệu đang nhập
+      const body = (await res.json().catch(() => ({}))) as { detail?: unknown };
+      setFormError(typeof body.detail === "string" ? body.detail : "Dữ liệu chưa hợp lệ, kiểm tra lại các ô");
     } catch {
       setFormError("Không thể kết nối tới máy chủ");
     }

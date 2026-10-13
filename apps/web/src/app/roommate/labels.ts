@@ -4,7 +4,8 @@
 export const SLEEP = ["Trước 22h", "22h – 24h", "Sau 0h"];
 export const CLEAN = [
   "", "Để đến khi hết chén sạch", "Để 1–2 ngày rồi rửa",
-  "Rửa trong ngày", "Rửa trong ngày", "Rửa chén ngay",
+  // mức 3 nằm giữa (khảo sát chỉ có 4 đáp án ↔ 1, 2, 4, 5); hai nút cùng nhãn "Rửa trong ngày" trước 12/10
+  "Thường rửa trong ngày, có hôm để qua", "Rửa trong ngày", "Rửa chén ngay",
 ];
 export const NOISE = [
   "", "Rất khó chịu, phải nói ngay", "Hơi khó chịu nhưng không nói",

@@ -1,46 +1,26 @@
 import { NextResponse } from "next/server";
-import { deleteListing, updateListing, type ApiError, type ListingInput } from "@/lib/api";
-import { getAccessToken } from "@/lib/session";
+import { getListing, type ApiError } from "@/lib/api";
+import { proxyToApi } from "@/lib/proxy";
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
-  const token = getAccessToken();
-  if (!token) {
-    return NextResponse.json({ detail: "Chưa đăng nhập" }, { status: 401 });
-  }
-
-  let body: Partial<ListingInput>;
+// Sửa / ẩn tin (admin). Qua proxyToApi để access token 15 phút hết hạn giữa lúc admin đang điền form thì tự refresh,
+// không báo "Chưa đăng nhập". id phải là số: id kiểu "..%2Fchat%2F…" từng đi tới path API khác kèm token người dùng.
+// Đọc 1 tin cho client component (bản đồ lớn mở từ bản đồ nhỏ với tin ngoài bán kính nearby).
+export async function GET(_req: Request, { params }: { params: { id: string } }) {
+  if (!/^\d+$/.test(params.id)) return NextResponse.json({ detail: "Không tìm thấy tin" }, { status: 404 });
   try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ detail: "Body không hợp lệ" }, { status: 400 });
-  }
-
-  try {
-    const listing = await updateListing(token, params.id, body);
-    return NextResponse.json(listing);
+    return NextResponse.json(await getListing(params.id));
   } catch (e) {
     const err = e as ApiError;
-    return NextResponse.json(
-      { detail: err.detail ?? "Sửa tin thất bại" },
-      { status: err.status ?? 500 },
-    );
+    return NextResponse.json({ detail: err.detail ?? "Lỗi lấy tin" }, { status: err.status ?? 500 });
   }
 }
 
-export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
-  const token = getAccessToken();
-  if (!token) {
-    return NextResponse.json({ detail: "Chưa đăng nhập" }, { status: 401 });
-  }
+export async function PUT(req: Request, { params }: { params: { id: string } }) {
+  if (!/^\d+$/.test(params.id)) return NextResponse.json({ detail: "Không tìm thấy tin" }, { status: 404 });
+  return proxyToApi(req, `/listings/${params.id}`);
+}
 
-  try {
-    await deleteListing(token, params.id);
-    return new NextResponse(null, { status: 204 });
-  } catch (e) {
-    const err = e as ApiError;
-    return NextResponse.json(
-      { detail: err.detail ?? "Xóa tin thất bại" },
-      { status: err.status ?? 500 },
-    );
-  }
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+  if (!/^\d+$/.test(params.id)) return NextResponse.json({ detail: "Không tìm thấy tin" }, { status: 404 });
+  return proxyToApi(req, `/listings/${params.id}`);
 }

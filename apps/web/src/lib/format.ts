@@ -3,19 +3,17 @@
 export function formatPrice(price: number | null | undefined): string {
   if (price == null) return "Thỏa thuận";
   // dưới 1 triệu: "750 nghìn" — làm tròn 1 chữ số thập phân ra "0.8 triệu" sai lệch với tiêu đề tin
-  if (price < 1_000_000) return `${Math.round(price / 1000)} nghìn/tháng`;
-  const trieu = price / 1_000_000;
-  const formatted = Number.isInteger(trieu) ? trieu.toFixed(0) : trieu.toFixed(1);
-  return `${formatted} triệu/tháng`;
+  return `${formatPriceShort(price)}/tháng`;
 }
 
 // Bản ngắn cho card: giá to + hậu tố "/ tháng" tách riêng ở UI.
 export function formatPriceShort(price: number | null | undefined): string {
   if (price == null) return "Thỏa thuận";
-  if (price < 1_000_000) return `${Math.round(price / 1000)} nghìn`;
-  const trieu = price / 1_000_000;
-  const formatted = Number.isInteger(trieu) ? trieu.toFixed(0) : trieu.toFixed(1);
-  return `${formatted} triệu`;
+  // làm tròn TRƯỚC khi chọn đơn vị: 999.600 đ từng ra "1000 nghìn", 1.040.000 đ ra "1.0 triệu"
+  const nghin = Math.round(price / 1000);
+  if (nghin < 1000) return `${nghin} nghìn`;
+  const trieu = Math.round(price / 100_000) / 10;
+  return `${Number.isInteger(trieu) ? trieu.toFixed(0) : trieu.toFixed(1)} triệu`;
 }
 
 export function formatArea(area: number | null | undefined): string {

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getNearby, searchListings, type ListingOut, type SearchResult } from "@/lib/api";
+import { apiFetch, getNearby, searchListings, type ListingOut, type SearchResult } from "@/lib/api";
 import ListingCard from "./ListingCard";
 import SiteHeader from "./SiteHeader";
 import { HomeFilters, SortSelect, type HomeParams } from "./HomeControls";
@@ -36,14 +36,41 @@ function medianPrice(items: ListingOut[]): number | null {
   return prices[Math.floor(prices.length / 2)];
 }
 
+const HOUSING_VALUES = ["phong_tro", "nha_mini"];
+const SORT_VALUES = ["price_asc", "price_desc", "newest", "nearest", "freshness", "quality"];
+
+// URL người dùng tự sửa / link cũ: tham số sai kiểu bị BỎ thay vì đẩy "NaN" hay giá trị ngoài enum xuống API — API trả
+// 422 kèm detail là mảng, trước 12/10 làm trang chủ 500 ("Objects are not valid as a React child").
+function cleanParams(raw: SearchParamsShape): SearchParamsShape {
+  const first = (v: unknown) => (Array.isArray(v) ? v[0] : v) as string | undefined;
+  const int = (v: unknown) => (/^\d+$/.test(first(v) ?? "") ? first(v) : undefined);
+  const num = (v: unknown) => {
+    const s = first(v);
+    return s && Number.isFinite(Number(s)) && Number(s) >= 0 ? s : undefined;
+  };
+  const oneOf = (v: unknown, values: string[]) => (values.includes(first(v) ?? "") ? first(v) : undefined);
+  return {
+    q: first(raw.q),
+    district: first(raw.district),
+    min_price: int(raw.min_price),
+    max_price: int(raw.max_price),
+    min_area: num(raw.min_area),
+    max_distance_ctu: num(raw.max_distance_ctu),
+    housing: oneOf(raw.housing, HOUSING_VALUES),
+    sort: oneOf(raw.sort, SORT_VALUES),
+    page: int(raw.page),
+  };
+}
+
 export default async function Home({
-  searchParams,
+  searchParams: rawParams,
 }: {
   searchParams: SearchParamsShape;
 }) {
+  const searchParams = cleanParams(rawParams);
   const page = Math.max(1, Number(searchParams.page) || 1);
 
-  const [resultRes, totalRes, nearbyRes] = await Promise.allSettled([
+  const [resultRes, totalRes, nearbyRes, crawlRes] = await Promise.allSettled([
     searchListings({
       q: searchParams.q,
       district: searchParams.district,
@@ -60,7 +87,21 @@ export default async function Home({
     }),
     searchListings({ page: 1, size: 1 }),
     getNearby(CTU_LAT, CTU_LNG, 3000),
+    apiFetch<{ runs: { finished_at: string | null }[] }>("/crawler/status?limit=20"),
   ]);
+  // Ngày dữ liệu thật thay câu cố định "tự cập nhật mỗi 5 giờ": lịch crawl có thể đang tắt/dừng (lần cuối 10/10 khi
+  // đo 13/10) — hội đồng đối chiếu với tin trên trang nguồn là thấy ngay câu cố định sai
+  const lastCrawl =
+    crawlRes.status === "fulfilled"
+      ? crawlRes.value.runs
+          .map((r) => r.finished_at)
+          .filter((t): t is string => Boolean(t))
+          .sort()
+          .at(-1) ?? null
+      : null;
+  const lastCrawlLabel = lastCrawl
+    ? new Date(lastCrawl).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "Asia/Ho_Chi_Minh" })
+    : null;
 
   let result: SearchResult;
   let errorMessage: string | null = null;
@@ -119,8 +160,8 @@ export default async function Home({
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[13px] font-medium">
               <span className="block h-[7px] w-[7px] rounded-full bg-[#7fe0b0]" />
-              {totalAll != null ? `${totalAll} tin` : "Tin"} đã lọc sạch từ 6 nguồn, tự cập nhật
-              mỗi 5 giờ
+              {totalAll != null ? `${totalAll} tin` : "Tin"} đã lọc sạch từ 6 nguồn và khảo sát thực địa
+              {lastCrawlLabel ? ` · cập nhật ${lastCrawlLabel}` : ""}
             </div>
 
             <h1 className="mt-4 max-w-[17ch] text-balance text-[34px] font-extrabold leading-[1.1] tracking-[-0.03em] sm:text-[46px]">
@@ -234,7 +275,8 @@ export default async function Home({
 
       {/* KẾT QUẢ */}
       <section className="mx-auto grid max-w-[1160px] items-start gap-7 px-5 py-9 sm:px-10 lg:grid-cols-[292px_minmax(0,1fr)]">
-        <HomeFilters current={searchParams} />
+        {/* key theo query: chip nhanh / Xoá hết / phân trang đổi URL mà client component giữ state cũ */}
+        <HomeFilters key={JSON.stringify(searchParams)} current={searchParams} />
 
         <div className="flex flex-col gap-[18px]">
           <div className="flex flex-wrap items-end justify-between gap-4">

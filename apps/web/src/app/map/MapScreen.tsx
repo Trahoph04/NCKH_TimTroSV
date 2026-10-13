@@ -6,6 +6,9 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { ContactOut, ListingOut, PoiOut, PoiSummary } from "@/lib/api";
 import { formatPhone, formatPrice, isLocationPrecise, listingTags, sourceName } from "@/lib/format";
+import { minutesToCampusText } from "@/lib/campus";
+import { MapBadge, POI_GLYPH } from "@/lib/map-icons";
+import { formatRating } from "@/lib/reviews";
 import { formatMeters, POI_CATEGORIES } from "@/lib/pois";
 
 // maplibre-gl đụng window ngay khi import → phải tắt SSR, nếu không build
@@ -63,15 +66,30 @@ export default function MapScreen({
   const [poiSummary, setPoiSummary] = useState<PoiSummary | null>(null);
   const [contact, setContact] = useState<ContactOut | null>(null);
   const [hiddenPoiCats, setHiddenPoiCats] = useState<string[]>([]);
+  // Màn hẹp: danh sách tiện ích gập lại để thẻ tin không che hết bản đồ (desktop luôn mở)
+  const [poiOpen, setPoiOpen] = useState(false);
   // Mặc định hiện cả tin cấp phường (chỉ tin chính xác thì quá ít — 26 tin/5 km); MapCanvas vẽ chúng thành lớp
   // riêng (chấm rỗng, cụm xám) nằm dưới tin chính xác. Bật "chỉ chính xác" khi cần demo gọn.
   const [preciseOnly, setPreciseOnly] = useState(false);
   // Bấm nhanh qua nhiều tin: response về muộn của tin cũ không được ghi đè tin mới.
   const latestId = useRef<number | null>(null);
+  // Đường đi khoá theo tin + khu: đổi Khu I → Khu III liên tiếp thì đường khu I về muộn không được đè đường khu III
+  const routeKey = useRef<string | null>(null);
+
+  // ?focus=<id> từ bản đồ nhỏ: tin cách khu II quá bán kính tối đa (5 km, ~14% số tin) không có trong danh sách nearby
+  // ⇒ lấy riêng tin đó, nếu không bản đồ lớn mở ra mà không chọn được gì.
+  const [focusExtra, setFocusExtra] = useState<ListingOut | null>(null);
+  useEffect(() => {
+    if (focusId == null || items.some((l) => l.id === focusId)) return;
+    getJson<ListingOut>(`/api/listings/${focusId}`).then(setFocusExtra).catch(() => {});
+  }, [focusId, items]);
 
   const allWithCoords = useMemo(
-    () => items.filter((l): l is ListingWithCoords => l.lat != null && l.lng != null),
-    [items],
+    () =>
+      [...items, ...(focusExtra && !items.some((l) => l.id === focusExtra.id) ? [focusExtra] : [])].filter(
+        (l): l is ListingWithCoords => l.lat != null && l.lng != null,
+      ),
+    [items, focusExtra],
   );
   const preciseCount = useMemo(() => allWithCoords.filter(isLocationPrecise).length, [allWithCoords]);
   const withCoords = useMemo(
@@ -84,24 +102,29 @@ export default function MapScreen({
   );
 
   // Đổi bán kính/loại/bật tin gần đúng → nhóm + tin đang chọn có thể không còn trên bản đồ.
+  // Bỏ chọn qua clearSelection để đường đi + icon tiện ích của tin vừa rời bản đồ không nằm lại mồ côi.
   useEffect(() => {
     setGroup(null);
-    setSelected((cur) => (cur && withCoords.some((l) => l.id === cur.id) ? cur : null));
+    if (selected && !withCoords.some((l) => l.id === selected.id)) clearSelection();
+    // chỉ chạy khi tập tin đổi; selected đọc tại thời điểm đó
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [withCoords]);
 
   async function drawRoute(listing: ListingWithCoords, campusIdx: number) {
+    const key = `${listing.id}:${campusIdx}`;
+    routeKey.current = key;
     setRouteStatus("loading");
     try {
       const path = await getJson<[number, number][]>(
         `/api/listings/${listing.id}/route?campus=${campusIdx}`,
       );
-      if (latestId.current === listing.id) {
+      if (routeKey.current === key) {
         setRoute(path);
         setRouteStatus("ok");
       }
     } catch {
       // cả ORS lẫn OSRM dự phòng đều lỗi và cache chưa có — không chặn UI, nhưng báo cho người dùng biết (FR-M.8)
-      if (latestId.current === listing.id) {
+      if (routeKey.current === key) {
         setRoute(null);
         setRouteStatus("fail");
       }
@@ -159,6 +182,7 @@ export default function MapScreen({
 
   function clearSelection() {
     latestId.current = null;
+    routeKey.current = null;
     setRouteStatus("idle");
     setSelected(null);
     setRoute(null);
@@ -190,10 +214,11 @@ export default function MapScreen({
   function minutesLabel(listing: ListingOut): string | null {
     const minutes = listing.route_time_campus?.[campus];
     if (minutes == null) return null;
-    return `${Math.round(minutes)} phút tới ${CAMPUS_LABELS[campus].replace("Khu", "khu")}`;
+    return minutesToCampusText(minutes, CAMPUS_LABELS[campus].replace("Khu", "khu"));
   }
 
-  const approximate = selected?.geocode_confidence !== "high";
+  // cùng tiêu chí với icon (đặc/rỗng) trên bản đồ — 46 tin geocode "high" vẫn là toạ độ cấp phường
+  const approximate = selected ? !isLocationPrecise(selected) : false;
   const tags = selected ? listingTags(selected) : [];
 
   return (
@@ -274,6 +299,10 @@ export default function MapScreen({
             Bấm một tin để vẽ đường đi từ {CAMPUS_LABELS[campus].replace("Khu", "khu")} tới phòng và xem tiện
             ích xung quanh.
           </p>
+          {/* số phút từ ORS profile ô tô (không có profile xe máy), tốc độ đường trống ⇒ nói rõ là ước tính */}
+          <p className="mt-1 text-[12px] text-ink-faint">
+            Số phút đi xe là ước tính của OpenRouteService, chưa tính kẹt xe và đèn đỏ.
+          </p>
         </div>
 
         {error && (
@@ -336,6 +365,11 @@ export default function MapScreen({
                         {t.label}
                       </span>
                     ))}
+                    {listing.rating_avg != null && (listing.rating_count ?? 0) > 0 && (
+                      <span className="text-[12.5px] font-semibold text-ink-soft">
+                        <span className="text-amber-500">★</span> {formatRating(listing.rating_avg)} ({listing.rating_count})
+                      </span>
+                    )}
                   </span>
                   {meta && <span className="truncate text-[13px] text-ink-muted">{meta}</span>}
                 </span>
@@ -359,20 +393,31 @@ export default function MapScreen({
           onPickGroup={setGroup}
         />
 
-        {/* Chú giải 2 lớp tin — hình dạng (đặc/rỗng) + chữ, không chỉ dựa vào màu */}
-        {!preciseOnly && preciseCount < allWithCoords.length && (
-          <div className="absolute left-4 top-4 z-10 flex flex-col gap-1 rounded-xl border border-line bg-white/95 px-3 py-2 text-[12px] text-ink-soft shadow-md">
+        {/* Chú giải — cùng icon với bản đồ; 2 lớp tin phân biệt bằng hình (đặc/rỗng) + chữ, không chỉ bằng màu.
+            Tiện ích không cần dòng riêng: thẻ tin đang chọn đã liệt kê từng nhóm kèm icon. Màn hẹp dùng nhãn ngắn để
+            không đè ô bán kính bên phải. */}
+        <div className="absolute left-3 top-3 z-10 flex flex-col gap-1 rounded-xl border border-line bg-white/95 px-2.5 py-2 text-[11.5px] text-ink-soft shadow-md sm:left-4 sm:top-4 sm:px-3 sm:text-[12px]">
+          <span className="flex items-center gap-2">
+            <MapBadge badge="precise" glyph="house" size={18} className="shrink-0" />
+            <span className="sm:hidden">Vị trí chính xác</span>
+            <span className="hidden sm:inline">Nhà trọ — vị trí chính xác</span>
+          </span>
+          {!preciseOnly && preciseCount < allWithCoords.length && (
             <span className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded-full border-2 border-white bg-[#1069bd] shadow" /> Vị trí chính xác
+              <MapBadge badge="approx" glyph="house" size={18} className="shrink-0" />
+              <span className="sm:hidden">Vị trí gần đúng</span>
+              <span className="hidden sm:inline">Nhà trọ — vị trí gần đúng (cấp phường)</span>
             </span>
-            <span className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded-full border-2 border-[#64748b] bg-white" /> Vị trí gần đúng (cấp phường)
-            </span>
-          </div>
-        )}
+          )}
+          <span className="flex items-center gap-2">
+            <MapBadge badge="campus" glyph="campus" size={18} className="shrink-0" />
+            <span className="sm:hidden">Khu CTU</span>
+            <span className="hidden sm:inline">Khu Đại học Cần Thơ</span>
+          </span>
+        </div>
 
         {/* Điều khiển bán kính — góc phải trên theo mockup */}
-        <div className="absolute right-4 top-4 z-10 flex w-[180px] flex-col gap-2 rounded-xl border border-line bg-white px-3.5 py-3 shadow-md">
+        <div className="absolute right-3 top-3 z-10 flex w-[150px] flex-col gap-2 rounded-xl border border-line bg-white px-3 py-2.5 shadow-md sm:right-4 sm:top-4 sm:w-[180px] sm:px-3.5 sm:py-3">
           <span className="text-[13.5px] font-bold text-ink">
             Bán kính {(radiusDraft / 1000).toFixed(1)} km
           </span>
@@ -391,9 +436,11 @@ export default function MapScreen({
         </div>
 
         {/* Card tin đang chọn — thay Popup vì nhiều tin trùng toạ độ nằm trong cluster,
-            popup không mở được từ danh sách bên trái. */}
+            popup không mở được từ danh sách bên trái. Màn hẹp: dải dưới cùng, bỏ ảnh lớn (danh sách bên dưới đã có
+            ảnh) và gập tiện ích, chừa phần trên cho bản đồ + đường đi. Bố cục block (không flex-col): flex co các dòng
+            khi chạm max-h ⇒ tiêu đề line-clamp bị cắt mất nửa trên. */}
         {selected && (
-          <div className="absolute bottom-5 left-4 z-10 flex max-h-[calc(100%-2.5rem)] w-[300px] flex-col overflow-y-auto rounded-[14px] border border-line bg-white p-3.5 shadow-xl">
+          <div className="absolute inset-x-2 bottom-2 z-10 max-h-[60%] overflow-y-auto rounded-[14px] border border-line bg-white p-3 shadow-xl lg:inset-x-auto lg:bottom-5 lg:left-4 lg:max-h-[calc(100%-2.5rem)] lg:w-[300px] lg:p-3.5">
             <button
               type="button"
               onClick={clearSelection}
@@ -407,13 +454,13 @@ export default function MapScreen({
               <img
                 src={selected.images[0]}
                 alt=""
-                className="h-[96px] w-full shrink-0 rounded-[9px] object-cover"
+                className="hidden h-[96px] w-full shrink-0 rounded-[9px] object-cover lg:block"
               />
             ) : (
-              <div className="photo-placeholder h-[72px] w-full shrink-0 rounded-[9px]" />
+              <div className="photo-placeholder hidden h-[72px] w-full shrink-0 rounded-[9px] lg:block" />
             )}
             {tags.length > 0 && (
-              <div className="mt-2 flex gap-1.5">
+              <div className="flex gap-1.5 pr-8 lg:mt-2 lg:pr-0">
                 {tags.map((t) => (
                   <span key={t.label} className={`rounded-md px-2 py-0.5 text-[12px] font-semibold ${t.className}`}>
                     {t.label}
@@ -421,10 +468,17 @@ export default function MapScreen({
                 ))}
               </div>
             )}
-            <p className="mt-2 line-clamp-2 text-[14.5px] font-semibold leading-tight text-ink">
+            <p className={`line-clamp-2 text-[14.5px] font-semibold leading-tight text-ink lg:mt-2 lg:pr-0 ${tags.length > 0 ? "mt-2" : "pr-8"}`}>
               {selected.title}
             </p>
-            <p className="mt-1 text-[17px] font-bold text-primary">{formatPrice(selected.price)}</p>
+            <p className="mt-1 flex items-baseline gap-2">
+              <span className="text-[17px] font-bold text-primary">{formatPrice(selected.price)}</span>
+              {selected.rating_avg != null && (selected.rating_count ?? 0) > 0 && (
+                <span className="text-[13px] font-semibold text-ink-soft">
+                  <span className="text-amber-500">★</span> {formatRating(selected.rating_avg)} ({selected.rating_count} đánh giá)
+                </span>
+              )}
+            </p>
             {selected.address && (
               <p className="mt-1 line-clamp-2 text-[13px] text-ink-muted">{selected.address}</p>
             )}
@@ -445,10 +499,29 @@ export default function MapScreen({
 
             {poiSummary && (
               <div className="mt-3 border-t border-line-soft pt-2.5">
-                <p className="text-[13px] font-semibold text-ink">
-                  {approximate ? "Tiện ích quanh khu vực" : "Tiện ích"} trong {POI_RADIUS / 1000} km
-                </p>
-                <ul className="mt-1.5 flex flex-col gap-0.5">
+                <button
+                  type="button"
+                  onClick={() => setPoiOpen((v) => !v)}
+                  aria-expanded={poiOpen}
+                  className="flex w-full items-center justify-between text-left text-[13px] font-semibold text-ink lg:pointer-events-none"
+                >
+                  <span>
+                    {approximate ? "Tiện ích quanh khu vực" : "Tiện ích"} trong {POI_RADIUS / 1000} km
+                  </span>
+                  <svg
+                    viewBox="0 0 24 24"
+                    className={`h-4 w-4 shrink-0 text-ink-muted transition-transform lg:hidden ${poiOpen ? "rotate-180" : ""}`}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2.2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden
+                  >
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
+                </button>
+                <ul className={`mt-1.5 flex-col gap-0.5 ${poiOpen ? "flex" : "hidden lg:flex"}`}>
                   {POI_CATEGORIES.map((cat) => {
                     const row = poiSummary.categories.find((c) => c.category === cat.key);
                     const hidden = hiddenPoiCats.includes(cat.key);
@@ -463,10 +536,7 @@ export default function MapScreen({
                             hidden ? "opacity-45" : ""
                           }`}
                         >
-                          <span
-                            className="h-2.5 w-2.5 shrink-0 rounded-full"
-                            style={{ background: cat.color }}
-                          />
+                          <MapBadge badge="poi" glyph={POI_GLYPH[cat.key]} size={18} className="shrink-0" />
                           <span className="flex-1 truncate text-ink-soft">{cat.label}</span>
                           <span className="font-semibold text-ink">{row?.count ?? 0}</span>
                           <span className="w-[76px] whitespace-nowrap text-right text-ink-muted">
@@ -477,7 +547,7 @@ export default function MapScreen({
                     );
                   })}
                 </ul>
-                <p className="mt-1.5 text-[11px] leading-snug text-ink-faint">
+                <p className={`mt-1.5 text-[11px] leading-snug text-ink-faint ${poiOpen ? "" : "hidden lg:block"}`}>
                   Khoảng cách đường chim bay · Dữ liệu © OpenStreetMap
                 </p>
               </div>

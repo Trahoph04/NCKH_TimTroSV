@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { formatPrice, listingTags } from "@/lib/format";
+import { formatPrice, isLocationPrecise, listingTags } from "@/lib/format";
 import { CAMPUS_OPTIONS, FACTOR_OPTIONS, toPayload, type Criteria, type RecommendResult } from "@/lib/recommend";
 import CriteriaForm from "./CriteriaForm";
 
@@ -68,7 +68,8 @@ export default function RecommendApp() {
             {res.items.map((it) => {
               const l = it.listing;
               const tags = listingTags(l);
-              const approx = l.geocode_confidence !== "high";
+              // cùng tiêu chí với icon bản đồ (location_precise), không phải geocode_confidence
+              const approx = !isLocationPrecise(l);
               return (
                 <article key={l.id} className="flex flex-col gap-4 rounded-2xl border border-line bg-white p-4 sm:flex-row">
                   {l.images[0] ? (

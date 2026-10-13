@@ -16,3 +16,10 @@ export function nearestCampus(routeTimes: (number | null)[] | null | undefined):
   });
   return best;
 }
+
+// Phút tới trường dạng chữ. < 1 phút gần như chỉ xảy ra khi toạ độ là tâm phường trùng khuôn viên (phường Tân An ↔
+// khu II, 4 tin 12/10) — "0 phút" đọc như "nằm trong trường", nên nói "quanh khu II" cho đúng độ chính xác cấp phường.
+export function minutesToCampusText(minutes: number, campusLabel: string, verb = "tới"): string {
+  const m = Math.round(minutes);
+  return m < 1 ? `quanh ${campusLabel}` : `${m} phút ${verb} ${campusLabel}`;
+}

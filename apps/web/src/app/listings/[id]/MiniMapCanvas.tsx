@@ -3,6 +3,7 @@
 import { Map as MapGL, Marker } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { CAMPUSES, CAMPUS_MARKER_LABELS } from "@/lib/campus";
+import { MapBadge } from "@/lib/map-icons";
 
 // Bản đồ nhỏ KHÔNG tương tác (chỉ để nhìn vị trí tin so với trường); bấm vào thì mở /map — xem MiniMap.tsx.
 export default function MiniMapCanvas({
@@ -32,17 +33,22 @@ export default function MiniMapCanvas({
       attributionControl={false}
       style={{ width: "100%", height: "100%" }}
     >
+      {/* cùng icon với bản đồ lớn (lib/map-icons.tsx), thu nhỏ cho khung tròn */}
       <Marker latitude={cLat} longitude={cLng} anchor="center">
-        <span
-          className="block h-[14px] w-[14px] border-2 border-white bg-navy shadow"
+        <MapBadge
+          badge="campus"
+          glyph="campus"
+          size={22}
           title={CAMPUS_MARKER_LABELS[campus]}
+          className="block drop-shadow-[0_1px_3px_rgba(0,0,0,.3)]"
         />
       </Marker>
       <Marker latitude={lat} longitude={lng} anchor="center">
-        <span
-          className={`block h-[16px] w-[16px] rounded-full border-[3px] shadow-[0_2px_6px_rgba(0,0,0,.35)] ${
-            precise ? "border-white bg-[#1069bd]" : "border-[#64748b] bg-white"
-          }`}
+        <MapBadge
+          badge={precise ? "precise" : "approx"}
+          glyph="house"
+          size={24}
+          className="block drop-shadow-[0_2px_4px_rgba(0,0,0,.3)]"
         />
       </Marker>
     </MapGL>

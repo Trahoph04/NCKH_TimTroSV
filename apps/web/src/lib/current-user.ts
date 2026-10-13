@@ -37,6 +37,21 @@ export async function getCurrentUser(
   }
 }
 
+// Token để Server Component gọi API: access còn trong cookie thì dùng; cookie access (15 phút) đã hết thì xin access mới
+// bằng refresh — trước đây trang quản lý nhận undefined rồi hiện "Chưa có tin" sai. Không ghi cookie được khi render;
+// Route Handler kế tiếp (vd. /api/auth/me của header) sẽ ghi.
+export async function getServerAccessToken(): Promise<string | undefined> {
+  const access = getAccessToken();
+  if (access) return access;
+  const refreshTok = getRefreshToken();
+  if (!refreshTok) return undefined;
+  try {
+    return (await refresh(refreshTok)).access_token;
+  } catch {
+    return undefined;
+  }
+}
+
 // URL cho page server-side khi getCurrentUser() trả null. Tới được page nghĩa
 // là middleware đã thấy cookie ⇒ cookie đó không dùng được; `reauth=1` báo
 // middleware xoá cookie trước khi hiện /login, nếu không sẽ vòng redirect

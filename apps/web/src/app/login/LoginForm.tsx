@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter, useSearchParams } from "next/navigation";
+import { authButton, authFieldError, authFormError, authInput, authLabel } from "../AuthShell";
 
 const emailSchema = z.object({
   email: z.string().email("Email không hợp lệ"),
@@ -25,8 +26,7 @@ type EmailValues = z.infer<typeof emailSchema>;
 type MssvValues = z.infer<typeof mssvSchema>;
 type Mode = "mssv" | "email";
 
-const inputCls =
-  "mt-1 w-full rounded border border-slate-300 px-3 py-2 text-slate-800 focus:border-emerald-500 focus:outline-none";
+const inputCls = authInput;
 
 function useLoginSubmit() {
   const router = useRouter();
@@ -44,8 +44,10 @@ function useLoginSubmit() {
 
       if (res.ok) {
         // chỉ cho phép đường dẫn nội bộ (chặn open-redirect kiểu ?next=//evil.com)
+        // "/\evil.com" qua được kiểu kiểm startsWith (trình duyệt hiểu "\" như "/") ⇒ phân giải rồi so origin
         const raw = searchParams.get("next") || "/";
-        const next = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
+        const target = new URL(raw, window.location.origin);
+        const next = target.origin === window.location.origin && !raw.includes("\\") ? target.pathname + target.search : "/";
         router.push(next);
         router.refresh();
         return;
@@ -68,7 +70,7 @@ function useLoginSubmit() {
 function FormError({ message }: { message: string | null }) {
   if (!message) return null;
   return (
-    <p className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-600">
+    <p className={authFormError}>
       {message}
     </p>
   );
@@ -79,7 +81,7 @@ function SubmitButton({ busy }: { busy: boolean }) {
     <button
       type="submit"
       disabled={busy}
-      className="w-full rounded bg-emerald-600 px-4 py-2 font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+      className={authButton}
     >
       {busy ? "Đang xử lý..." : "Đăng nhập"}
     </button>
@@ -102,7 +104,7 @@ function EmailLogin() {
       <FormError message={formError} />
 
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="email" className={authLabel}>
           Email
         </label>
         <input
@@ -113,12 +115,12 @@ function EmailLogin() {
           {...register("email")}
         />
         {errors.email && (
-          <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+          <p className={authFieldError}>{errors.email.message}</p>
         )}
       </div>
 
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="password" className={authLabel}>
           Mật khẩu
         </label>
         <input
@@ -129,7 +131,7 @@ function EmailLogin() {
           {...register("password")}
         />
         {errors.password && (
-          <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+          <p className={authFieldError}>{errors.password.message}</p>
         )}
       </div>
 
@@ -154,7 +156,7 @@ function MssvLogin() {
       <FormError message={formError} />
 
       <div>
-        <label htmlFor="mssv" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="mssv" className={authLabel}>
           Mã số sinh viên
         </label>
         <input
@@ -167,12 +169,12 @@ function MssvLogin() {
           {...register("mssv")}
         />
         {errors.mssv && (
-          <p className="mt-1 text-sm text-red-600">{errors.mssv.message}</p>
+          <p className={authFieldError}>{errors.mssv.message}</p>
         )}
       </div>
 
       <div>
-        <label htmlFor="mssv-password" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="mssv-password" className={authLabel}>
           Mã đăng nhập
         </label>
         <input
@@ -183,10 +185,10 @@ function MssvLogin() {
           {...register("password")}
         />
         {errors.password && (
-          <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+          <p className={authFieldError}>{errors.password.message}</p>
         )}
-        <p className="mt-1 text-xs text-slate-500">
-          Mã được phát trên phiếu ở buổi thử nghiệm.
+        <p className="mt-1.5 text-[12.5px] text-ink-muted">
+          Mã đăng nhập do nhóm nghiên cứu cấp kèm MSSV.
         </p>
       </div>
 
@@ -208,10 +210,8 @@ export default function LoginForm() {
       role="tab"
       aria-selected={mode === m}
       onClick={() => setMode(m)}
-      className={`flex-1 rounded px-3 py-1.5 text-sm font-medium transition ${
-        mode === m
-          ? "bg-white text-emerald-700 shadow-sm"
-          : "text-slate-500 hover:text-slate-700"
+      className={`flex-1 rounded-lg py-2 text-sm transition ${
+        mode === m ? "bg-primary font-semibold text-white" : "text-ink-soft hover:bg-white/70"
       }`}
     >
       {label}
@@ -220,7 +220,7 @@ export default function LoginForm() {
 
   return (
     <div className="space-y-4">
-      <div role="tablist" className="flex gap-1 rounded-md bg-slate-100 p-1">
+      <div role="tablist" className="flex gap-1.5 rounded-[11px] bg-tint p-1" aria-label="Cách đăng nhập">
         {tab("mssv", "MSSV")}
         {tab("email", "Email")}
       </div>

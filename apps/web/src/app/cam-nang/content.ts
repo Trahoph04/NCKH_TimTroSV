@@ -17,14 +17,14 @@ export type Tip = {
 };
 
 export type Section = {
-  id: "tim-phong" | "o-ghep" | "phap-ly";
+  id: "ktx" | "tim-phong" | "o-ghep" | "phap-ly";
   title: string;
   short: string;
   intro: string;
   tips: Tip[];
 };
 
-export const UPDATED_AT = "08/10/2026";
+export const UPDATED_AT = "12/10/2026";
 
 const LAW = {
   civil328: { label: "Bộ luật Dân sự 2015 — Điều 328 (Đặt cọc)", href: "https://congan.daklak.gov.vn/laws/detail/Bo-luat-Dan-su-163/" },
@@ -39,7 +39,91 @@ const LAW = {
   fireWarning: { label: "Công an tỉnh Phú Thọ — An toàn PCCC và kỹ năng thoát nạn tại nhà trọ", href: "https://congan.phutho.gov.vn/article/Tang-cuong-bao-dam-an-toan-phong-chay-chua-chay-27208-57" },
 } satisfies Record<string, Basis>;
 
+// Nguồn chính thức của ĐH Cần Thơ về KTX — cùng 4 tài liệu chatbot dùng (apps/api/chatbot_corpus/ctu-*.json, tải 04–07/10/2026)
+const CTU = {
+  facilities: { label: "TT. Phục vụ Sinh viên ĐHCT — Cơ sở vật chất, loại phòng và mức phí KTX", href: "https://ssc.ctu.edu.vn/hoat/160-cs1.html" },
+  rules: { label: "Nội quy Ký túc xá Trường ĐH Cần Thơ (bản trích 09/2025)", href: "https://ssc.ctu.edu.vn/images/upload/Noiquy_KTX_trich_092025.pdf" },
+  registration: { label: "Thông báo 307/TB-CTSV ngày 21/7/2026 — Đăng ký ở KTX học kỳ 1 năm học 2026–2027", href: "https://ssc.ctu.edu.vn/thong-bao/226-dang-ky-o-ky-tuc-xa-hoc-ky-1-nam-hoc-2026-2027.html" },
+  newStudents: { label: "Cổng tân sinh viên ĐHCT — Hướng dẫn đăng ký ở Ký túc xá", href: "https://tansinhvien.ctu.edu.vn/sinh-hoat/huong-dan-tan-sinh-vien-dang-ky-o-ky-tuc-xa" },
+} satisfies Record<string, Basis>;
+
+// Mức phí công bố (ssc.ctu.edu.vn, đọc 07/10/2026) — dùng cho khối "KTX hay thuê trọ?" ở page.tsx
+export const KTX_FEE = { min: 220_000, max: 475_000 };
+
 export const SECTIONS: Section[] = [
+  {
+    id: "ktx",
+    title: "Ký túc xá Đại học Cần Thơ",
+    short: "Ký túc xá CTU",
+    intro:
+      "Trước khi đi tìm trọ, xem KTX của trường có hợp với bạn không: rẻ nhất, an ninh, ngay trong khu II — đổi lại phải theo nội quy và đăng ký lại mỗi học kỳ. Thông tin tóm từ các trang chính thức của trường; hạn đăng ký thay đổi theo từng học kỳ nên luôn xem thông báo mới nhất.",
+    tips: [
+      {
+        id: "tong-quan",
+        title: "KTX có những khu nào",
+        items: [
+          "3 khu, sức chứa khoảng 8.780 sinh viên. Khu A và khu B nằm ngay trong khu II (đường 3/2); khu C ở cơ sở Hậu Giang (khoảng 250 chỗ, chỉ xếp sinh viên năm nhất và năm cuối học tại cơ sở này).",
+          "Phòng 3–8 sinh viên, mỗi người có giường và tủ riêng, phòng có khu vệ sinh và wifi riêng.",
+          "Có hàng rào, camera, bảo vệ chuyên nghiệp; trong khuôn viên có căn tin, nhà ăn và siêu thị mini.",
+          "Liên hệ: văn phòng KTX khu A (02923) 872 178 · khu B (02923) 872 275.",
+        ],
+        basis: [CTU.facilities, CTU.registration],
+      },
+      {
+        id: "chi-phi",
+        title: "Chi phí ở KTX",
+        items: [
+          "Phí chỗ ở 220.000–475.000 đ/sinh viên/tháng tuỳ loại phòng, nộp một lần cho cả học kỳ (học kỳ 1 năm 2026–2027 tính 3,5 tháng, từ 07/9 đến 18/12/2026).",
+          "Điện, nước tính theo đồng hồ riêng của từng phòng, cả phòng nộp hàng tháng theo số thực tế.",
+          "Xe đạp gửi miễn phí; xe máy, xe điện 25.000 đ/tháng (mỗi người ưu đãi 1 xe).",
+          "Ở lại trong kỳ nghỉ Tết phải đóng thêm phí 2 tuần.",
+        ],
+        basis: [CTU.facilities, CTU.newStudents, CTU.registration],
+      },
+      {
+        id: "loai-phong",
+        title: "Phòng được nấu ăn và không được nấu ăn",
+        items: [
+          "Phòng không nấu ăn (4 hoặc 8 người, có ở cả khu A và B): chỉ được dùng ấm đun siêu tốc, không dùng nồi đa năng.",
+          "Phòng được nấu ăn (3, 4, 5, 6 hoặc 8 người, chủ yếu ở khu A): sinh viên tự trang bị dụng cụ nấu.",
+          "Chọn loại phòng ngay lúc đăng ký — muốn tự nấu cho tiết kiệm thì ghi nguyện vọng phòng được nấu ăn.",
+        ],
+        basis: [CTU.facilities, CTU.newStudents, { label: "Nội quy KTX — Điều 3 khoản 8", href: CTU.rules.href }],
+      },
+      {
+        id: "dang-ky",
+        title: "Đăng ký ở KTX",
+        items: [
+          "Đăng ký theo từng học kỳ qua Hệ thống Quản lý KTX của trường (hoặc qua email, trực tiếp tại văn phòng Trung tâm Phục vụ Sinh viên). Tân sinh viên chưa có tài khoản điền mẫu đăng ký nhu cầu trên cổng tân sinh viên.",
+          "Có thể đăng ký theo nhóm và ghi nguyện vọng phòng; trường ưu tiên nhóm đủ người cho một phòng và nộp phí đúng hạn — rủ bạn cùng lớp đăng ký chung.",
+          "Sinh viên đang ở chỉ cần nộp phí đúng hạn cho học kỳ sau. Quá hạn nộp phí, chỗ đã xếp bị huỷ.",
+          "Học kỳ 1 năm 2026–2027: nộp phí 04–07/8/2026, sinh viên mới nhận chỗ từ 07/9/2026 — học kỳ sau xem thông báo mới.",
+        ],
+        basis: [CTU.registration, CTU.newStudents, { label: "Nội quy KTX — Điều 2 khoản 2, 4", href: CTU.rules.href }],
+      },
+      {
+        id: "tra-cho",
+        title: "Chuyển chỗ, trả chỗ và hoàn phí",
+        items: [
+          "Trả chỗ trước hạn KHÔNG được hoàn phí — trừ khi trả trong 7 ngày kể từ ngày được duyệt chỗ trên hệ thống và có lý do chính đáng.",
+          "Muốn đổi sang phòng khác phải được Trung tâm Phục vụ Sinh viên đồng ý, khi còn chỗ trống.",
+          "Hết hạn ở: bàn giao chỗ, vệ sinh phòng; tốt nghiệp mà chưa trả chỗ thì hệ thống còn báo nợ.",
+        ],
+        basis: [CTU.newStudents, CTU.registration, { label: "Nội quy KTX — Điều 2, Điều 4 khoản 8", href: CTU.rules.href }],
+      },
+      {
+        id: "noi-quy",
+        title: "Nội quy nên biết trước khi chọn KTX",
+        items: [
+          "Giờ yên tĩnh 12–13 giờ và 23 giờ đến 5 giờ sáng; ra vào khu KTX mang thẻ sinh viên.",
+          "Không qua khu ở của giới khác, không tiếp khách trong phòng; người thân muốn ở lại qua đêm phải đăng ký với văn phòng.",
+          "Không hút thuốc, không uống rượu bia, không nấu ăn ngoài các dãy cho phép; không nuôi vật nuôi, không tự ý thêm kệ tủ hay dán giấy lên tường.",
+          "Được dùng máy tính, máy in, bàn ủi, ấm nước công suất nhỏ, quạt bàn; vắng khỏi KTX nhiều ngày phải báo phòng trưởng.",
+        ],
+        basis: [{ label: "Nội quy KTX — Điều 2 đến Điều 5", href: CTU.rules.href }],
+      },
+    ],
+  },
   {
     id: "tim-phong",
     title: "Lưu ý khi tìm phòng",
@@ -252,6 +336,7 @@ export const SECTIONS: Section[] = [
 
 // Bài tham khảo — ý được viết lại, không chép nguyên văn
 export const REFERENCES: Basis[] = [
+  ...Object.values(CTU),
   { label: "Nhà Minh Bạch — Cẩm nang thuê nhà (thỏa thuận ở ghép; 5 bước kiểm tra trước khi cọc)", href: "https://nhaminhbach.com/tips" },
   { label: "“Cẩm nang thuê phòng trọ cho sinh viên năm nhất” — H.Mai (tổng hợp)" },
   { label: "Văn bản pháp luật trong kho tri thức của Trợ lý Trọ CTU (44 văn bản, cập nhật 07/10/2026)" },

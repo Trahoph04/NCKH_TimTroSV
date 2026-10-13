@@ -310,6 +310,7 @@ export default function ChatThread(p: Props) {
           <button
             onClick={() => setPickerOpen(true)}
             title="Chia sẻ một tin trọ"
+            aria-label="Chia sẻ một tin trọ"
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] border border-line text-xl text-ink-soft hover:bg-tint"
           >
             +
@@ -317,6 +318,7 @@ export default function ChatThread(p: Props) {
           <button
             onClick={() => fileRef.current?.click()}
             title="Gửi ảnh"
+            aria-label="Gửi ảnh"
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] border border-line hover:bg-tint"
           >
             <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden>

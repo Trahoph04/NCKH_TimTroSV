@@ -3,7 +3,7 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useState } from "react";
-import { CAMPUS_MARKER_LABELS, nearestCampus } from "@/lib/campus";
+import { CAMPUS_MARKER_LABELS, minutesToCampusText, nearestCampus } from "@/lib/campus";
 
 // maplibre-gl đụng window ngay khi import → tắt SSR (như map/MapScreen.tsx)
 const MiniMapCanvas = dynamic(() => import("./MiniMapCanvas"), {
@@ -12,7 +12,8 @@ const MiniMapCanvas = dynamic(() => import("./MiniMapCanvas"), {
 });
 
 // Bản đồ nhỏ hình tròn ở góc dưới bên phải trang chi tiết: ghim tin + khu CTU gần nhất (theo phút đi thật).
-// Bấm vào → /map với tin đã chọn sẵn (vẽ đường đi, tiện ích xung quanh, liên hệ).
+// Bấm vào → /map với tin đã chọn sẵn (vẽ đường đi, tiện ích xung quanh, liên hệ). Màn hẹp (< sm) nằm trong dòng
+// nội dung thay vì nổi: khung 128 px cố định góc màn hình che mất giá/địa chỉ trên điện thoại.
 export default function MiniMap({
   id,
   lat,
@@ -35,7 +36,7 @@ export default function MiniMap({
       <button
         type="button"
         onClick={() => setHidden(false)}
-        className="fixed bottom-5 right-5 z-40 rounded-full bg-white px-4 py-2 text-sm font-semibold text-primary shadow-lg ring-1 ring-line hover:bg-tint"
+        className="mt-4 rounded-full bg-white px-4 py-2 text-sm font-semibold text-primary shadow-lg ring-1 ring-line hover:bg-tint sm:fixed sm:bottom-5 sm:right-5 sm:z-40 sm:mt-0"
       >
         🗺 Bản đồ
       </button>
@@ -43,8 +44,8 @@ export default function MiniMap({
   }
 
   return (
-    <div className="fixed bottom-5 right-5 z-40 flex flex-col items-center gap-1.5">
-      <div className="relative h-32 w-32 overflow-hidden rounded-full border-4 border-white shadow-xl ring-1 ring-black/10 sm:h-44 sm:w-44">
+    <div className="mt-5 flex flex-col items-center gap-1.5 sm:fixed sm:bottom-5 sm:right-5 sm:z-40 sm:mt-0">
+      <div className="relative h-40 w-40 overflow-hidden rounded-full border-4 border-white shadow-xl ring-1 ring-black/10 sm:h-44 sm:w-44">
         <MiniMapCanvas lat={lat} lng={lng} campus={campus} precise={precise} />
         <Link
           href={`/map?radius=5000&focus=${id}&campus=${campus}`}
@@ -64,7 +65,7 @@ export default function MiniMap({
       <div className="rounded-lg bg-white/95 px-2.5 py-1 text-center text-[11.5px] leading-tight text-ink-soft shadow">
         {minutes != null && (
           <span className="block font-semibold text-ink">
-            {Math.round(minutes)} phút tới {CAMPUS_MARKER_LABELS[campus].replace("CTU ", "")}
+            {minutesToCampusText(minutes, CAMPUS_MARKER_LABELS[campus].replace("CTU ", ""))}
           </span>
         )}
         {!precise && <span className="block text-ink-faint">vị trí tương đối</span>}
