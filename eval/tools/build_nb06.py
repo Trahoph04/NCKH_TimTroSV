@@ -356,7 +356,11 @@ else:
 
 # ── 9
 md("""
-## 9. P@3 / NDCG@3 / Wilcoxon — **chờ dữ liệu buổi thử nghiệm**
+## 9. P@3 / NDCG@3 / Wilcoxon với người dùng — **KHÔNG THỰC HIỆN**
+
+**Quyết định 14/10/2026 (chủ nhiệm): không tổ chức thử nghiệm với người dùng** ⇒ mục này không có số liệu; khung tính giữ
+lại để chạy được nếu sau này có `eval/data/ratings.csv`. Đánh giá ghép bạn trong báo cáo dựa trên mục 1–7 (19 hồ sơ khảo sát
+thật + mô phỏng có ghi rõ).
 
 Thiết kế 2.7: mỗi người chấm 1–5 cho **5 thẻ làm mù** = 3 thẻ top của thuật toán (`arm='algo'`) + 2 ngẫu nhiên trong
 pool (`arm='random'`), thứ tự xáo trộn, không hiện %. Thu bằng trang `/roommate/rate`, xuất:
@@ -402,34 +406,35 @@ if R.RATINGS_CSV.exists():
     print(f"ratings.csv: {len(ratings)} thẻ · {ratings.rater_id.nunique()} người · đã chấm {ratings.rating.notna().sum()}")
     display(evaluate_ratings(ratings))
 else:
-    print("⚠ CHƯA CÓ eval/data/ratings.csv — mục 9 chưa có số thật.")
+    print("Không thực hiện thử nghiệm người dùng (quyết định 14/10/2026) — mục 9 không có số liệu.")
 """)
 md("""
-### 9b. Kiểm tra khung tính — **DỮ LIỆU GIẢ, KHÔNG DÙNG CHO BÁO CÁO**
+### 9b. Kiểm tra hàm thống kê (không phải kết quả)
 
-Ô dưới sinh ngẫu nhiên điểm chấm cho 20 người (nhóm `algo` được cộng thêm 0,7 điểm) **chỉ để chứng minh pipeline ở
-mục 9 chạy đúng** trước buổi thử nghiệm. Mọi con số ở đây là **giả**.
+`metrics.wilcoxon_signed_rank` (dùng ở mục 9 và notebook 01) đối chiếu với `scipy.stats.wilcoxon` trên 200 cặp vectơ
+ngẫu nhiên. Ô dưới chỉ in KHỚP/LỆCH — không in chỉ số đánh giá nào.
 """)
 code("""
 rng = np.random.default_rng(SEED)
-fake = []
-for rid in range(1, 21):
-    for pos, (arm, rank) in enumerate([("algo", 1), ("algo", 2), ("algo", 3), ("random", None), ("random", None)]):
-        base_r = 3.4 if arm == "algo" else 2.7
-        fake.append({"rater_id": rid, "round": 1, "card_code": f"F{rid}{pos}", "target_id": 1000 * rid + pos,
-                     "arm": arm, "algo_rank": rank, "display_pos": pos, "target_is_simulated": 0,
-                     "rater_is_simulated": 0, "rating": int(np.clip(round(rng.normal(base_r, 1.0)), 1, 5))})
-print("DỮ LIỆU GIẢ — chỉ kiểm tra code:")
-evaluate_ratings(pd.DataFrame(fake))
+worst = 0.0
+for _ in range(200):
+    n = int(rng.integers(6, 40))
+    x, y = rng.normal(3.2, 1, n).round(1).tolist(), rng.normal(3.0, 1, n).round(1).tolist()
+    ours = M.wilcoxon_signed_rank(x, y)
+    if ours["n"] and ours["p_two_sided"] is not None:
+        ref = stats.wilcoxon(x, y, zero_method="wilcox", correction=False, method="approx")
+        worst = max(worst, abs(ref.pvalue - ours["p_two_sided"]))
+print("metrics.wilcoxon_signed_rank", "KHỚP scipy" if worst < 1e-9 else "LỆCH scipy", f"(chênh p lớn nhất {worst:.1e})")
 """)
 
 md("""
 ## Ghi chú cho Chương 4
 
-- Mục 1–5, 7 đo trên **19 hồ sơ khảo sát thật** (n nhỏ — nêu rõ). Mục 6 là **mô phỏng**. Mục 9b là **dữ liệu giả**.
+- Mục 1–5, 7 đo trên **19 hồ sơ khảo sát thật** (n nhỏ — nêu rõ). Mục 6 là **mô phỏng**. Mục 9 không thực hiện (không thử
+  nghiệm người dùng, quyết định 14/10/2026); 9b chỉ kiểm hàm thống kê.
 - Hồ sơ mô phỏng (`is_simulated`) chỉ dùng cho mục 7–8 để so, **không** vào số liệu chính.
-- Học trọng số từ swipe (hồi quy logistic, L2, leave-one-user-out CV, AUC ± CI) — **chỉ làm sau buổi thử nghiệm**
-  (thiết kế 3.4); đưa ≤ 5–6 chiều vào mô hình.
+- Học trọng số từ swipe (hồi quy logistic, L2, leave-one-user-out CV) cần dữ liệu người dùng thật — hướng phát triển,
+  không làm trong đề tài này.
 """)
 
 nb["cells"] = C

@@ -33,7 +33,7 @@ md("""
 | 2 | Vì sao không dùng cosine của thiết kế gốc | danh mục tin thật |
 | 3 | So 3 hệ offline: thoả ràng buộc, ILS@10, đa dạng vị trí, độ phủ | 31 bộ tiêu chí thật × danh mục thật |
 | 4 | Độ nhạy tham số thiết kế (θ, λ, co rút, trọng số ±20%) | như mục 3 |
-| 5 | P@10 / NDCG@10 / Wilcoxon từ phán đoán mù (pooling) | **buổi thử nghiệm 09/10** |
+| 5 | P@10 / NDCG@10 / Wilcoxon từ phán đoán mù (pooling) | **không thực hiện** — không thử nghiệm người dùng (quyết định 14/10/2026) |
 
 **Riêng tư:** `survey_v2.csv` có họ tên · MSSV · email — `recommend_lib` chỉ đọc 4 cột tiêu chí. Đừng thêm ô in CSV gốc.
 **Giả định:** khảo sát không lưu câu "khu học" ⇒ mục 3–4 dùng khu II cho mọi truy vấn.
@@ -185,8 +185,14 @@ SENS
 """)
 
 md("""
-## 5. Đánh giá mù trong buổi thử nghiệm (pooling kiểu TREC)
+## 5. Đánh giá mù với người dùng (pooling kiểu TREC) — KHÔNG THỰC HIỆN
 
+**Quyết định 14/10/2026 (chủ nhiệm): không tổ chức thử nghiệm với người dùng.** Mục này giữ khung tính để chạy lại được nếu
+sau này có phán đoán thật (`eval/data/rec_judgments.csv` từ `app.recommend.export_judgments`); khi không có file, notebook
+**không sinh dữ liệu giả** và không có số liệu ở mục này. Chỉ tiêu P@10 ≥ 0,6 / NDCG@10 ≥ 0,65 (thuyết minh bổ sung) vì vậy
+chưa được đo — đánh giá hệ gợi ý dựa trên mục 1–4 (offline, dữ liệu thật).
+
+Thiết kế buổi chấm (đã có trong sản phẩm: `/goi-y/danh-gia`, bảng `rec_eval_*`):
 Mỗi SV nhập tiêu chí → server gộp top-10 của 3 hệ, xáo trộn, thẻ giống hệt nhau (không điểm/lý do) → SV chấm
 0 *không quan tâm* · 1 *có thể xem thử* · 2 *sẽ liên hệ*. Mọi tin của mọi hệ đều được chấm ⇒ không có tin chưa chấm.
 
@@ -203,18 +209,7 @@ if REAL:
     J = J[J["session_id"].isin(first.values)]
     print(f"DỮ LIỆU THẬT: {J['rater'].nunique()} người chấm, {len(J)} thẻ")
 else:
-    # KHUNG + DỮ LIỆU GIẢ để kiểm tra code trước buổi 09/10. KHÔNG ĐƯA SỐ Ở ĐÂY VÀO BÁO CÁO.
-    print("⚠ CHƯA CÓ rec_judgments.csv — dùng DỮ LIỆU GIẢ (random) chỉ để chạy thử khung phân tích")
-    rng = random.Random(7); fake = []
-    for r, q in enumerate(QUERIES[:18]):
-        out = RL.run_systems(CANDS, q); pool = {}
-        for s, col in zip(SYSTEMS, ["rank_proposed", "rank_price", "rank_cosine"]):
-            for i, c in enumerate(out[s], 1):
-                pool.setdefault(c.id, {})[col] = i
-        for lid, ranks in pool.items():
-            fake.append({"rater": f"gia_{r}", "session_id": r, "listing_id": lid, **ranks,
-                         "relevance": rng.choice([0, 0, 1, 2]), "completed": 1})
-    J = pd.DataFrame(fake)
+    print("Không thực hiện thử nghiệm người dùng (quyết định 14/10/2026) — mục 5 không có số liệu, không sinh dữ liệu giả.")
 
 def per_rater(J):
     out = []
@@ -229,7 +224,7 @@ def per_rater(J):
                         "NDCG@10": M.ndcg_at_k(ranked, gain, 10)})
     return pd.DataFrame(out)
 
-PR = per_rater(J)
+PR = per_rater(J) if REAL else None
 
 def boot_ci(x, n=2000, seed=1):
     rng = np.random.default_rng(seed); x = np.asarray(x)
@@ -237,7 +232,7 @@ def boot_ci(x, n=2000, seed=1):
     return np.percentile(means, [2.5, 97.5])
 
 summary = []
-for s in SYSTEMS:
+for s in (SYSTEMS if REAL else []):
     g = PR[PR["he"] == s]
     row = {"hệ": LABEL[s], "N": len(g)}
     for m in ["P@10_chat", "P@10_long", "NDCG@10"]:
@@ -247,30 +242,29 @@ pd.DataFrame(summary)
 """)
 code("""
 tests = []
-for b in ["b_gia", "b_cosine"]:
+for b in (["b_gia", "b_cosine"] if REAL else []):
     for m in ["P@10_chat", "NDCG@10"]:
         x = PR[PR["he"] == "de_xuat"].sort_values("rater")[m].tolist()
         y = PR[PR["he"] == b].sort_values("rater")[m].tolist()
         w = M.wilcoxon_signed_rank(x, y)
         tests.append({"so sánh": f"Đề xuất vs {LABEL[b]}", "chỉ số": m, **w})
-print("DỮ LIỆU THẬT" if REAL else "⚠ DỮ LIỆU GIẢ — chỉ kiểm tra code")
 pd.DataFrame(tests)
 """)
 code("""
-fig, axes = plt.subplots(1, 2, figsize=(9, 3.4))
-for ax, m in zip(axes, ["P@10_chat", "NDCG@10"]):
-    means = [PR[PR["he"] == s][m].mean() for s in SYSTEMS]
-    cis = [boot_ci(PR[PR["he"] == s][m]) for s in SYSTEMS]
-    err = np.array([[mu - lo for mu, (lo, hi) in zip(means, cis)], [hi - mu for mu, (lo, hi) in zip(means, cis)]])
-    bars = ax.bar(range(3), means, width=0.55, color=[COLOR[s] for s in SYSTEMS], edgecolor="#fcfcfb", linewidth=2,
-                  yerr=err, error_kw={"ecolor": "#52514e", "elinewidth": 1, "capsize": 3})
-    for b, v in zip(bars, means):
-        ax.text(b.get_x() + b.get_width() / 2, 0.02, f"{v:.2f}", ha="center", va="bottom", fontsize=9, color="#ffffff")
-    ax.set_xticks(range(3), [LABEL[s].split(" (")[0] for s in SYSTEMS], fontsize=9)
-    ax.set_ylim(0, 1); ax.set_title(m + " (TB · KTC 95% bootstrap)", fontsize=10); ax.grid(axis="x", visible=False)
-if not REAL:
-    fig.suptitle("DỮ LIỆU GIẢ — KHÔNG DÙNG", color="#d03b3b", fontsize=12)
-fig.tight_layout(); fig.savefig(FIG / ("01_online_3_he.png" if REAL else "01_online_GIA.png"), dpi=150); plt.show()
+# không có phán đoán thật ⇒ không vẽ (trước 14/10 vẽ bằng dữ liệu giả)
+if REAL:
+    fig, axes = plt.subplots(1, 2, figsize=(9, 3.4))
+    for ax, m in zip(axes, ["P@10_chat", "NDCG@10"]):
+        means = [PR[PR["he"] == s][m].mean() for s in SYSTEMS]
+        cis = [boot_ci(PR[PR["he"] == s][m]) for s in SYSTEMS]
+        err = np.array([[mu - lo for mu, (lo, hi) in zip(means, cis)], [hi - mu for mu, (lo, hi) in zip(means, cis)]])
+        bars = ax.bar(range(3), means, width=0.55, color=[COLOR[s] for s in SYSTEMS], edgecolor="#fcfcfb", linewidth=2,
+                      yerr=err, error_kw={"ecolor": "#52514e", "elinewidth": 1, "capsize": 3})
+        for b, v in zip(bars, means):
+            ax.text(b.get_x() + b.get_width() / 2, 0.02, f"{v:.2f}", ha="center", va="bottom", fontsize=9, color="#ffffff")
+        ax.set_xticks(range(3), [LABEL[s].split(" (")[0] for s in SYSTEMS], fontsize=9)
+        ax.set_ylim(0, 1); ax.set_title(m + " (TB · KTC 95% bootstrap)", fontsize=10); ax.grid(axis="x", visible=False)
+    fig.tight_layout(); fig.savefig(FIG / "01_online_3_he.png", dpi=150); plt.show()
 """)
 
 md("""
@@ -278,7 +272,8 @@ md("""
 
 - Trọng số lấy từ khảo sát 31 SV (mục 1); các hằng số còn lại là thiết kế, đã kiểm độ nhạy (mục 4).
 - Cosine của thiết kế gốc bị bác bằng số đo trên dữ liệu thật (mục 2–3), không bằng lập luận.
-- Chỉ tiêu P@10 ≥ 0,6 / NDCG@10 ≥ 0,65 chỉ đối chiếu được với số **thật** ở mục 5 (sau 09/10); N nhỏ ⇒ báo kèm KTC và r.
+- Không thử nghiệm người dùng (quyết định 14/10/2026) ⇒ chỉ tiêu P@10 ≥ 0,6 / NDCG@10 ≥ 0,65 **chưa đo được**; nêu ở hạn chế.
+  Đánh giá hệ gợi ý trong báo cáo dựa trên mục 1–4: trọng số từ khảo sát thật, so 3 hệ offline, độ nhạy.
 - Hạn chế: chưa có dữ liệu an ninh; tiện ích phần lớn "chưa rõ" (tin không ghi); toạ độ cấp phường; khu học mặc định
   khu II ở offline; phút đi là ORS `driving-car`.
 """)

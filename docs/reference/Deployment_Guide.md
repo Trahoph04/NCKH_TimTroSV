@@ -31,7 +31,8 @@ open http://localhost:8000/docs          # API OpenAPI
 ```
 
 Bật crawler tự động: set `CRAWLER_ENABLED=1` trong `.env` rồi restart api.
-Trigger thủ công: `curl -X POST "http://localhost:8000/crawler/run?source=phongtro123&mode=incremental"`.
+Trigger thủ công: `docker compose exec -T api python -m app.crawler.run_once --source phongtro123 --mode incremental`
+(HTTP `POST /crawler/run` cần token **admin** từ 12/10/2026; `source` phải thuộc `ENABLED_SOURCES`, một nguồn chỉ chạy 1 lượt cùng lúc — trùng ⇒ 409).
 
 Migration DB chạy tự động lần đầu (`infra/db/migrations/*.sql` qua initdb). Reset sạch:
 ```bash
@@ -50,7 +51,7 @@ docker compose down -v   # XÓA volume pgdata — mất hết data, dùng cẩn 
 ### 3.2 Backend API (Render / Railway)
 - Deploy `apps/api` (Dockerfile sẵn).
 - Env: `DATABASE_URL`, `REDIS_URL`, `CRAWLER_ENABLED`, secret JWT, Gemini API key.
-- Lưu ý: free-tier sleep khi idle — crawler scheduler có thể không chạy đều; dùng external cron (cron-job.org) gọi `/crawler/run` thay thế.
+- Lưu ý: free-tier sleep khi idle — crawler scheduler có thể không chạy đều; dùng cron gọi `python -m app.crawler.run_once` trong container (HTTP `/crawler/run` cần token admin).
 
 ### 3.3 Redis (Upstash free-tier)
 - Tạo Redis → lấy `REDIS_URL`.

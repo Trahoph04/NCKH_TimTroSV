@@ -31,6 +31,8 @@ Không truy vấn nào phải nới. Độ nhạy (Jaccard@10 với top-10 mặc
 
 ## 3. Buổi thử nghiệm 09/10 — kịch bản phần gợi ý (~6 phút/người)
 
+> **14/10: không tổ chức** (ADR-026). Kịch bản giữ lại làm tài liệu cho công cụ `/goi-y/danh-gia` nếu sau này thử nghiệm.
+
 1. SV đăng nhập tab **MSSV** (phiếu in `eval/data/phieu_dang_nhap.html`).
 2. Mở `/goi-y/danh-gia` → chọn tiêu chí **như khi tìm phòng thật** → "Bắt đầu đánh giá".
 3. Chấm hết ~25–30 thẻ: Không quan tâm / Có thể xem thử / Sẽ liên hệ (được mở "Xem chi tiết").

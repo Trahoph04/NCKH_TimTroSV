@@ -50,7 +50,7 @@ Phân loại bằng luật, **không dùng học máy** vì chưa có tập dữ
 
 **Vì sao không dùng lọc cộng tác hay cosine:** gần như không có lịch sử tương tác (5 dòng) nên không có gì để học; cosine không phân biệt được tin (cho điểm ≥ 0,9999 ở 100% tin trên vector [giá, phút]).
 
-**Số đo offline** (31 bộ tiêu chí thật × 1.012 tin, 07/10): thoả tiêu chí 90%; độ đa dạng ILS@10 = 0,29 (chỉ tiêu ≤ 0,7); 9,9 vị trí khác nhau/10 tin — tốt hơn cách "lọc rồi sắp theo giá" (0,48 và 8,1). **Chưa có số đo với người dùng thật** (chấm mù P@10/NDCG@10 chờ buổi thử nghiệm 09/10).
+**Số đo offline** (31 bộ tiêu chí thật × 1.115 tin, chạy lại 14/10): thoả ràng buộc gốc 91,9%; độ đa dạng ILS@10 = 0,295 (chỉ tiêu ≤ 0,7); 9,97 vị trí khác nhau/10 tin — tốt hơn cách "lọc rồi sắp theo giá" (ILS 0,475; 8,07 vị trí); cosine của thiết kế gốc chỉ thoả 32,6%. **Không có số đo với người dùng thật** — không thử nghiệm người dùng (quyết định 14/10, ADR-026).
 
 ### 3.5 Ghép bạn ở (reciprocal recommender)
 1. **Lọc cứng 2 tầng:** an toàn (cùng giới; deal-breaker hút thuốc/ở bẩn, phủ quyết hai chiều) → khả thi (ngân sách, thời điểm cần phòng).
@@ -58,7 +58,7 @@ Phân loại bằng luật, **không dùng học máy** vì chưa có tập dữ
 3. **Trung bình điều hoà** hai điểm để chặn cặp chỉ hợp một chiều.
 4. Bộ thẻ ưu tiên hồ sơ thật; thẻ mô phỏng tối đa 50% và gắn nhãn.
 
-Số đo (notebook 06): lọc 2 tầng làm số người có ứng viên tăng 6/19 → 16/19; trọng số ±20% gần như không đổi thứ hạng (Kendall τ = 0,974). Điểm hài lòng so với ghép ngẫu nhiên: chờ buổi 09/10.
+Số đo (notebook 06): lọc 2 tầng làm số người có ứng viên tăng 6/19 → 16/19; trọng số ±20% gần như không đổi thứ hạng (Kendall τ = 0,974). Điểm hài lòng so với ghép ngẫu nhiên: không đo (không thử nghiệm người dùng, ADR-026).
 
 ### 3.6 Chatbot — phần AI chính
 
@@ -95,7 +95,7 @@ Thay cho "AI cảnh báo rủi ro": dữ liệu không có nhãn lừa đảo n�
 _(Số liệu KTX theo trang thông tin của CTU trong kho tài liệu chatbot, tải 07/10/2026.)_
 
 ## 6. Hạn chế cần nói rõ
-- **Chưa có đánh giá với người dùng thật** (P@10/NDCG@10 gợi ý, điểm hài lòng ghép bạn, SUS): chờ buổi thử nghiệm 09/10.
+- **Không có đánh giá với người dùng thật** (P@10/NDCG@10 gợi ý, điểm hài lòng ghép bạn, SUS): chủ nhiệm quyết định không thử nghiệm người dùng (14/10, ADR-026) — đánh giá dựa trên số đo offline trên dữ liệu thật và mô phỏng; công cụ chấm mù vẫn có sẵn trong hệ thống.
 - **Dữ liệu:** vị trí chính xác chỉ ~4% tin; diện tích 67% là số hệ thống tự đoán theo giá; 333 tin của 3 nguồn bị treo chưa cập nhật từ 18/09.
 - **Chatbot:** kết quả dao động giữa các lần chạy; chưa chấm theo đáp án chuẩn; số đo của nhánh Phúc (36 câu, RAGAS) dùng mô hình qua proxy chưa xác minh nên chỉ để tham khảo.
 - **Thay đổi so với thuyết minh:** OSM thay Google Maps; MAUT/Gower thay cosine; cắt tạo nhóm 3+ người; bỏ đăng tin cho sinh viên (chỉ admin nhập tin); cảnh báo rủi ro bằng cẩm nang thay vì mô hình AI — **cần báo CBHD**.

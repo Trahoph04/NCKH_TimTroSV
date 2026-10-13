@@ -238,6 +238,21 @@ Rate limit (429): tin nhắn 30/phút · upload 10/phút · báo cáo 5/10 phút
 
 ---
 
+## 5b. Đánh giá nhà trọ của SV — ✅ đã code (12/10, ADR-025)
+
+| Method | Path | Mô tả | Auth |
+|---|---|---|---|
+| GET | `/listings/{id}/reviews?page&size` | `{summary: {average, total, rating_counts, tag_counts}, items[{id, rating, tags, content, relation, author, status, created_at, updated_at}]}` — chỉ đánh giá `visible`; tin ẩn/hết hạn ⇒ 404 | 🌐 |
+| GET | `/listings/{id}/reviews/mine` | Đánh giá của mình (kể cả bị ẩn) hoặc `null` | 🔒 |
+| POST | `/listings/{id}/reviews` | `{rating 1–5, tags[] ≤ 6 (12 key chuẩn), content? ≤ 1000, relation: dang_o\|da_o\|da_xem}` — 1 đánh giá/tài khoản/tin, gửi lại = sửa; nội dung có SĐT/link ⇒ 422; rate limit 10/10 phút | 🔒 |
+| DELETE | `/listings/{id}/reviews/mine` | Xoá đánh giá của mình (204; chưa có ⇒ 404) | 🔒 |
+| GET | `/admin/reviews?status=visible\|hidden` | Danh sách kiểm duyệt (kèm tiêu đề tin, email người viết) | Admin |
+| PATCH | `/admin/reviews/{id}` | `{status: visible\|hidden}` — ẩn không xoá; người viết sửa lại vẫn ẩn | Admin |
+
+`ListingOut` có thêm `rating_avg` (null = chưa có) và `rating_count` — thẻ tin/bản đồ hiện "★ 4,2 (5)".
+
+---
+
 ## 6. Risk (`/risk`)
 
 | Method | Path | Mô tả | Auth |
@@ -259,8 +274,9 @@ Rate limit (429): tin nhắn 30/phút · upload 10/phút · báo cáo 5/10 phút
 | GET | `/admin/dashboard` | Thống kê tổng quan | Admin |
 | GET | `/admin/listings/flagged` | DS tin risk cao / bị report | Admin |
 | POST | `/admin/listings/{id}/moderate` | Duyệt / ẩn tin | Admin |
-| GET | `/admin/users` | Quản lý người dùng | Admin |
-| POST | `/admin/users/{id}/lock` | Khóa tài khoản | Admin |
+| GET | `/admin/users` | ✅ (12/10) Danh sách người dùng: `q` (email/tên/MSSV), `role=user\|admin`, `locked=true\|false`, `page`, `size` ≤ 100 → `{total, page, size, items[{id, email, name, role, created_at, last_seen_at, locked, providers, mssv, has_roommate_profile}]}` | Admin |
+| PATCH | `/admin/users/{id}` | ✅ (12/10) `{role?: "user"\|"admin", locked?: bool}`. Tự khoá / tự bỏ quyền ⇒ 400; khoá/bỏ quyền admin cuối cùng ⇒ 400; không có ⇒ 404. Khoá có hiệu lực ngay: token đang có ⇒ 403, `/auth/login*` và `/auth/refresh` ⇒ 403 | Admin |
+| GET/PATCH | `/admin/documents*` | ✅ Bật/tắt tài liệu chatbot (ADR-023) | Admin |
 
 ---
 
@@ -268,8 +284,8 @@ Rate limit (429): tin nhắn 30/phút · upload 10/phút · báo cáo 5/10 phút
 
 | Method | Path | Mô tả | Auth |
 |---|---|---|---|
-| GET | `/crawler/status` | Trạng thái N lần crawl gần nhất (crawl_runs) | Admin |
-| POST | `/crawler/run` | Trigger thủ công 1 nguồn (`source`, `mode`) | Admin |
+| GET | `/crawler/status` | Trạng thái N lần crawl gần nhất (crawl_runs) | Công khai |
+| POST | `/crawler/run` | Trigger thủ công 1 nguồn (`source` ∈ `ENABLED_SOURCES`, `mode`); nguồn đang chạy ⇒ 409. Bắt buộc token admin từ 12/10 (trước đó không kiểm) | Admin |
 
 ```jsonc
 // POST /crawler/run?source=phongtro123&mode=incremental

@@ -261,3 +261,35 @@ Ghi quyết định kiến trúc quan trọng + LÝ DO. Không xóa cũ, chỉ a
 - **Đánh đổi**: "Tương tác giữa sinh viên và chủ trọ" (thuyết minh phần 5) chỉ còn qua khung liên hệ (gọi/Zalo/tin gốc) —
   chủ trọ không có tài khoản. Chưa có lớp "điểm cần kiểm tra" tự động trên từng tin (giá/m² bất thường, ảnh trùng, 1 SĐT
   nhiều tin) — để sau. Thay đổi phạm vi cần báo GVHD.
+
+
+## ADR-025: Đánh giá nhà trọ = UGC sao + tag chuẩn trên bảng `reviews` sẵn có; không mô hình cảm xúc, không review Google
+- **Ngày**: 2026-10-12
+- **Bối cảnh**: Thuyết minh dòng 6 đăng ký "nhắn tin, trao đổi, **đánh giá**"; 14.2 có "cảnh báo thông tin rủi ro". DB có bảng
+  `reviews` (mig 90: sao + tag) nhưng 0 dòng; branch `PHUC` có module `listing_reviews` (sao + nhận xét + Naive Bayes cảm xúc
+  huấn luyện trên vài chục câu tự viết). Không có nguồn đánh giá sẵn: khảo sát thực địa không chấm điểm, Google Maps Platform
+  không dùng được ở Việt Nam (xem Map_MapLibre_POI.md mục 5) và không có khoá.
+- **Quyết định**: module `app/reviews` trên bảng `reviews` (mig 102: unique (listing_id, user_id) + updated_at). SV đăng nhập,
+  1 đánh giá/tin (sửa/xoá được), sao 1–5 + tối đa 6 tag trong 12 tag chuẩn (5 tốt, 7 cảnh báo) + nhận xét ≤ 1000 ký tự (chặn
+  SĐT/link) + "đang ở / đã ở / đã đi xem". Hiện ngay; admin ẩn ở `/quan-ly/danh-gia`. Trang chi tiết hiện điểm TB, phân bố
+  sao, đếm tag; tag cảnh báo được ≥ 2 người báo ⇒ khung "Lưu ý từ người đã ở" trỏ sang cẩm nang. Thẻ tin/bản đồ: "★ 4,2 (5)".
+- **Lý do**: tag chuẩn đếm được và hiện thành cảnh báo rủi ro có nguồn là người thật (đúng 14.2, không cần mô hình — ADR-024);
+  NB của branch PHUC không có dữ liệu thật để đánh giá độ chính xác nên không đưa vào sản phẩm/báo cáo.
+- **Đánh đổi**: chưa có dữ liệu ⇒ cần nhóm thu đánh giá THẬT (nhóm khảo sát ghi theo quan sát thực địa, SV đang thuê), không
+  tạo đánh giá mẫu. Không kiểm chứng được người viết có thật ở trọ (chỉ tự khai). Nếu sau này ghép module của PHUC thì trùng
+  tên package `app/reviews` — phải gộp.
+
+
+## ADR-026: Không thử nghiệm với người dùng — đánh giá bằng số đo offline trên dữ liệu thật và mô phỏng
+- **Ngày**: 2026-10-14 · quyết định của chủ nhiệm.
+- **Bối cảnh**: Buổi thử nghiệm dự kiến 09/10 (chấm mù gợi ý, chấm điểm ghép bạn, SUS) chưa diễn ra: DB có 0 phiên
+  `rec_eval_sessions`, `roommate_ratings` chỉ có dữ liệu thử, 12 tài khoản MSSV chưa dùng. Nghiệm thu tuần 12–16/10.
+  Thuyết minh 12.2 cho phép "đánh giá tính khả thi và hiệu quả … thông qua mô phỏng chức năng và phân tích kết quả";
+  14.2 có nhắc "phản hồi từ người dùng thử nghiệm".
+- **Quyết định**: Không thử nghiệm người dùng. Chương kết quả dùng: gợi ý — trọng số từ khảo sát 31 SV + so 3 hệ offline
+  trên 31 bộ tiêu chí thật × 1.115 tin (notebook 01, chạy lại 14/10: đề xuất thoả ràng buộc 91,9%, ILS@10 0,295, 9,97 vị trí
+  khác nhau/10; B-giá 100% / 0,475 / 8,07; cosine thiết kế gốc 32,6% / 0,346 / 6,0) + độ nhạy; ghép bạn — 19 hồ sơ khảo sát
+  thật + mô phỏng ghi rõ (notebook 06). Notebook bỏ hẳn phần sinh dữ liệu giả; khung tính online giữ lại (chạy được nếu sau này
+  có dữ liệu), hàm Wilcoxon được đối chiếu `scipy`.
+- **Hệ quả**: chỉ tiêu P@10 ≥ 0,6 / NDCG@10 ≥ 0,65 / điểm hài lòng ghép bạn / SUS (thuyết minh bổ sung) KHÔNG đo — ghi ở
+  hạn chế và hướng phát triển. Trang `/goi-y/danh-gia`, `/roommate/rate` vẫn là công cụ đánh giá có sẵn trong sản phẩm.

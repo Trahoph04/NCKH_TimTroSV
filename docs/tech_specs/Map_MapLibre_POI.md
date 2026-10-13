@@ -51,14 +51,25 @@ Số phút trên card vẫn lấy từ ORS Matrix (quota riêng) — đường v
 ## 3. Frontend
 
 - `map/MapCanvas.tsx` — `react-map-gl/maplibre`, style `tiles.openfreemap.org/styles/liberty`. Lớp: vòng bán kính
-  (đa giác 64 đỉnh), đường đi (viền trắng + xanh), tiện ích (chấm màu theo nhóm, bấm → popup tên + khoảng cách),
-  cluster tin (`clusterMaxZoom = 18`, source `maxzoom = 20`), chấm tin màu theo `risk_level` (unknown = xanh — tự đổi
-  màu khi module rủi ro ghi `risk_score`). Campus và tin đang chọn là `Marker` HTML (luôn thấy dù tin trong cluster).
+  (đa giác 64 đỉnh), đường đi (viền trắng + xanh, source luôn mount để nằm DƯỚI icon), tiện ích (icon theo nhóm, bấm →
+  popup tên + khoảng cách), cluster tin (`clusterMaxZoom = 18`, source `maxzoom = 20`), icon tin theo `risk_level`
+  (unknown = xanh — tự đổi màu khi module rủi ro ghi `risk_score`). Campus và tin đang chọn là `Marker` HTML (luôn
+  thấy dù tin trong cluster).
+- **Icon bản đồ (12/10)** — `lib/map-icons.tsx`: 8 glyph nét đơn 24×24, một màu (nhà trọ, chợ, siêu thị/tiện lợi,
+  ATM/ngân hàng, nhà thuốc, bệnh viện/phòng khám, xe buýt, khu CTU). Cùng bộ path vẽ ra canvas → `map.addImage`
+  (lớp `symbol`, nạp ở `styledata` đầu tiên + lưới an toàn `styleimagemissing`) và ra `<svg>` (`MapBadge`: chú giải,
+  danh sách tiện ích, popup, marker, bản đồ nhỏ) ⇒ bản đồ và chú giải luôn khớp. Quy ước hình: tin trọ = hình tròn
+  (xanh đậm = vị trí chính xác, xanh nhạt viền xanh = cấp phường — trước 12/10 chiều là xám), cụm tin = nhãn "🏠 + số"
+  (ảnh co giãn `stretchX` + `content` phủ hết chiều cao, `icon-text-fit: width`; cùng quy ước đậm/nhạt), tiện ích = ô
+  vuông trắng nét xám (không tô màu riêng
+  từng nhóm — phân biệt bằng hình), khu CTU = ô vuông navy, tin đang chọn = tròn navy có quầng. Tiện ích không cho
+  chồng nhau (`symbol-sort-key` = khoảng cách ⇒ cái gần tin nhất được đặt trước, phóng to thì hiện thêm); tin trọ
+  `icon-allow-overlap` để không bao giờ bị ẩn. Màn hẹp: thẻ tin thành dải dưới cùng, bỏ ảnh lớn, gập danh sách tiện ích.
 - Bấm cluster: zoom tới mức tách được; nếu không tách được nữa (tin chung toạ độ) → sidebar chỉ còn các tin đó,
   tiêu đề "N tin chung một vị trí" + giải thích vị trí gần đúng.
 - `map/MapScreen.tsx` — tab Tất cả / Phòng trọ / Nhà mini (URL `?housing=`), tab 3 khu, slider bán kính, card tin:
   nhãn Nhà mini / Sang nhượng, phút tới khu, "Vị trí tương đối" khi confidence ≠ high, bảng **Tiện ích (quanh khu
-  vực) trong 1 km**: 6 nhóm × số lượng × gần nhất, bấm từng dòng để ẩn/hiện lớp trên bản đồ.
+  vực) trong 1 km**: 6 nhóm (kèm icon) × số lượng × gần nhất, bấm từng dòng để ẩn/hiện lớp trên bản đồ.
 - `map/page.tsx` — bỏ mô tả + ảnh thứ 2 trở đi trước khi đưa xuống client (trang 1,9 MB → 1,2 MB).
 - Trang chủ: nhóm lọc "Loại chỗ ở", card có nhãn Nhà mini / Sang nhượng (`lib/format.ts:listingTags`).
 - Route Handler proxy: `/api/listings/[id]/route`, `/api/pois`, `/api/pois/summary`.

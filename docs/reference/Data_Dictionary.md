@@ -90,6 +90,8 @@ aggregated_listings 1──N crawl_runs (theo source, không FK cứng)
 | role | VARCHAR(20) | DEFAULT 'user' | guest/user/admin |
 | preference_vector | VECTOR(384) | | Vector sở thích (T5 recommend) |
 | created_at | TIMESTAMPTZ | DEFAULT now() | |
+| last_seen_at | TIMESTAMPTZ | | Lần hoạt động gần nhất (chat) |
+| locked_at | TIMESTAMPTZ | NULL = hoạt động | Admin khoá tài khoản (mig 101): chặn đăng nhập, refresh và mọi request có token |
 
 ---
 
@@ -205,3 +207,19 @@ PK `(origin_lat, origin_lng, campus, profile)` — toạ độ gốc `NUMERIC(8,
 - `python -m app.pois.fetch_overpass [--apply] [--sql]` — lấy lại tiện ích OSM / sinh seed 96.
 - `python -m app.listings.route_cache_backfill [--apply]` — lưu sẵn đường đi mọi toạ độ × 3 khu.
 - `python -m app.recommend.export_snapshot` / `export_judgments` — CSV cho notebook 01 (không PII).
+
+
+## Bảng `reviews` — đánh giá nhà trọ của sinh viên (mig 90 + 102, dùng từ 12/10/2026)
+
+| Cột | Kiểu | Ràng buộc | Ý nghĩa |
+|---|---|---|---|
+| id | SERIAL | PK | |
+| listing_id | INTEGER | FK→aggregated_listings, ON DELETE CASCADE | Tin được đánh giá |
+| place_id | INTEGER | FK→places | Chưa dùng (đánh giá theo địa điểm Google — không dùng, xem ADR-025) |
+| user_id | INTEGER | FK→users, ON DELETE SET NULL; UNIQUE (listing_id, user_id) | Người viết — 1 đánh giá/tài khoản/tin |
+| rating | SMALLINT | 1–5 | Số sao |
+| tags | TEXT[] | 12 key chuẩn (`reviews/schemas.py`) | 5 tốt + 7 cảnh báo (giữ cọc, giá khác tin, điện nước cao, an ninh kém, ồn, ngập, chủ khó tính) |
+| content | TEXT | ≤ 1000, không SĐT/link | Nhận xét |
+| stay_period | VARCHAR(20) | dang_o / da_o / da_xem | Quan hệ với nhà trọ (đang ở / đã ở / đã đi xem) |
+| status | VARCHAR(20) | visible / hidden | Admin ẩn ⇒ không tính điểm |
+| created_at / updated_at | TIMESTAMPTZ | | |

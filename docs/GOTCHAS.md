@@ -276,3 +276,37 @@ Các test tích hợp gọi `/chatbot/ask` thật; khi `GEMINI_API_KEY` có giá
 ## Đánh giá chatbot bằng một lần chạy là nhiễu (08/10/2026)
 
 Gemini không tất định: cùng mã, cùng câu hỏi, cờ `partial_answer` đổi giữa lần chạy (câu 13: 1/4 lần đủ). So sánh trước/sau trên 36 câu phải chạy nhiều lượt (≥ 3) rồi so TỶ LỆ, không so từng câu; và đừng gộp nhiều câu hỏi vào một hội thoại khi đo (lịch sử bị lẫn, từng làm câu "rẻ hơn" trả lời bằng nội dung câu khẩn cấp trước đó).
+
+## `route_time_campus` không tự tính lại khi toạ độ đổi (12/10/2026)
+
+`auto_route` chỉ route tin có `route_time_campus IS NULL`, còn upsert crawler/backfill ghi toạ độ mới mà giữ phút cũ ⇒ tin
+nằm cạnh khu III vẫn mang `{4, 0, 3.4}` của toạ độ khu II, hiện "0 phút" ngay đầu danh sách bản đồ. Đã sửa: upsert và
+`backfill.py` đặt `route_time_campus = NULL` khi toạ độ dời > ~5 m. Dữ liệu cũ: so phút với khoảng cách chim bay (phút < km
+là bất khả thi) để tìm tin cần route lại. Lưu ý: 4 tin có địa chỉ "Đường 3/2, phường Tân An" đúng là **tâm phường** trùng
+khu II (không phải lỗi geocode) — UI ghi "quanh khu II" thay vì "0 phút" (`lib/campus.ts:minutesToCampusText`).
+
+## Lọc quận bằng cột `district` thô trượt vì "Thủy"/"Thuỷ" (12/10/2026)
+
+`district` lưu nguyên văn nguồn ("Quận Bình Thuỷ , Thành phố Cần Thơ", dấu trên u); trang chủ gửi "Bình Thủy" ⇒ `ILIKE`
+chỉ khớp 8/39 tin. API tin giờ lọc và trả `COALESCE(NULLIF(district_norm,''), district)`. Thêm nguồn mới thì phải điền
+`district_norm` (crawler/address.py), nếu không tin sẽ rơi về chuỗi thô.
+
+## `POST /crawler/run` cần token admin (12/10/2026)
+
+Trước đây không đòi đăng nhập ⇒ máy nào trong LAN demo cũng kích crawl full (site ngoài, Nominatim, quota ORS). Giờ chỉ
+admin, `source` theo whitelist `ENABLED_SOURCES`, một nguồn một lượt (trùng ⇒ 409). Script/terminal dùng
+`docker compose exec -T api python -m app.crawler.run_once --source <tên> --mode incremental|full`. Lượt `full` lỗi trang
+danh sách hoặc thấy < 50% số tin đang hiện thì KHÔNG đánh dấu tin vắng mặt (trước đây 2 lượt lỗi liên tiếp làm expired toàn
+bộ tin của nguồn). Crawl gặp lại tin có `audit_reason` không bật lại `active`; `mark_misses` không đụng tin `hidden`.
+
+## Thẻ trong khung `flex-col` + `max-h` cắt mất chữ (12/10/2026)
+
+Item của flex co lại khi container chạm `max-h`; đoạn có `line-clamp` (overflow hidden) bị cắt nửa trên. Thẻ tin trên
+bản đồ (màn hẹp) dùng bố cục block + `overflow-y-auto` thay vì `flex flex-col`.
+
+
+## Toạ độ "khu I/II/III" là tâm khuôn viên, không phải cổng — đừng route đi bộ tới đó (13/10/2026)
+
+`CAMPUSES` (routing.py, lib/campus.ts) là tâm khu có tường rào. Xe máy thì lệch ít (phút ORS vẫn dùng được), nhưng router
+đi bộ/xe đạp tìm đường vòng tới điểm gần tâm nhất: phòng cách khu II ~400 m ra "đi bộ 54 phút". Làm chế độ đi bộ phải có toạ độ
+cổng đã đo thực địa. Nhánh `codex/open-mobility-handoff` của Huy cũng gắn cờ "ENTRANCE_UNVERIFIED" vì lý do này.

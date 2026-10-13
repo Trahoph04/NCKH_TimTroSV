@@ -548,3 +548,147 @@ khẩn cấp ("bị chủ trọ đe doạ") bị coi là tìm phòng; "mức ph�
 - Cấp quyền admin cho thành viên nhóm: `UPDATE users SET role='admin' WHERE email='…'`.
 - Bổ sung nội dung cẩm nang (sửa `apps/web/src/app/cam-nang/content.ts`); khảo sát người dùng thử về mức hữu ích.
 - Trang Ghép bạn ở chưa có link "Lưu ý khi ở ghép" (giữ nguyên giao diện vì đang dùng cho buổi thử nghiệm).
+
+---
+
+## Phiên 12/10/2026 — Icon bản đồ + kiểm định chất lượng trước nghiệm thu (audit 4 agent)
+
+Yêu cầu chủ nhiệm: kiểm dự án đủ chất lượng chưa, chưa thì hoàn thành; bản đồ thay chấm tròn bằng icon đơn giản (nhà trọ,
+cửa hàng, ATM, chợ, bệnh viện, nhà thuốc…).
+
+### Icon bản đồ
+- `lib/map-icons.tsx`: 8 glyph nét đơn một màu (nhà trọ, chợ, siêu thị/tiện lợi, ATM, nhà thuốc, bệnh viện, xe buýt, khu
+  CTU) vẽ ra canvas cho lớp `symbol` MapLibre và ra `<svg>` cho chú giải/danh sách/popup/bản đồ nhỏ. Tin trọ = tròn (đặc
+  xanh = chính xác, rỗng xám = cấp phường), tiện ích = ô vuông trắng nét xám, khu CTU = ô vuông navy. Chi tiết:
+  `docs/tech_specs/Map_MapLibre_POI.md` mục 3.
+- Màn hẹp: thẻ tin thành dải dưới cùng (bỏ ảnh lớn, gập tiện ích); bản đồ nhỏ trang chi tiết nằm trong dòng nội dung.
+
+### Kiểm định (theo `~/Downloads/dynamic_workflow_4_agents.md`)
+Tech Lead + Haiku (cấu hình/CI/docs/smoke 19 trang) + Sonnet (frontend, 17 phát hiện) + Opus (phân quyền/bảo mật, 8 phát
+hiện). 94 nghìn token đầu ra; lần thử trước với 8 agent song song bị chặn 2 lần vì hết hạn mức phiên.
+- Dữ liệu: 1.115 tin hiển thị, 0 thiếu giá/toạ độ, 0 ngoài Cần Thơ, 0 giá/diện tích bất thường, 0 trùng, 1 thiếu ảnh;
+  5 tin demo còn sống, vị trí chính xác.
+
+### Đã sửa
+- **Bảo mật/dữ liệu**: `POST /crawler/run` chỉ admin + whitelist nguồn + 1 lượt/nguồn (CLI `app.crawler.run_once`,
+  `recrawl_all.sh` đổi theo); lượt full lỗi/thiếu tin không quét expired; crawl không hồi sinh tin bị audit loại, không
+  đụng tin `hidden`; Postgres/Redis chỉ mở `127.0.0.1` (docker-compose); route `[id]` chỉ nhận id số; open redirect
+  `/login?next=/\evil.com`.
+- **Dữ liệu sai**: lọc quận qua `district_norm` (Bình Thủy 8 → 39 tin); đổi toạ độ thì xoá phút tới trường cũ + route lại 21
+  tin (9 tin sai thật, vd. #1017 `{4,0,3.4}` → `{3.8,3.4,0.1}`; bản sao lưu ở scratchpad phiên); "0 phút" → "quanh khu II".
+- **Frontend**: trang chủ 500 khi URL sai kiểu; menu điện thoại (trước không có đường tới bản đồ/chat trên điện thoại);
+  `/api/auth/me` trả `role` ⇒ link "Quản lý" hiện cho admin; bộ lọc trang chủ đồng bộ URL; form đăng ký/tin sập khi 422;
+  nhãn ngân sách/giờ ngủ trong chat khớp form ghép bạn; "vị trí tương đối" cùng tiêu chí `location_precise`; bản đồ nhỏ
+  của tin > 5 km mở đúng tin; ghi/sửa/ẩn tin tự refresh token; tab ghép bạn (Đổi ý, Thử lại, hết thẻ tự tải); đổi khu nhanh
+  không vẽ nhầm đường; IME tiếng Việt trong trợ lý; giá "750 nghìn" thống nhất; aria-label nút icon.
+- Kiểm: pytest **604 passed**, 20 skip, 1 xfail; `tsc` sạch; `next build` xanh; trình duyệt (desktop + khung 390 px).
+
+### Quản lý người dùng (cùng ngày, chủ nhiệm đồng ý làm — thuyết minh dòng 4)
+- Mig **101** `users.locked_at` (COPY `98d-user-admin.sql`; đã áp tay `nckh` + `nckh_test`). Module `app/admin_users`:
+  `GET /admin/users` (tìm email/tên/MSSV, lọc admin/bị khoá), `PATCH /admin/users/{id}` (quyền, khoá). Khoá có hiệu lực
+  ngay (deps đọc DB mỗi request), chặn login/login MSSV/Google/refresh; không tự khoá/tự hạ quyền, luôn còn ≥ 1 admin.
+- Web `/quan-ly/nguoi-dung` + tab "Nhà trọ | Người dùng"; thao tác bấm 2 lần để xác nhận. Không xoá tài khoản (giữ lịch sử
+  chat/chấm mù làm số liệu). Test `test_admin_users.py` (6 ca). pytest **611 passed**.
+
+### Đánh giá nhà trọ (cùng ngày — thuyết minh dòng 6, ADR-025)
+- Mig **102** (unique 1 đánh giá/tài khoản/tin, `updated_at`; COPY `98e-reviews-ugc.sql`, đã áp `nckh` + `nckh_test`).
+  Module `app/reviews`: `GET/POST /listings/{id}/reviews`, `GET|DELETE …/reviews/mine`, `GET|PATCH /admin/reviews`.
+  `ListingOut.rating_avg/rating_count`. Tên người viết rút gọn ("Phú T.H.").
+- Web: khu "Đánh giá của sinh viên" ở trang chi tiết (tóm tắt, phân bố sao, tag, cảnh báo khi ≥ 2 người báo cùng tag xấu,
+  form sao + "Bạn là" + 12 tag + nhận xét); "★ 4,2 (5)" ở thẻ tin, danh sách + thẻ bản đồ; `/quan-ly/danh-gia` ẩn/hiện.
+- Thử end-to-end trên production bằng tài khoản mẫu (gửi → điểm 4,0 hiện → chặn SĐT → xoá về 0).
+- Rà soát (1 agent Sonnet) + sửa: regex SĐT không chặn nhầm khoảng giá/năm; đánh giá bị ẩn không xoá được (409) để thoát
+  kiểm duyệt; chủ tin không tự đánh giá; tài khoản bị khoá: WebSocket chat từ chối + socket đang mở bị đóng 4403 (sự kiện
+  `account.locked` qua hub), ra khỏi bộ thẻ ghép bạn; ô tìm admin escape `%`/`_`; "Xem thêm đánh giá", xoá bấm 2 lần.
+  pytest **621 passed**, 20 skip, 1 xfail.
+
+### Còn lại / chờ quyết định
+- **Đánh giá chưa có dữ liệu**: nhóm cần thu đánh giá THẬT trước nghiệm thu (thành viên đã khảo sát 20 nhà ghi theo quan
+  sát thực địa — chọn "Đã đi xem phòng"; SV đang thuê). Không tạo đánh giá mẫu.
+- SĐT chủ trọ thu qua khảo sát: chủ nhiệm xác nhận 12/10 đã có đồng ý của chủ trọ cho công khai.
+- `.env.example` (read-only) thiếu biến chatbot/Gemini/`COOKIE_SECURE`… — đã có mặc định trong compose; ghi ở Deployment
+  Guide nếu cần. `Diagrams/tools/plantuml.jar` 22 MB nằm trong git (chỉ là vệ sinh repo).
+- Sau khi kéo code: `docker compose up -d --build` (đổi cổng db/redis cần tạo lại 2 container này).
+
+### Giao diện (cùng ngày, theo đề nghị chủ nhiệm)
+- Bản đồ: cụm tin cấp phường hết màu xám — mọi cụm là nhãn "🏠 + số" họ xanh (đậm = vị trí chính xác, nhạt = cấp phường),
+  chấm tin lẻ cấp phường đổi xanh nhạt viền xanh; vẫn giữ phân biệt chính xác/gần đúng (bằng độ đậm, có chú giải).
+- `/login`, `/register` dùng khung chung `app/AuthShell.tsx` (header site, khối giới thiệu xanh như hero trang chủ, ô nhập/nút/
+  tab theo token `primary/ink/line`) thay bảng màu slate/emerald cũ. Trang chi tiết tin vẫn còn kiểu cũ (phần UI chi tiết do
+  thành viên khác làm, branch `codex/ui-chi-tiet-nha-tro`).
+
+### Cẩm nang Ký túc xá CTU (cùng ngày — chủ nhiệm đề xuất phần gắn với ĐH Cần Thơ)
+- `/cam-nang#ktx` (mục 1): 6 thẻ — các khu KTX, chi phí, phòng nấu/không nấu ăn, đăng ký, trả chỗ/hoàn phí, nội quy; mọi ý dẫn
+  4 nguồn chính thức (ssc.ctu.edu.vn, tansinhvien.ctu.edu.vn: trang CSVC & mức phí, Nội quy KTX 09/2025, TB 307/TB-CTSV
+  21/7/2026, hướng dẫn tân SV) — đúng 4 tài liệu chatbot đang dùng (`chatbot_corpus/ctu-*.json`) nên hai nơi không lệch.
+- Khối "KTX hay thuê trọ?": phí KTX 220–475 nghìn/SV/tháng cạnh giá giữa phòng trọ trong 2 km quanh khu II tính từ dữ liệu
+  hệ thống (12/10: 2,7 triệu, 308 tin; ở ghép 2 người ≈ 1,4 triệu/người), cache 1 giờ; nút sang bản đồ, ghép bạn, trợ lý.
+- Trợ lý: `/tro-ly?hoi=…` điền sẵn câu hỏi (không tự gửi); thêm câu gợi ý "Phí ở KTX CTU bao nhiêu, phòng nào được nấu ăn?".
+  Thử thật: trả lời đúng mức phí/cách đăng ký, trích 3 nguồn CTU, 6,4 s.
+- Lưu ý nội dung: hạn đăng ký trong thẻ là của HK1 2026–2027 — học kỳ sau cập nhật theo thông báo mới (và nạp lại corpus).
+
+
+---
+
+## Phiên 13/10/2026 — Đánh giá nhánh bản đồ của Huy (`origin/codex/open-mobility-handoff`)
+
+Nhánh 2 commit (9e732ff, 588e154), base `origin/main` 59a0395 — KHÔNG chung gốc với `feature/ghep-ban-chat` nên chỉ port
+từng phần, không merge. Nội dung: module `app/mobility` (ORS đi bộ/xe đạp gọi trực tiếp, Overpass/Nominatim live, chính sách
+quota demo 30 lượt/provider), bản đồ Leaflet + tile raster sau cờ `MOBILITY_ENABLED`, catalog 789 tin đọc từ DB riêng.
+
+**Quyết định: giữ bản đồ hiện tại** (MapLibre + icon, 1.115 tin đã làm sạch gồm khảo sát, phút tới 3 khu tính sẵn, đường xe
+máy có cache + OSRM dự phòng, tiện ích nạp sẵn trong DB). Nhánh của Huy kém hơn ở bối cảnh demo: không có xe máy (phương tiện
+chính của SV), phụ thuộc provider live + quota, cần Docker catalog riêng, quay lại Leaflet (ADR-019 đã bỏ).
+
+**Đã port:** `route_time_campus` cho phép `null` từng khu (`list[float | None]`, API tin + chatbot + kiểu TS). Trước đó ORS
+Matrix không tới được 1 khu ⇒ ghi `[4.0, None, 3.2]` ⇒ schema `list[float]` làm 500 mọi trang có tin đó (chưa xảy ra trên DB,
+0 dòng). Test `test_partial_route_times_do_not_break_listing_endpoints`. pytest **622 passed**.
+
+**Chưa port — đi bộ/xe đạp:** thử OSRM FOSSGIS (routed-foot/bike): từ điểm cách tâm khu II ~400 m chim bay ra 4,05 km / 54
+phút đi bộ; tới toạ độ "cổng chính 3/2" (geocode.py) vẫn bị kéo lệch 288 m ⇒ 2,5 km / 34 phút. Toạ độ khu đang là TÂM khuôn
+viên (có rào), chưa phải cổng ⇒ thời gian đi bộ sai rõ. Điều kiện để làm: nhóm đo toạ độ các cổng (khu I, cổng A/B/C khu II,
+khu III) khi đi khảo sát, rồi route tới cổng gần nhất (ORS foot/cycling → OSRM FOSSGIS, có cache như xe máy).
+
+**Ghi nhận khác:** phút (ORS Matrix) tính chiều tin → trường, đường vẽ chiều trường → tin (UI ghi "từ khu II tới phòng") —
+chỉ lệch ở đường một chiều; đổi chiều phải tính lại ~300 tuyến trong `route_cache`, để sau.
+
+---
+
+## Phiên 13/10/2026 (2) — Kiểm định sẵn sàng nghiệm thu
+
+Quy trình 4 vai (Haiku: dựng DB từ volume rỗng + smoke 18 trang × 3 vai + CI + file nhạy cảm — đạt hết; Sonnet: chạy kịch bản
+demo bằng HTTP thật; Opus bỏ qua vì phân quyền/bảo mật đã audit 12/10, không có rủi ro cao mới). 138 nghìn token subagent.
+
+### Đã sửa
+- **Chặn demo**: chatbot hiểu "Chủ trọ giữ cọc không trả thì sao?" (câu demo số 1) là tìm phòng ⇒ thêm cụm tranh chấp cọc vào
+  phân loại pháp lý (`parser.py`) + mở rộng truy vấn theo thuật ngữ Điều 328 (`legal_retrieval.py`). Thử thật: trích BLDS Điều
+  328, 7,3 s. Test mới trong `test_chatbot_scope.py`.
+- Cẩm nang: khối "KTX hay thuê trọ?" không còn cache kết quả lỗi 1 giờ khi web lên trước API (trang dynamic, chỉ cache 2 con
+  số qua `unstable_cache`, lỗi thì không cache).
+- Trang chủ: bỏ câu cố định "tự cập nhật mỗi 5 giờ" (lịch crawl dừng từ 10/10 15:00 UTC dù `CRAWLER_ENABLED=true` — chưa điều
+  tra, cố ý không crawl trước nghiệm thu) ⇒ hiện ngày crawl thật từ `/crawler/status`.
+- Bản đồ: ghi chú số phút là ước tính ORS (profile ô tô, chưa tính kẹt xe) — 1598→khu I 5,1 km/4,1 phút.
+- DEMO.md: cặp ghép bạn dùng được (Thu ↔ Trân; Thu–Hân, Thu–Linh, Huy–Đức đã ghép), tin 1215 cho nút gọi, không mở đầu bằng 4712
+  (2 ảnh 404), đánh giá demo bằng cách viết thật tại chỗ, checklist kiểm Cẩm nang + khoá Gemini.
+- **Báo cáo kiểm thử** `docs/report/BaoCao_KiemThu_13-10-2026.md` (thuyết minh dòng 7): 645 ca (624 đạt, 20 skip có lý do, 1 xfail),
+  smoke, trình duyệt, dựng DB sạch, kết quả audit, hiệu năng, hạn chế.
+
+### Chưa xong — cần chủ nhiệm/nhóm
+- **Không có dữ liệu buổi thử nghiệm người dùng** trong DB này: `rec_eval_sessions` 0, `roommate_ratings` 5 (thử), 12 tài khoản
+  MSSV chưa dùng ⇒ notebook 01 phần online vẫn chạy DỮ LIỆU GIẢ (đã ghi "không đưa vào báo cáo"); chưa có SUS. Nếu buổi 09/10 diễn
+  ra ở máy khác: `export_judgments` + chạy lại notebook 01/06.
+- Không thấy trên máy: báo cáo tổng kết, báo cáo tóm tắt, bản tin, video ≤ 2 phút, slide (thuyết minh mục 16 + kế hoạch mục 6).
+- Đánh giá nhà trọ chưa có dữ liệu thật; toàn bộ thay đổi 12–13/10 chưa commit/push.
+
+
+---
+
+## Phiên 14/10/2026 — Quyết định không thử nghiệm người dùng (ADR-026)
+
+- Notebook 01/06: bỏ hẳn phần sinh dữ liệu giả (mục 5 nb01, mục 9b nb06) — không có phán đoán thật thì in "không thực hiện";
+  9b nb06 chỉ còn kiểm hàm Wilcoxon khớp scipy (chênh 2,2e-16). Xoá hình `figs/01_online_GIA.png` (vẽ từ dữ liệu giả).
+- Xuất lại `eval/data/rec_candidates.csv` (1.115 tin; bản 07/10 1.012 tin lưu ở scratchpad phiên) và chạy lại 2 notebook:
+  0 ô lỗi. Gợi ý offline: đề xuất thoả ràng buộc 91,9% · ILS@10 0,295 · 9,97 vị trí/10 · độ phủ 59; B-giá 100% · 0,475 · 8,07 · 19;
+  cosine gốc 32,6% · 0,346 · 6,0 · 70; cosine thô ≥ 0,9999 ở 100% tin.
+- Tài liệu cập nhật: ADR-026, báo cáo chức năng & phương pháp (số mới), kế hoạch nghiệm thu, Recommendation tech spec, báo cáo
+  kiểm thử.

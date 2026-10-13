@@ -14,6 +14,9 @@ _Lập: 13/09/2026 · Mốc nghiệm thu: **tuần 12–16/10/2026** · Chủ nh
 > cho mỗi SV (đăng nhập MSSV): `/roommate/rate` (chấm ghép bạn) → `/goi-y/danh-gia` (chấm mù gợi ý, ~6 phút) → phiếu SUS.
 > Kịch bản + lệnh xuất CSV: `docs/tech_specs/Recommendation.md` mục 3.
 
+> **Cập nhật 14/10:** KHÔNG thử nghiệm với người dùng (ADR-026) — bỏ SUS, P@10/NDCG@10 online, điểm hài lòng ghép bạn.
+> Chương 4 dùng số offline/mô phỏng (notebook 01, 06 đã chạy lại); slide số liệu (mục 5 bước 6) đổi theo.
+
 > Nguyên tắc xuyên suốt: **hội đồng chấm 3 thứ — demo chạy trót lọt, báo cáo có số liệu, mỗi nội dung đã đăng ký trong thuyết minh có sản phẩm tương ứng.** Mọi việc không phục vụ 1 trong 3 thứ đó thì cắt.
 
 ---
@@ -149,14 +152,14 @@ Phụ lục: bộ câu hỏi khảo sát, hướng dẫn cài đặt, danh sách
 
 1. (1') Trang chủ — số liệu thật, lọc "Dưới 2 triệu · Khu II · ≤10 phút".
 2. (2') Bản đồ — bán kính quanh Khu II, tab Nhà mini/Phòng trọ; bấm cluster lớn → "N tin chung một vị trí" (giải
-   thích toạ độ cấp phường); chọn tin → đường đi từ khu II + phút + "Tiện ích trong 1 km" (bấm chấm nhà thuốc/xe
+   thích toạ độ cấp phường); chọn tin → đường đi từ khu II + phút + "Tiện ích trong 1 km" (bấm icon nhà thuốc/xe
    buýt); đổi Khu III. *(Nếu nhánh risk đã ghép: marker đỏ → review 1 sao + lý do rủi ro; bấm "Khiếu nại".)*
 3. (1') Gợi ý cho bạn — `/goi-y`: ngân sách lấy sẵn từ hồ sơ, chọn khu/thời gian/tiện ích/3 điều quan tâm → 10 tin + % + lý do + "nên hỏi chủ trọ"; mở "Hệ thống xếp hạng như thế nào?" (trọng số từ khảo sát).
 4. (2') Ghép bạn ở — đăng nhập tab **MSSV** → hồ sơ đã điền → bộ thẻ kèm % + lý do → "Quan tâm" (hoặc "✉ Nhắn" kèm lời
    nhắn) → tài khoản thứ 2 mở tab Lời mời, thích lại → **"Thành đôi!"** bật ra ở **cả hai** máy → mở chat, nhắn 1 câu
    (realtime) → cả hai bấm đồng ý chia sẻ liên hệ (**T3**) → hiện email/SĐT + nút Zalo.
 5. (1.5') Chatbot — "Chủ trọ giữ cọc không trả thì sao?" (trích BLDS Điều 328) và "Phòng nào dưới 1.5 triệu gần khu I?" (trích DB).
-6. (0.5') Slide số liệu: 4 metric + SUS.
+6. (0.5') Slide số liệu: số đo offline gợi ý (thoả ràng buộc, ILS@10, đa dạng vị trí), ghép bạn (độ phủ, độ nhạy), chatbot, kiểm thử (ADR-026: không có SUS).
 
 Chuẩn bị sẵn: 2 tài khoản đăng nhập (demo: `*.demo@example.com` / `demo1234`, chạy `python -m app.chat.seed_demo
 --reset` trước buổi), DB đã seed review mẫu, `docker compose up` trước 30 phút, video dự phòng. Hai tài khoản demo

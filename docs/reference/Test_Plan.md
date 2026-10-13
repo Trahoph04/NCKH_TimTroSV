@@ -95,3 +95,6 @@ npx playwright test
 - Module mới đi kèm unit test trước khi handoff QA.
 - AI module: notebook eval đạt ngưỡng nghiệm thu (mục 2.4-2.6).
 - Coverage tổng ≥60% trước nghiệm thu (Sprint 5).
+
+> Kết quả thực hiện: xem `docs/report/BaoCao_KiemThu_13-10-2026.md` (645 ca tự động, smoke 3 vai, kiểm thử trình duyệt,
+> dựng DB từ volume rỗng, rà soát chất lượng 12–13/10).

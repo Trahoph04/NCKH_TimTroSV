@@ -84,6 +84,8 @@ thử lại với `"{quận}, Cần Thơ"` → có toạ độ cấp quận đ�
 
 ## 7. Ghi chú vận hành
 
-- Kích hoạt tay 1 nguồn: `POST /crawler/run?source=<tên>&mode=incremental` (giờ tự làm sạch luôn).
+- Kích hoạt tay 1 nguồn: `python -m app.crawler.run_once --source <tên> --mode incremental` trong container, hoặc
+  `POST /crawler/run` với token admin (từ 12/10; tự làm sạch luôn). Lượt `full` chỉ đánh dấu tin vắng mặt khi không lỗi và
+  thấy ≥ 50% số tin đang hiện của nguồn (`pipeline.MIN_SWEEP_RATIO`).
 - Lịch tự động: incremental mỗi 5h, full sweep 3h sáng (Asia/Ho_Chi_Minh).
 - Nguồn đang bật: phongtro123, tromoi, mogi, bds123, nhadatcantho, nhadatcantho247.
