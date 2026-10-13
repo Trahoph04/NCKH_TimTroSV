@@ -56,6 +56,8 @@ docker cp apps/api/tests/. "$(docker compose ps -q api)":/app/tests/ && docker c
 - [`docs/GOTCHAS.md`](docs/GOTCHAS.md) — các bẫy đã gặp
 - [`docs/report/`](docs/report) — báo cáo chức năng & phương pháp, báo cáo kiểm thử
 - `docs/specs/`, `docs/tech_specs/` — thiết kế và mô tả sau triển khai từng phần
+- [`docs/diagrams/`](docs/diagrams) — **nguồn để vẽ sơ đồ**: ERD sinh từ DB thật + hướng dẫn use case, sequence, activity, state
+  (thư mục `Diagrams/` vẽ từ 08/2026, đã cũ)
 
 ## Không có trong repo
 
